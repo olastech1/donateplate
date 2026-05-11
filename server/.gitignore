@@ -1,0 +1,5 @@
+# Antigravity Tools Server
+
+node_modules/
+.env
+*.log
