@@ -23,6 +23,7 @@ export const authAPI = {
 
 // --- Campaigns ---
 export const campaignAPI = {
+  getStats: () => api.get('/campaigns/stats/platform'),
   list: (params) => api.get('/campaigns', { params }),
   getById: (id) => api.get(`/campaigns/${id}`),
   getDonors: (id, params) => api.get(`/campaigns/${id}/donors`, { params }),

@@ -12,6 +12,7 @@ const campaignController = require('../controllers/campaignController');
 const { authenticate, requireCreator } = require('../middleware/auth');
 
 // Public routes
+router.get('/stats/platform', campaignController.getPublicStats);
 router.get('/', campaignController.listActiveCampaigns);
 router.get('/:id', campaignController.getCampaignById);
 router.get('/:id/donors', campaignController.getCampaignDonors);

@@ -5,6 +5,7 @@ import { campaignAPI } from '../services/api';
 
 export default function HomePage() {
   const [campaigns, setCampaigns] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -12,6 +13,10 @@ export default function HomePage() {
       .then(res => setCampaigns(res.data.data))
       .catch(console.error)
       .finally(() => setLoading(false));
+      
+    campaignAPI.getStats()
+      .then(res => setStats(res.data.data))
+      .catch(console.error);
   }, []);
 
   return (
@@ -38,16 +43,16 @@ export default function HomePage() {
       <section className="container">
         <div className="stats-bar animate-in" style={{ animationDelay: '0.3s' }}>
           <div className="stat-item">
-            <div className="stat-value">$12.4M</div>
+            <div className="stat-value">{stats ? `$${Number(stats.donations.total_raised).toLocaleString()}` : '...'}</div>
             <div className="stat-label">Total Raised</div>
           </div>
           <div className="stat-item">
-            <div className="stat-value">348</div>
+            <div className="stat-value">{stats ? stats.campaigns.funded : '...'}</div>
             <div className="stat-label">Campaigns Funded</div>
           </div>
           <div className="stat-item">
-            <div className="stat-value">5,200+</div>
-            <div className="stat-label">Lives Impacted</div>
+            <div className="stat-value">{stats ? stats.donations.unique_donors : '...'}</div>
+            <div className="stat-label">Donors Impacting Lives</div>
           </div>
           <div className="stat-item">
             <div className="stat-value">100%</div>

@@ -9,6 +9,23 @@ const pool = require('../config/db');
  * List all active campaigns (public). Supports pagination & category filtering.
  * Query params: ?page=1&limit=12&category=medical&search=library
  */
+const getPublicStats = async (req, res) => {
+  try {
+    const [campaigns, donations] = await Promise.all([
+      pool.query(`SELECT COUNT(*) FILTER (WHERE status = 'active') AS active, COUNT(*) FILTER (WHERE current_amount >= goal_amount AND goal_amount > 0) AS funded FROM campaigns`),
+      pool.query(`SELECT COALESCE(SUM(amount), 0) AS total_raised, COUNT(DISTINCT COALESCE(user_id::text, guest_email)) AS unique_donors FROM donations WHERE status = 'success'`)
+    ]);
+    res.json({ success: true, data: { campaigns: campaigns.rows[0], donations: donations.rows[0] } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+/**
+ * GET /api/campaigns
+ * List all active campaigns (public). Supports pagination & category filtering.
+ * Query params: ?page=1&limit=12&category=medical&search=library
+ */
 const listActiveCampaigns = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -263,6 +280,7 @@ const getMyCampaigns = async (req, res) => {
 
 module.exports = {
   listActiveCampaigns,
+  getPublicStats,
   getCampaignById,
   getCampaignDonors,
   createCampaign,
