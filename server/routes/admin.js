@@ -26,7 +26,7 @@ router.put('/withdrawals/:id/reject', adminController.rejectWithdrawal);
 router.get('/stats', adminController.getPlatformStats);
 
 // KYC
-router.get('/kyc/pending', adminController.getPendingKyc);
+router.get('/kyc/all', adminController.getAllKyc);
 router.put('/kyc/:id/approve', adminController.approveKyc);
 router.put('/kyc/:id/reject', adminController.rejectKyc);
 
