@@ -18,8 +18,8 @@ router.get('/:id', campaignController.getCampaignById);
 router.get('/:id/donors', campaignController.getCampaignDonors);
 
 // Protected routes (creator or admin)
+router.get('/me/all', authenticate, requireCreator, campaignController.getMyCampaigns);
 router.post('/', authenticate, requireCreator, campaignController.createCampaign);
 router.put('/:id', authenticate, requireCreator, campaignController.updateCampaign);
-router.get('/:id/my-campaigns', authenticate, requireCreator, campaignController.getMyCampaigns);
 
 module.exports = router;

@@ -14,6 +14,8 @@ const campaignRoutes = require('./routes/campaigns');
 const donationRoutes = require('./routes/donations');
 const updateRoutes = require('./routes/updates');
 const adminRoutes = require('./routes/admin');
+const userRoutes = require('./routes/users');
+const withdrawalRoutes = require('./routes/withdrawals');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -64,6 +66,8 @@ app.use('/api/campaigns', campaignRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/updates', updateRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/withdrawals', withdrawalRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

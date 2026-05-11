@@ -23,12 +23,25 @@ export const authAPI = {
 
 // --- Campaigns ---
 export const campaignAPI = {
-  getStats: () => api.get('/campaigns/stats/platform'),
   list: (params) => api.get('/campaigns', { params }),
+  getStats: () => api.get('/campaigns/stats/platform'),
   getById: (id) => api.get(`/campaigns/${id}`),
   getDonors: (id, params) => api.get(`/campaigns/${id}/donors`, { params }),
   create: (data) => api.post('/campaigns', data),
   update: (id, data) => api.put(`/campaigns/${id}`, data),
+  getMyCampaigns: () => api.get('/campaigns/me/all'),
+};
+
+// --- Users ---
+export const userAPI = {
+  getMe: () => api.get('/users/me'),
+  submitKyc: () => api.post('/users/kyc'),
+};
+
+// --- Withdrawals ---
+export const withdrawalAPI = {
+  request: (data) => api.post('/withdrawals', data),
+  getMyWithdrawals: () => api.get('/withdrawals/me'),
 };
 
 // --- Donations (Stripe) ---

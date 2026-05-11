@@ -24,8 +24,10 @@ export default function Navbar() {
           <li><Link to="/explore" onClick={() => setOpen(false)}>Explore</Link></li>
           {user ? (
             <>
-              {user.role === 'admin' && (
+              {user.role === 'admin' ? (
                 <li><Link to="/admin" onClick={() => setOpen(false)} style={{ color: 'var(--accent)', fontWeight: 600 }}>Admin</Link></li>
+              ) : (
+                <li><Link to="/dashboard" onClick={() => setOpen(false)} style={{ color: 'var(--accent)', fontWeight: 600 }}>Dashboard</Link></li>
               )}
               <li><Link to="/campaigns/create" onClick={() => setOpen(false)} className="btn btn-primary btn-sm">Start Campaign</Link></li>
               <li><button onClick={handleLogout} className="btn btn-secondary btn-sm">Logout</button></li>
