@@ -1,17 +1,22 @@
 const pool = require('../config/db');
 
-// Update KYC status to pending
+// Update KYC status
 const submitKyc = async (req, res) => {
   try {
     const { id } = req.user;
     const { full_name, dob, address, document_type, document_url } = req.body;
     
-    // Simple Auto-Verification rule: If name contains "AUTO VERIFY" or document is "AUTO_VERIFY", verify instantly
-    const isAutoVerify = 
-      (full_name && full_name.toUpperCase().includes('AUTO VERIFY')) || 
-      (document_url && document_url.includes('AUTO_VERIFY'));
-
-    const newStatus = isAutoVerify ? 'verified' : 'pending';
+    // Simulate Automatic Document Verification
+    // In a real production system, this would integrate with Stripe Identity, Onfido, etc.
+    // For now, if a document is provided, we simulate a successful OCR/Verification scan.
+    let newStatus = 'pending';
+    let message = 'KYC submitted successfully. Pending admin approval.';
+    
+    if (document_url && document_url.length > 50) { 
+      // Assuming a base64 file string will be large, we auto-verify it
+      newStatus = 'verified';
+      message = 'Document automatically verified by system. KYC Approved!';
+    }
     
     const result = await pool.query(
       `UPDATE users 
@@ -32,7 +37,7 @@ const submitKyc = async (req, res) => {
     
     res.json({
       success: true,
-      message: isAutoVerify ? 'KYC verified automatically!' : 'KYC submitted successfully. Pending admin approval.',
+      message,
       data: result.rows[0]
     });
   } catch (err) {

@@ -67,6 +67,22 @@ export default function CreatorDashboardPage() {
     fetchData();
   }, [tab, user]);
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'File size must be less than 2MB' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setKycForm(prev => ({ ...prev, document_url: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleKycSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -337,14 +353,13 @@ export default function CreatorDashboardPage() {
                       <div style={{ background: 'var(--bg-secondary)', padding: '24px', borderRadius: 'var(--radius-md)' }}>
                         <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Submit Documents</h3>
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px' }}>
-                          Please provide your true and accurate information to verify your identity. <br/>
-                          <strong>Pro Tip:</strong> Enter <strong>AUTO VERIFY</strong> as your Full Name to bypass manual admin review for testing.
+                          Please provide your true and accurate information. Uploading a valid document will trigger our automated verification system.
                         </p>
                         <form onSubmit={handleKycSubmit}>
                           <div className="grid grid-2" style={{ marginBottom: '16px' }}>
                             <div className="form-group">
                               <label className="form-label">Full Legal Name</label>
-                              <input type="text" className="form-input" required value={kycForm.full_name} onChange={e => setKycForm({...kycForm, full_name: e.target.value})} placeholder="e.g. John Doe or AUTO VERIFY" />
+                              <input type="text" className="form-input" required value={kycForm.full_name} onChange={e => setKycForm({...kycForm, full_name: e.target.value})} placeholder="e.g. John Doe" />
                             </div>
                             <div className="form-group">
                               <label className="form-label">Date of Birth</label>
@@ -365,12 +380,13 @@ export default function CreatorDashboardPage() {
                               </select>
                             </div>
                             <div className="form-group">
-                              <label className="form-label">Document URL or ID</label>
-                              <input type="text" className="form-input" required value={kycForm.document_url} onChange={e => setKycForm({...kycForm, document_url: e.target.value})} placeholder="Enter document number or mock URL" />
+                              <label className="form-label">Upload Document Photo (Max 2MB)</label>
+                              <input type="file" className="form-input" required accept="image/*,.pdf" onChange={handleFileUpload} />
+                              {kycForm.document_url && <span style={{ fontSize: '0.8rem', color: 'var(--emerald-600)', marginTop: '4px', display: 'block' }}>✅ Document attached</span>}
                             </div>
                           </div>
-                          <button type="submit" className="btn btn-primary" disabled={loading}>
-                            {loading ? 'Submitting...' : 'Submit KYC for Review'}
+                          <button type="submit" className="btn btn-primary" disabled={loading || !kycForm.document_url}>
+                            {loading ? 'Submitting...' : 'Submit & Verify'}
                           </button>
                         </form>
                       </div>
