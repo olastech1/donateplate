@@ -71,7 +71,7 @@ export default function CreateCampaignPage() {
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Funding Goal (₦) *</label>
+            <label className="form-label">Funding Goal ($) *</label>
             <input type="number" className="form-input" placeholder="e.g., 500000" value={form.goal_amount} onChange={e => update('goal_amount', e.target.value)} min="1000" />
           </div>
           <button className="btn btn-primary btn-block btn-lg" onClick={() => { if (form.title && form.goal_amount) setStep(2); else setError('Title and goal amount are required.'); }}>
@@ -106,7 +106,7 @@ export default function CreateCampaignPage() {
               <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Review Your Campaign</h3>
               <div className="tracking-detail-row"><span className="tracking-label">Title</span><span className="tracking-value">{form.title}</span></div>
               <div className="tracking-detail-row"><span className="tracking-label">Category</span><span className="tracking-value">{form.category}</span></div>
-              <div className="tracking-detail-row"><span className="tracking-label">Goal</span><span className="tracking-value">₦{Number(form.goal_amount).toLocaleString()}</span></div>
+              <div className="tracking-detail-row"><span className="tracking-label">Goal</span><span className="tracking-value">${Number(form.goal_amount).toLocaleString()}</span></div>
               <div className="tracking-detail-row"><span className="tracking-label">Story</span><span className="tracking-value" style={{ maxWidth: '300px', textAlign: 'right' }}>{form.description.substring(0, 100)}...</span></div>
             </div>
           </div>
