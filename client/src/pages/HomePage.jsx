@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CampaignCard from '../components/campaigns/CampaignCard';
-import { campaignAPI } from '../services/api';
+import { campaignAPI, donationAPI } from '../services/api';
 
 export default function HomePage() {
   const [campaigns, setCampaigns] = useState([]);
+  const [recentDonations, setRecentDonations] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -16,6 +17,10 @@ export default function HomePage() {
       
     campaignAPI.getStats()
       .then(res => setStats(res.data.data))
+      .catch(console.error);
+
+    donationAPI.getRecent()
+      .then(res => setRecentDonations(res.data.data))
       .catch(console.error);
   }, []);
 
@@ -90,6 +95,35 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Recent Donations */}
+      {recentDonations.length > 0 && (
+        <section className="container" style={{ padding: '40px 20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', marginBottom: '60px' }}>
+          <div className="section-header" style={{ marginBottom: '32px' }}>
+            <h2>Recent Donations</h2>
+            <p>See the live impact from our generous community</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
+            {recentDonations.map(d => (
+              <div key={d.id} className="card animate-in" style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                    {d.donor_name ? d.donor_name.charAt(0).toUpperCase() : 'A'}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{d.donor_name || 'Anonymous'}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>donated to <span style={{ color: 'var(--slate-800)', fontWeight: 500 }}>{d.campaign_title}</span></div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: 'var(--emerald-600)', fontWeight: 'bold', fontSize: '1.2rem' }}>${Number(d.amount).toLocaleString()}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(d.created_at).toLocaleDateString()}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* How It Works */}
       <section className="container" style={{ padding: '60px 20px 80px' }} id="how-it-works">

@@ -14,6 +14,9 @@ router.get('/campaigns/pending', adminController.getPendingCampaigns);
 router.put('/campaigns/:id/approve', adminController.approveCampaign);
 router.put('/campaigns/:id/reject', adminController.rejectCampaign);
 
+// Donations
+router.get('/donations', adminController.getAllDonations);
+
 // Withdrawal management
 router.get('/withdrawals', adminController.getPendingWithdrawals);
 router.put('/withdrawals/:id/approve', adminController.approveWithdrawal);

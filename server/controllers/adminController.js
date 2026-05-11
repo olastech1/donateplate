@@ -46,6 +46,23 @@ const rejectCampaign = async (req, res) => {
   }
 };
 
+// ─── Donations ──────────────────────────────────────────────
+
+const getAllDonations = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT d.*, c.title AS campaign_title, u.name AS donor_user_name
+       FROM donations d
+       JOIN campaigns c ON d.campaign_id = c.id
+       LEFT JOIN users u ON d.user_id = u.id
+       ORDER BY d.created_at DESC`
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
 // ─── Withdrawals ──────────────────────────────────────────
 
 const getPendingWithdrawals = async (req, res) => {
@@ -169,6 +186,7 @@ const getStripeStatus = async (req, res) => {
 module.exports = {
   getPendingCampaigns, approveCampaign, rejectCampaign,
   getPendingWithdrawals, approveWithdrawal, rejectWithdrawal,
+  getAllDonations,
   getPlatformStats,
   getSettings, updateSetting, getStripeStatus
 };

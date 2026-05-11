@@ -15,6 +15,9 @@ router.post('/webhook/stripe', donationController.stripeWebhook);
 // Post-payment callback (verify session)
 router.get('/callback', donationController.donationCallback);
 
+// Public recent donations
+router.get('/recent', donationController.getRecentDonations);
+
 // Guest tracking by Stripe session ID (public)
 router.get('/track/:sessionId', donationController.trackDonation);
 

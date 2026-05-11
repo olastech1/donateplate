@@ -7,6 +7,7 @@ const TABS = [
   { key: 'overview', label: '📊 Overview', icon: '📊' },
   { key: 'campaigns', label: '📋 Pending Campaigns', icon: '📋' },
   { key: 'withdrawals', label: '💸 Withdrawals', icon: '💸' },
+  { key: 'donations', label: '💳 All Donations', icon: '💳' },
   { key: 'settings', label: '⚙️ Settings', icon: '⚙️' },
 ];
 
@@ -17,6 +18,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [pending, setPending] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
+  const [donations, setDonations] = useState([]);
   const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
@@ -43,6 +45,9 @@ export default function AdminDashboardPage() {
         } else if (tab === 'withdrawals') {
           const res = await adminAPI.getWithdrawals();
           setWithdrawals(res.data.data);
+        } else if (tab === 'donations') {
+          const res = await adminAPI.getDonations();
+          setDonations(res.data.data);
         } else if (tab === 'settings') {
           const res = await adminAPI.getSettings();
           setSettings(res.data.data);
@@ -284,6 +289,58 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                   ))
+                )}
+              </div>
+            )}
+
+            {/* ── Donations Tab ── */}
+            {tab === 'donations' && (
+              <div className="animate-in">
+                {donations.length === 0 ? (
+                  <div className="card" style={{ textAlign: 'center' }}>
+                    <div className="card-body" style={{ padding: '60px 20px' }}>
+                      <div style={{ fontSize: '3rem', marginBottom: '16px' }}>💳</div>
+                      <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)' }}>No donations yet</h3>
+                      <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>There are no recorded donations on the platform.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="card" style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--bg-secondary)', borderBottom: '2px solid var(--border)' }}>
+                          <th style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--slate-800)' }}>Date</th>
+                          <th style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--slate-800)' }}>Campaign</th>
+                          <th style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--slate-800)' }}>Donor</th>
+                          <th style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--slate-800)' }}>Amount</th>
+                          <th style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--slate-800)' }}>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {donations.map(d => (
+                          <tr key={d.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                            <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                              {new Date(d.created_at).toLocaleDateString()} {new Date(d.created_at).toLocaleTimeString()}
+                            </td>
+                            <td style={{ padding: '12px 16px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                              {d.campaign_title}
+                            </td>
+                            <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
+                              {d.is_anonymous ? 'Anonymous' : (d.donor_user_name || d.guest_name || 'Guest')}
+                            </td>
+                            <td style={{ padding: '12px 16px', color: 'var(--emerald-600)', fontWeight: 700 }}>
+                              ${Number(d.amount).toLocaleString()}
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <span className={`badge ${d.status === 'success' ? 'badge-success' : d.status === 'pending' ? 'badge-warning' : 'badge-danger'}`}>
+                                {d.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
             )}

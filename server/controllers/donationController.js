@@ -261,4 +261,31 @@ const donationCallback = async (req, res) => {
   }
 };
 
-module.exports = { initiateDonation, stripeWebhook, trackDonation, donationCallback };
+/**
+ * GET /api/donations/recent
+ * Public list of recent successful donations across the platform.
+ */
+const getRecentDonations = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT d.id, d.amount, d.created_at, c.title AS campaign_title,
+              CASE
+                WHEN d.is_anonymous THEN 'Anonymous'
+                WHEN d.user_id IS NOT NULL THEN u.name
+                ELSE d.guest_name
+              END AS donor_name
+       FROM donations d
+       JOIN campaigns c ON d.campaign_id = c.id
+       LEFT JOIN users u ON d.user_id = u.id
+       WHERE d.status = 'success'
+       ORDER BY d.created_at DESC
+       LIMIT 10`
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error('Recent donations error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+module.exports = { initiateDonation, stripeWebhook, trackDonation, donationCallback, getRecentDonations };

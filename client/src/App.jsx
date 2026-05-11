@@ -10,6 +10,10 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CreateCampaignPage from './pages/CreateCampaignPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
 import { useAuth } from './context/AuthContext';
 
 function App() {
@@ -37,6 +41,10 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="*" element={
             <div className="page container" style={{ textAlign: 'center' }}>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '4rem', marginBottom: '16px' }}>404</h1>

@@ -36,6 +36,7 @@ export const donationAPI = {
   initiate: (data) => api.post('/donations/initiate', data),
   track: (sessionId) => api.get(`/donations/track/${sessionId}`),
   callback: (sessionId) => api.get(`/donations/callback?session_id=${sessionId}`),
+  getRecent: () => api.get('/donations/recent'),
 };
 
 // --- Updates ---
@@ -56,6 +57,7 @@ export const adminAPI = {
   getSettings: () => api.get('/admin/settings'),
   updateSetting: (key, value) => api.put(`/admin/settings/${key}`, { value }),
   getStripeStatus: () => api.get('/admin/settings/stripe-status'),
+  getDonations: () => api.get('/admin/donations'),
 };
 
 export default api;
