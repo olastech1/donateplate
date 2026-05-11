@@ -19,7 +19,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [pending, setPending] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
-  const [kycPending, setKycPending] = useState([]);
+  const [kycList, setKycList] = useState([]);
   const [donations, setDonations] = useState([]);
   const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +99,7 @@ export default function AdminDashboardPage() {
     try {
       if (action === 'approve') await adminAPI.approveKyc(id);
       else await adminAPI.rejectKyc(id);
-      setKycPending(prev => prev.filter(k => k.id !== id));
+      setKycList(prev => prev.map(k => k.id === id ? { ...k, kyc_status: action === 'approve' ? 'verified' : 'rejected' } : k));
       setMessage({ type: 'success', text: `KYC ${action}d successfully.` });
     } catch (err) {
       setMessage({ type: 'error', text: `Failed to ${action} KYC.` });
