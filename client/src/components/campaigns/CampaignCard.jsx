@@ -11,7 +11,7 @@ export default function CampaignCard({ campaign }) {
         height: '200px',
         background: campaign.cover_image_url
           ? `url(${campaign.cover_image_url}) center/cover`
-          : 'linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%)',
+          : 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)',
         display: 'flex',
         alignItems: 'flex-end',
         padding: '16px'
@@ -35,7 +35,7 @@ export default function CampaignCard({ campaign }) {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-          <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
+          <span style={{ color: 'var(--emerald-600)', fontWeight: 700 }}>
             ${Number(campaign.current_amount).toLocaleString()}
           </span>
           <span style={{ color: 'var(--text-muted)' }}>

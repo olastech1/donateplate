@@ -47,7 +47,7 @@ export default function TrackingPage() {
 
         <div className="tracking-detail-row">
           <span className="tracking-label">Amount</span>
-          <span className="tracking-value" style={{ color: 'var(--accent)' }}>${Number(donation.amount).toLocaleString()}</span>
+          <span className="tracking-value" style={{ color: 'var(--emerald-600)' }}>${Number(donation.amount).toLocaleString()}</span>
         </div>
         <div className="tracking-detail-row">
           <span className="tracking-label">Date</span>

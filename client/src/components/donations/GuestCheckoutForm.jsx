@@ -53,7 +53,7 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
 
   return (
     <div className="donate-box" id="guest-checkout-form">
-      <h3>Support this Campaign</h3>
+      <h3>Support This Plea</h3>
 
       {error && <div className="alert alert-error">{error}</div>}
 
@@ -130,7 +130,7 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
         </div>
 
         <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading} id="donate-submit-btn">
-          {loading ? 'Redirecting to Stripe...' : `Donate${amount ? ` $${Number(amount).toLocaleString()}` : ''}`}
+          {loading ? 'Redirecting to Stripe...' : `Support${amount ? ` $${Number(amount).toLocaleString()}` : ' This Plea'}`}
         </button>
 
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '12px' }}>

@@ -46,7 +46,7 @@ export default function CreateCampaignPage() {
       {/* Step indicator */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
         {[1, 2, 3].map(s => (
-          <div key={s} style={{ flex: 1, height: '4px', borderRadius: '100px', background: s <= step ? 'var(--accent)' : 'var(--border)', transition: 'background 0.3s' }} />
+          <div key={s} style={{ flex: 1, height: '4px', borderRadius: '100px', background: s <= step ? 'var(--accent)' : 'var(--slate-200)', transition: 'background 0.3s' }} />
         ))}
       </div>
 

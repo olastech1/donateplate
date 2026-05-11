@@ -64,7 +64,7 @@ export default function CampaignPage() {
               <div className="progress-fill" style={{ width: `${progress}%` }} />
             </div>
             <div className="campaign-stats-row">
-              <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--accent)' }}>
+              <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--emerald-600)' }}>
                 ${Number(campaign.current_amount).toLocaleString()}
               </span>
               <span style={{ color: 'var(--text-muted)' }}>
