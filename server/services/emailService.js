@@ -1,31 +1,34 @@
 const nodemailer = require('nodemailer');
-
-// Set up the transporter
-// In production, these should be configured in your .env file
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: process.env.SMTP_PORT || 587,
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
-const defaultFrom = process.env.SMTP_FROM || '"Donate Plea" <noreply@donateplea.com>';
+const { getSetting } = require('../config/settings');
 
 /**
  * Send an email safely (fails gracefully if SMTP is not configured)
  */
 const sendEmail = async (to, subject, htmlContent) => {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.log(`[EMAIL MOCK] To: ${to} | Subject: ${subject}`);
-    return;
-  }
-
   try {
+    const smtpHost = await getSetting('smtp_host') || process.env.SMTP_HOST || 'smtp.gmail.com';
+    const smtpPort = await getSetting('smtp_port') || process.env.SMTP_PORT || '587';
+    const smtpUser = await getSetting('smtp_user') || process.env.SMTP_USER;
+    const smtpPass = await getSetting('smtp_pass') || process.env.SMTP_PASS;
+    const smtpFrom = await getSetting('smtp_from') || process.env.SMTP_FROM || '"Donate Plea" <noreply@donateplea.com>';
+
+    if (!smtpUser || !smtpPass) {
+      console.log(`[EMAIL MOCK] To: ${to} | Subject: ${subject}`);
+      return;
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: parseInt(smtpPort),
+      secure: smtpPort === '465',
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
     const info = await transporter.sendMail({
-      from: defaultFrom,
+      from: smtpFrom,
       to,
       subject,
       html: `
