@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CampaignCard from '../components/campaigns/CampaignCard';
 import { campaignAPI, donationAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function HomePage() {
+  const { user } = useAuth();
   const [campaigns, setCampaigns] = useState([]);
   const [recentDonations, setRecentDonations] = useState([]);
   const [stats, setStats] = useState(null);
@@ -39,7 +41,7 @@ export default function HomePage() {
           </p>
           <div className="hero-actions animate-in" style={{ animationDelay: '0.2s' }}>
             <Link to="/explore" className="btn btn-primary btn-lg">Explore Campaigns</Link>
-            <Link to="/register" className="btn btn-secondary btn-lg">Start a Campaign</Link>
+            <Link to={user ? "/campaigns/create" : "/register"} className="btn btn-secondary btn-lg">Start a Campaign</Link>
           </div>
         </div>
       </section>

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { campaignAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const CATEGORIES = [
   { value: 'medical', label: '🏥 Medical' },
@@ -12,6 +13,7 @@ const CATEGORIES = [
 ];
 
 export default function CreateCampaignPage() {
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -19,6 +21,14 @@ export default function CreateCampaignPage() {
   const [form, setForm] = useState({
     title: '', category: 'general', goal_amount: '', description: '', cover_image_url: '', deadline: ''
   });
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/login');
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || !user) return <div className="page"><div className="spinner" /></div>;
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
