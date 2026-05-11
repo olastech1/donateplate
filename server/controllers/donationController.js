@@ -4,6 +4,7 @@
 const pool = require('../config/db');
 const { getStripeSecretKey, getStripeWebhookSecret, getSetting } = require('../config/settings');
 const { v4: uuidv4 } = require('uuid');
+const emailService = require('../services/emailService');
 
 /**
  * POST /api/donations/initiate
@@ -170,6 +171,15 @@ const stripeWebhook = async (req, res) => {
       }
 
       // The DB trigger automatically updates campaigns.current_amount
+
+      // Send email receipt
+      if (donor_email) {
+        const camp = await pool.query('SELECT title FROM campaigns WHERE id = $1', [campaign_id]);
+        if (camp.rows.length > 0) {
+          const trackingUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/campaigns/${campaign_id}`;
+          emailService.sendDonationReceiptEmail(donor_email, donor_name || 'Generous Donor', session.amount_total / 100, camp.rows[0].title, trackingUrl);
+        }
+      }
     }
 
     // Always respond 200

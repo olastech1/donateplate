@@ -3,6 +3,7 @@
 // ============================================================
 const pool = require('../config/db');
 const { getAllSettings, setSetting, getSetting, getStripePublicKey } = require('../config/settings');
+const emailService = require('../services/emailService');
 
 // ─── Campaign Vetting ─────────────────────────────────────
 
@@ -27,6 +28,12 @@ const approveCampaign = async (req, res) => {
       [req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Campaign not found or already processed.' });
+    
+    const user = await pool.query('SELECT email FROM users WHERE id = $1', [result.rows[0].creator_id]);
+    if (user.rows.length > 0) {
+      emailService.sendCampaignApprovedEmail(user.rows[0].email, result.rows[0].title, result.rows[0].id);
+    }
+
     res.json({ success: true, message: 'Campaign approved.', data: result.rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -40,6 +47,12 @@ const rejectCampaign = async (req, res) => {
       [req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Campaign not found.' });
+    
+    const user = await pool.query('SELECT email FROM users WHERE id = $1', [result.rows[0].creator_id]);
+    if (user.rows.length > 0) {
+      emailService.sendCampaignRejectedEmail(user.rows[0].email, result.rows[0].title);
+    }
+
     res.json({ success: true, message: 'Campaign rejected.', data: { campaign: result.rows[0], reason: req.body.reason } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -86,6 +99,14 @@ const approveWithdrawal = async (req, res) => {
       [req.user.id, req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Withdrawal not found.' });
+
+    const wd = result.rows[0];
+    const user = await pool.query('SELECT email FROM users WHERE id = $1', [wd.creator_id]);
+    const camp = await pool.query('SELECT title FROM campaigns WHERE id = $1', [wd.campaign_id]);
+    if (user.rows.length > 0 && camp.rows.length > 0) {
+      emailService.sendWithdrawalApprovedEmail(user.rows[0].email, wd.amount, camp.rows[0].title);
+    }
+
     res.json({ success: true, message: 'Withdrawal approved.', data: result.rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -100,6 +121,14 @@ const rejectWithdrawal = async (req, res) => {
       [req.user.id, req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Withdrawal not found.' });
+
+    const wd = result.rows[0];
+    const user = await pool.query('SELECT email FROM users WHERE id = $1', [wd.creator_id]);
+    const camp = await pool.query('SELECT title FROM campaigns WHERE id = $1', [wd.campaign_id]);
+    if (user.rows.length > 0 && camp.rows.length > 0) {
+      emailService.sendWithdrawalRejectedEmail(user.rows[0].email, wd.amount, camp.rows[0].title);
+    }
+
     res.json({ success: true, message: 'Withdrawal rejected.', data: result.rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });

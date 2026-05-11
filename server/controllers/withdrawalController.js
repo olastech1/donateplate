@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const emailService = require('../services/emailService');
 
 const requestWithdrawal = async (req, res) => {
   try {
@@ -44,6 +45,9 @@ const requestWithdrawal = async (req, res) => {
        RETURNING *`,
       [campaign_id, creatorId, amount, bank_name, account_number, account_name]
     );
+
+    // Send email to creator
+    emailService.sendWithdrawalRequestEmail(req.user.email, amount, campaign.title);
 
     res.status(201).json({
       success: true,

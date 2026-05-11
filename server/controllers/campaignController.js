@@ -3,6 +3,7 @@
 // Handles CRUD for campaigns + public browsing.
 // ============================================================
 const pool = require('../config/db');
+const emailService = require('../services/emailService');
 
 /**
  * GET /api/campaigns
@@ -197,6 +198,9 @@ const createCampaign = async (req, res) => {
        RETURNING *`,
       [creatorId, title, description, cover_image_url, category || 'general', goal_amount, deadline || null]
     );
+
+    // Send email notification to creator
+    emailService.sendCampaignPendingEmail(req.user.email, title);
 
     res.status(201).json({
       success: true,

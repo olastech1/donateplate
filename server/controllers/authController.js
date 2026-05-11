@@ -5,6 +5,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
+const emailService = require('../services/emailService');
 
 const SALT_ROUNDS = 12;
 
@@ -60,6 +61,9 @@ const register = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
+
+    // Send Welcome Email (async, don't await so it doesn't block response)
+    emailService.sendWelcomeEmail(user.email, user.name);
 
     res.status(201).json({
       success: true,
