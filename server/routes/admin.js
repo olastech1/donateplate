@@ -23,7 +23,7 @@ router.put('/campaigns/:id/reject', adminController.rejectCampaign);
 router.get('/donations', adminController.getAllDonations);
 
 // Withdrawal management
-router.get('/withdrawals', adminController.getPendingWithdrawals);
+router.get('/withdrawals/pending', adminController.getPendingWithdrawals);
 router.put('/withdrawals/:id/approve', adminController.approveWithdrawal);
 router.put('/withdrawals/:id/reject', adminController.rejectWithdrawal);
 
