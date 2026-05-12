@@ -42,22 +42,40 @@ export default function CampaignPage() {
   return (
     <div className="campaign-detail">
       <div className="container">
-        <div style={{ marginBottom: '20px' }}>
-          <div className="campaign-meta" style={{ marginBottom: '12px' }}>
-            <span className="badge badge-accent">{campaign.category}</span>
-            <span className={`badge ${campaign.status === 'active' ? 'badge-success' : 'badge-warning'}`}>{campaign.status}</span>
-          </div>
-          <h1 className="campaign-title" style={{ marginTop: '0', marginBottom: '12px', fontSize: '2.5rem', lineHeight: '1.2' }}>
-            {campaign.title}
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', margin: '0' }}>
-            by <strong style={{ color: 'var(--slate-800)' }}>{campaign.creator_name}</strong> · Created {timeAgo(campaign.created_at)}
-          </p>
-        </div>
+        {/* Hero: Cover Image with title overlaid */}
+        <div style={{ position: 'relative', marginBottom: '0', borderRadius: '12px', overflow: 'hidden', background: '#0f172a' }}>
+          {campaign.cover_image_url ? (
+            <img
+              src={campaign.cover_image_url}
+              alt={campaign.title}
+              style={{ width: '100%', maxHeight: '480px', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <div style={{ width: '100%', height: '320px', background: 'linear-gradient(135deg, #a855f7, #6366f1)' }} />
+          )}
 
-        {campaign.cover_image_url && (
-          <img src={campaign.cover_image_url} alt={campaign.title} className="campaign-hero-img" />
-        )}
+          {/* Dark gradient overlay */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)',
+            padding: '60px 24px 24px'
+          }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+              <span style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, backdropFilter: 'blur(4px)' }}>
+                {campaign.category}
+              </span>
+              <span style={{ background: campaign.status === 'active' ? 'rgba(74,222,128,0.25)' : 'rgba(251,191,36,0.25)', color: campaign.status === 'active' ? '#4ade80' : '#fbbf24', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, backdropFilter: 'blur(4px)' }}>
+                {campaign.status}
+              </span>
+            </div>
+            <h1 style={{ color: '#ffffff', fontSize: '1.9rem', fontWeight: 800, lineHeight: 1.2, margin: '0 0 8px', textShadow: '0 2px 8px rgba(0,0,0,0.5)', fontFamily: 'var(--font-display)' }}>
+              {campaign.title}
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem', margin: 0 }}>
+              by <strong style={{ color: '#fff' }}>{campaign.creator_name}</strong> · {timeAgo(campaign.created_at)}
+            </p>
+          </div>
+        </div>
 
         <div className="campaign-layout">
           {/* Left: Content */}
