@@ -48,6 +48,8 @@ const initiateDonation = async (req, res) => {
     const stripeSecretKey = await getStripeSecretKey();
     const stripe = require('stripe')(stripeSecretKey);
 
+    const frontendUrl = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:3000';
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -72,8 +74,8 @@ const initiateDonation = async (req, res) => {
         user_id: req.user ? req.user.id : '',
         platform_fee: platformFee.toString()
       },
-      success_url: `${process.env.FRONTEND_URL}/donation/callback?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/campaigns/${campaign.id}`
+      success_url: `${frontendUrl}/donation/callback?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/campaigns/${campaign.id}`
     });
 
     // Insert pending donation record

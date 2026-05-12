@@ -188,7 +188,8 @@ const forgotPassword = async (req, res) => {
       [resetToken, expires, email.toLowerCase()]
     );
 
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+    const frontendUrl = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
     await emailService.sendPasswordResetEmail(email, resetUrl);
 
     res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
