@@ -2,7 +2,7 @@
 // ADMIN CONTROLLER — Platform management + Settings
 // ============================================================
 const pool = require('../config/db');
-const { getAllSettings, setSetting, getSetting, getStripePublicKey } = require('../config/settings');
+const { getAllSettings, setSetting, getSetting, getStripePublicKey, getStripeSecretKey } = require('../config/settings');
 const emailService = require('../services/emailService');
 
 // ─── User Management ──────────────────────────────────────
@@ -364,6 +364,86 @@ const testEmail = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/admin/donations/verify-pending
+ * Loops through all 'pending' donations, checks their status on Stripe,
+ * and marks them 'success' if Stripe confirms payment was completed.
+ */
+const verifyPendingDonations = async (req, res) => {
+  try {
+    const stripeSecretKey = await getStripeSecretKey();
+    const stripe = require('stripe')(stripeSecretKey);
+
+    // Fetch all pending donations that have a Stripe session ID
+    const pending = await pool.query(
+      `SELECT id, stripe_checkout_session_id, campaign_id, guest_email, guest_name, amount
+       FROM donations
+       WHERE status = 'pending' AND stripe_checkout_session_id IS NOT NULL`
+    );
+
+    if (pending.rows.length === 0) {
+      return res.json({ success: true, message: 'No pending donations to verify.', verified: 0 });
+    }
+
+    let verified = 0;
+    let failed = 0;
+    const results = [];
+
+    for (const donation of pending.rows) {
+      try {
+        const session = await stripe.checkout.sessions.retrieve(donation.stripe_checkout_session_id);
+
+        if (session.payment_status === 'paid') {
+          // Mark as success in DB
+          await pool.query(
+            `UPDATE donations
+             SET status = 'success',
+                 stripe_payment_intent_id = $1
+             WHERE id = $2`,
+            [session.payment_intent, donation.id]
+          );
+          verified++;
+          results.push({ id: donation.id, result: 'verified', amount: donation.amount });
+
+          // Send receipt email if we have the donor's email
+          const donorEmail = donation.guest_email || session.customer_email;
+          if (donorEmail) {
+            const camp = await pool.query('SELECT title FROM campaigns WHERE id = $1', [donation.campaign_id]);
+            if (camp.rows.length > 0) {
+              const trackingUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/track/${donation.stripe_checkout_session_id}`;
+              emailService.sendDonationReceiptEmail(
+                donorEmail,
+                donation.guest_name || 'Generous Donor',
+                donation.amount,
+                camp.rows[0].title,
+                trackingUrl
+              );
+            }
+          }
+        } else {
+          failed++;
+          results.push({ id: donation.id, result: 'not_paid', status: session.payment_status });
+        }
+      } catch (err) {
+        console.error(`Failed to verify session ${donation.stripe_checkout_session_id}:`, err.message);
+        failed++;
+        results.push({ id: donation.id, result: 'error', error: err.message });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Verification complete. ${verified} marked as success, ${failed} not paid or errored.`,
+      verified,
+      failed,
+      results
+    });
+  } catch (err) {
+    console.error('Verify pending donations error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error.' });
+  }
+};
+
 module.exports = {
   getAllUsers, updateUser, deleteUser,
   getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign,
@@ -371,5 +451,6 @@ module.exports = {
   getAllKyc, approveKyc, rejectKyc,
   getAllDonations,
   getPlatformStats,
-  getSettings, updateSetting, getStripeStatus, testEmail
+  getSettings, updateSetting, getStripeStatus, testEmail,
+  verifyPendingDonations
 };

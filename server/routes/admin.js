@@ -23,6 +23,7 @@ router.delete('/campaigns/:id', adminController.deleteCampaign);
 
 // Donations
 router.get('/donations', adminController.getAllDonations);
+router.post('/donations/verify-pending', adminController.verifyPendingDonations);
 
 // Withdrawal management
 router.get('/withdrawals/pending', adminController.getPendingWithdrawals);

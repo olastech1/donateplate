@@ -82,6 +82,7 @@ export const adminAPI = {
   getStripeStatus: () => api.get('/admin/settings/stripe-status'),
   testEmail: (data) => api.post('/admin/settings/test-email', data),
   getDonations: () => api.get('/admin/donations'),
+  verifyPendingDonations: () => api.post('/admin/donations/verify-pending'),
 };
 
 export default api;

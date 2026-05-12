@@ -26,6 +26,8 @@ export default function AdminDashboardPage() {
   const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyResult, setVerifyResult] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [previewDocument, setPreviewDocument] = useState(null);
 
@@ -519,6 +521,44 @@ export default function AdminDashboardPage() {
             {/* ── Donations Tab ── */}
             {tab === 'donations' && (
               <div className="animate-in">
+                {/* Verify Payments Banner */}
+                <div className="card" style={{ marginBottom: '20px', background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', border: '1px solid #86efac' }}>
+                  <div className="card-body" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                    <div>
+                      <h4 style={{ margin: '0 0 4px', color: '#166534', fontFamily: 'var(--font-display)' }}>🔍 Verify Pending Payments</h4>
+                      <p style={{ margin: 0, color: '#15803d', fontSize: '0.88rem' }}>Check all pending donations against Stripe and automatically mark confirmed payments as success.</p>
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      style={{ background: '#16a34a', whiteSpace: 'nowrap' }}
+                      disabled={verifyLoading}
+                      onClick={async () => {
+                        setVerifyLoading(true);
+                        setVerifyResult(null);
+                        try {
+                          const res = await adminAPI.verifyPendingDonations();
+                          setVerifyResult(res.data);
+                          setMessage({ type: 'success', text: res.data.message });
+                          // Reload donations list
+                          const fresh = await adminAPI.getDonations();
+                          setDonations(fresh.data.data);
+                        } catch (err) {
+                          setMessage({ type: 'error', text: err.response?.data?.message || 'Verification failed.' });
+                        } finally {
+                          setVerifyLoading(false);
+                        }
+                      }}
+                    >
+                      {verifyLoading ? '⏳ Verifying...' : '✅ Verify Payments Now'}
+                    </button>
+                  </div>
+                  {verifyResult && (
+                    <div style={{ padding: '0 24px 20px', display: 'flex', gap: '24px' }}>
+                      <span style={{ color: '#166534', fontWeight: 700 }}>✅ {verifyResult.verified} verified</span>
+                      <span style={{ color: '#dc2626', fontWeight: 700 }}>❌ {verifyResult.failed} not paid / error</span>
+                    </div>
+                  )}
+                </div>
                 {donations.length === 0 ? (
                   <div className="card" style={{ textAlign: 'center' }}>
                     <div className="card-body" style={{ padding: '60px 20px' }}>
