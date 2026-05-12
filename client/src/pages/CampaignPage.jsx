@@ -42,6 +42,19 @@ export default function CampaignPage() {
   return (
     <div className="campaign-detail">
       <div className="container">
+        <div style={{ marginBottom: '20px' }}>
+          <div className="campaign-meta" style={{ marginBottom: '12px' }}>
+            <span className="badge badge-accent">{campaign.category}</span>
+            <span className={`badge ${campaign.status === 'active' ? 'badge-success' : 'badge-warning'}`}>{campaign.status}</span>
+          </div>
+          <h1 className="campaign-title" style={{ marginTop: '0', marginBottom: '12px', fontSize: '2.5rem', lineHeight: '1.2' }}>
+            {campaign.title}
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', margin: '0' }}>
+            by <strong style={{ color: 'var(--slate-800)' }}>{campaign.creator_name}</strong> · Created {timeAgo(campaign.created_at)}
+          </p>
+        </div>
+
         {campaign.cover_image_url && (
           <img src={campaign.cover_image_url} alt={campaign.title} className="campaign-hero-img" />
         )}
@@ -49,15 +62,6 @@ export default function CampaignPage() {
         <div className="campaign-layout">
           {/* Left: Content */}
           <div>
-            <div className="campaign-meta">
-              <span className="badge badge-accent">{campaign.category}</span>
-              <span className="badge badge-success">{campaign.status}</span>
-            </div>
-
-            <h1 className="campaign-title">{campaign.title}</h1>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
-              by {campaign.creator_name} · Created {timeAgo(campaign.created_at)}
-            </p>
 
             {/* Circular Progress & CTA Block */}
             <div style={{ margin: '24px 0', padding: '0', background: 'transparent' }}>
