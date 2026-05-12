@@ -27,6 +27,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [previewDocument, setPreviewDocument] = useState(null);
 
   // Guard: only admins
   useEffect(() => {
@@ -149,6 +150,20 @@ export default function AdminDashboardPage() {
       setMessage({ type: 'success', text: 'User updated successfully.' });
     } catch (err) {
       setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to update user.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    try {
+      setActionLoading(`user-del-${id}`);
+      await adminAPI.deleteUser(id);
+      setUsersList(prev => prev.filter(u => u.id !== id));
+      setMessage({ type: 'success', text: 'User deleted successfully.' });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to delete user.' });
     } finally {
       setActionLoading('');
     }
@@ -345,9 +360,12 @@ export default function AdminDashboardPage() {
                                 {k.kyc_address && <div><strong>Address:</strong> {k.kyc_address}</div>}
                                 {k.kyc_document_url && (
                                   <div style={{ marginTop: '8px' }}>
-                                    <a href={k.kyc_document_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+                                    <button 
+                                      className="btn btn-secondary btn-sm" 
+                                      onClick={() => setPreviewDocument(k.kyc_document_url)}
+                                    >
                                       📄 View Uploaded Document
-                                    </a>
+                                    </button>
                                   </div>
                                 )}
                               </div>
@@ -453,8 +471,11 @@ export default function AdminDashboardPage() {
                                   const newRole = prompt('Enter new role (admin or creator):', u.role);
                                   if (newRole === null || !['admin', 'creator'].includes(newRole)) return alert('Invalid role');
                                   handleUserUpdate(u.id, { name: newName, email: u.email, role: newRole });
-                                }} disabled={actionLoading === `user-${u.id}`}>
+                                }} disabled={actionLoading === `user-${u.id}`} style={{ marginRight: '8px' }}>
                                   {actionLoading === `user-${u.id}` ? 'Saving...' : 'Edit'}
+                                </button>
+                                <button className="btn btn-danger btn-sm" onClick={() => handleDeleteUser(u.id)} disabled={actionLoading === `user-del-${u.id}`}>
+                                  {actionLoading === `user-del-${u.id}` ? 'Deleting...' : 'Delete'}
                                 </button>
                               </td>
                             </tr>
@@ -573,6 +594,29 @@ export default function AdminDashboardPage() {
           </>
         )}
       </div>
+
+      {/* Document Preview Modal */}
+      {previewDocument && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }}>
+          <div style={{ width: '100%', maxWidth: '800px', background: '#fff', borderRadius: '8px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+            <div style={{ padding: '16px', background: 'var(--slate-100)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--slate-200)' }}>
+              <h3 style={{ margin: 0, fontFamily: 'var(--font-display)' }}>Document Preview</h3>
+              <button className="btn btn-secondary btn-sm" onClick={() => setPreviewDocument(null)}>Close</button>
+            </div>
+            <div style={{ flex: 1, overflow: 'auto', padding: '24px', display: 'flex', justifyContent: 'center', background: '#f8f9fa' }}>
+              {previewDocument.startsWith('data:application/pdf') ? (
+                <iframe src={previewDocument} width="100%" height="600px" style={{ border: 'none' }} title="PDF Preview" />
+              ) : (
+                <img src={previewDocument} alt="KYC Document" style={{ maxWidth: '100%', objectFit: 'contain' }} />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -46,10 +46,19 @@ export default function CampaignCard({ campaign }) {
         </div>
 
         {campaign.creator_name && (
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '12px' }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '12px', marginBottom: '16px' }}>
             by {campaign.creator_name}
           </p>
         )}
+
+        <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
+          <Link to={`/campaigns/${campaign.id}`} className="btn btn-secondary" style={{ flex: 1, padding: '8px', fontSize: '0.9rem' }}>
+            View
+          </Link>
+          <Link to={`/campaigns/${campaign.id}`} className="btn btn-primary" style={{ flex: 1, padding: '8px', fontSize: '0.9rem' }}>
+            Donate
+          </Link>
+        </div>
       </div>
     </div>
   );

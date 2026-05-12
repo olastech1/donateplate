@@ -41,6 +41,31 @@ const updateUser = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Prevent admin from deleting themselves
+    if (id === req.user.id) {
+      return res.status(400).json({ success: false, message: 'Cannot delete your own account.' });
+    }
+
+    const result = await pool.query(
+      `DELETE FROM users WHERE id = $1 RETURNING id`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    res.json({ success: true, message: 'User deleted successfully.' });
+  } catch (err) {
+    console.error('Delete user error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
 // ─── Campaign Vetting ─────────────────────────────────────
 
 const getPendingCampaigns = async (req, res) => {
@@ -311,7 +336,7 @@ const testEmail = async (req, res) => {
 };
 
 module.exports = {
-  getAllUsers, updateUser,
+  getAllUsers, updateUser, deleteUser,
   getPendingCampaigns, approveCampaign, rejectCampaign,
   getPendingWithdrawals, approveWithdrawal, rejectWithdrawal,
   getAllKyc, approveKyc, rejectKyc,

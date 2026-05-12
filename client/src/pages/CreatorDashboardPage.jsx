@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { campaignAPI, userAPI, withdrawalAPI } from '../services/api';
+import { campaignAPI, userAPI, withdrawalAPI, updateAPI } from '../services/api';
 
 const TABS = [
   { key: 'profile', label: '👤 Profile', icon: '👤' },
@@ -21,6 +21,12 @@ export default function CreatorDashboardPage() {
   
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  // Update Modal State
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [activeCampaignForUpdate, setActiveCampaignForUpdate] = useState(null);
+  const [updateForm, setUpdateForm] = useState({ title: '', message: '' });
+  const [updateLoading, setUpdateLoading] = useState(false);
   
   // Withdrawal Form State
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
@@ -112,6 +118,22 @@ export default function CreatorDashboardPage() {
       setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to request withdrawal.' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePostUpdate = async (e) => {
+    e.preventDefault();
+    if (!updateForm.message) return;
+    setUpdateLoading(true);
+    try {
+      await updateAPI.create(activeCampaignForUpdate, updateForm);
+      setMessage({ type: 'success', text: 'Campaign update posted successfully.' });
+      setShowUpdateModal(false);
+      setUpdateForm({ title: '', message: '' });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to post update.' });
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -232,11 +254,19 @@ export default function CreatorDashboardPage() {
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '8px' }}>
-                            {c.status === 'active' && (
-                              <Link to={`/campaigns/${c.id}`} className="btn btn-secondary btn-sm">View Public</Link>
-                            )}
-                            <button className="btn btn-primary btn-sm" onClick={() => alert('Edit feature coming soon!')}>Edit</button>
-                          </div>
+                              {c.status === 'active' && (
+                                <Link to={`/campaigns/${c.id}`} className="btn btn-secondary btn-sm">View Public</Link>
+                              )}
+                              <button 
+                                className="btn btn-primary btn-sm" 
+                                onClick={() => {
+                                  setActiveCampaignForUpdate(c.id);
+                                  setShowUpdateModal(true);
+                                }}
+                              >
+                                Post Update
+                              </button>
+                            </div>
                         </div>
                       </div>
                     </div>
@@ -410,6 +440,37 @@ export default function CreatorDashboardPage() {
           </>
         )}
       </div>
+
+      {/* Post Update Modal */}
+      {showUpdateModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.6)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }}>
+          <div className="card animate-in" style={{ width: '100%', maxWidth: '500px', background: '#fff' }}>
+            <div className="card-body">
+              <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Post Campaign Update</h3>
+              <form onSubmit={handlePostUpdate}>
+                <div className="form-group">
+                  <label className="form-label">Update Title (Optional)</label>
+                  <input type="text" className="form-input" placeholder="e.g., We reached 50%!" value={updateForm.title} onChange={e => setUpdateForm({...updateForm, title: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Update Message *</label>
+                  <textarea className="form-textarea" required rows="4" placeholder="Share your progress with donors..." value={updateForm.message} onChange={e => setUpdateForm({...updateForm, message: e.target.value})}></textarea>
+                </div>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowUpdateModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={updateLoading || !updateForm.message}>
+                    {updateLoading ? 'Posting...' : 'Post Update'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

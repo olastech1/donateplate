@@ -12,6 +12,7 @@ router.use(authenticate, requireAdmin);
 // User Management
 router.get('/users', adminController.getAllUsers);
 router.put('/users/:id', adminController.updateUser);
+router.delete('/users/:id', adminController.deleteUser);
 
 // Campaign vetting
 router.get('/campaigns/pending', adminController.getPendingCampaigns);
