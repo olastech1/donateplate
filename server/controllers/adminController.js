@@ -149,6 +149,28 @@ const deleteCampaign = async (req, res) => {
   }
 };
 
+const toggleCampaign = async (req, res) => {
+  try {
+    // Get current status first
+    const current = await pool.query('SELECT status FROM campaigns WHERE id = $1', [req.params.id]);
+    if (current.rows.length === 0) return res.status(404).json({ success: false, message: 'Campaign not found.' });
+
+    const currentStatus = current.rows[0].status;
+    // Toggle between active <-> paused. Rejected/pending stay as-is unless forced.
+    const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+
+    const result = await pool.query(
+      `UPDATE campaigns SET status = $1 WHERE id = $2 RETURNING *`,
+      [newStatus, req.params.id]
+    );
+
+    res.json({ success: true, message: `Campaign ${newStatus === 'active' ? 'activated' : 'paused'} successfully.`, data: result.rows[0] });
+  } catch (err) {
+    console.error('Toggle campaign error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
 // ─── KYC Verification ─────────────────────────────────────
 
 const getAllKyc = async (req, res) => {
@@ -446,7 +468,7 @@ const verifyPendingDonations = async (req, res) => {
 
 module.exports = {
   getAllUsers, updateUser, deleteUser,
-  getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign,
+  getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign, toggleCampaign,
   getPendingWithdrawals, approveWithdrawal, rejectWithdrawal,
   getAllKyc, approveKyc, rejectKyc,
   getAllDonations,

@@ -102,6 +102,20 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleToggleCampaign = async (id, currentStatus) => {
+    setActionLoading(`tog-${id}`);
+    try {
+      const res = await adminAPI.toggleCampaign(id);
+      const newStatus = res.data.data.status;
+      setPending(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
+      setMessage({ type: 'success', text: `Campaign ${newStatus === 'active' ? 'turned ON ✅' : 'turned OFF ⏸️'} successfully.` });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to toggle campaign.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
   const handleWithdrawalAction = async (id, action) => {
     setActionLoading(id);
     try {
@@ -320,7 +334,7 @@ export default function AdminDashboardPage() {
                               Raised: ${Number(c.current_amount).toLocaleString()} / Goal: ${Number(c.goal_amount).toLocaleString()}
                             </p>
                           </div>
-                          <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                          <div style={{ display: 'flex', gap: '8px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                             {c.status === 'pending' && (
                               <>
                                 <button
@@ -338,6 +352,22 @@ export default function AdminDashboardPage() {
                                   {actionLoading === c.id ? '...' : '❌ Reject'}
                                 </button>
                               </>
+                            )}
+                            {/* Toggle On/Off — only for active or paused */}
+                            {(c.status === 'active' || c.status === 'paused') && (
+                              <button
+                                className="btn btn-sm"
+                                style={{
+                                  background: c.status === 'active' ? '#fef9c3' : '#d1fae5',
+                                  color: c.status === 'active' ? '#92400e' : '#065f46',
+                                  border: `1px solid ${c.status === 'active' ? '#fde047' : '#6ee7b7'}`,
+                                  fontWeight: 700
+                                }}
+                                onClick={() => handleToggleCampaign(c.id, c.status)}
+                                disabled={actionLoading === `tog-${c.id}`}
+                              >
+                                {actionLoading === `tog-${c.id}` ? '...' : c.status === 'active' ? '⏸️ Pause' : '▶️ Activate'}
+                              </button>
                             )}
                             <button
                               className="btn btn-secondary btn-sm"

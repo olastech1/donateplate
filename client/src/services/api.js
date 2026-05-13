@@ -70,6 +70,7 @@ export const adminAPI = {
   approve: (id) => api.put(`/admin/campaigns/${id}/approve`),
   reject: (id, reason) => api.put(`/admin/campaigns/${id}/reject`, { reason }),
   deleteCampaign: (id) => api.delete(`/admin/campaigns/${id}`),
+  toggleCampaign: (id) => api.put(`/admin/campaigns/${id}/toggle`),
   getPendingWithdrawals: () => api.get('/admin/withdrawals/pending'),
   approveWithdrawal: (id) => api.put(`/admin/withdrawals/${id}/approve`),
   rejectWithdrawal: (id) => api.put(`/admin/withdrawals/${id}/reject`),
