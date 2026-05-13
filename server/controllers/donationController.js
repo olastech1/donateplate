@@ -32,7 +32,7 @@ const initiateDonation = async (req, res) => {
     if (campResult.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Campaign not found.' });
     }
-    if (campResult.rows[0].status !== 'active') {
+    if (!['active', 'paused'].includes(campResult.rows[0].status)) {
       return res.status(400).json({ success: false, message: 'Campaign not accepting donations.' });
     }
 
