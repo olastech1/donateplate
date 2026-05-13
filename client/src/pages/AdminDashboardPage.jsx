@@ -314,10 +314,14 @@ export default function AdminDashboardPage() {
                       <div className="card-body" style={{ padding: '24px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
                           <div style={{ flex: 1, minWidth: '250px' }}>
-                            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
                               <span className="badge badge-category">{c.category}</span>
-                              <span className={`badge ${c.status === 'active' ? 'badge-success' : c.status === 'pending' ? 'badge-warning' : 'badge-danger'}`}>
-                                {c.status}
+                              <span className={`badge ${
+                                c.status === 'active' ? 'badge-success' :
+                                c.status === 'pending' ? 'badge-warning' :
+                                c.status === 'paused' ? '' : 'badge-danger'
+                              }`} style={c.status === 'paused' ? { background: '#e0e7ff', color: '#3730a3', border: '1px solid #a5b4fc' } : {}}>
+                                {c.status === 'paused' ? '🚫 Hidden from Public' : c.status}
                               </span>
                               <span className={`badge ${c.kyc_status === 'verified' ? 'badge-success' : 'badge-danger'}`}>
                                 KYC: {c.kyc_status}
@@ -333,6 +337,23 @@ export default function AdminDashboardPage() {
                             <p style={{ color: 'var(--emerald-600)', fontWeight: 700, marginTop: '8px' }}>
                               Raised: ${Number(c.current_amount).toLocaleString()} / Goal: ${Number(c.goal_amount).toLocaleString()}
                             </p>
+                            {/* Share link for paused/hidden campaigns */}
+                            {c.status === 'paused' && (
+                              <div style={{ marginTop: '10px', padding: '8px 12px', background: '#f1f5f9', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.8rem', color: '#64748b', flex: 1, wordBreak: 'break-all' }}>
+                                  🔗 {window.location.origin}/campaigns/{c.id}
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(`${window.location.origin}/campaigns/${c.id}`);
+                                    setMessage({ type: 'success', text: 'Share link copied to clipboard!' });
+                                  }}
+                                  style={{ background: 'none', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '3px 10px', fontSize: '0.8rem', cursor: 'pointer', color: '#475569', whiteSpace: 'nowrap' }}
+                                >
+                                  📋 Copy
+                                </button>
+                              </div>
+                            )}
                           </div>
                           <div style={{ display: 'flex', gap: '8px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                             {c.status === 'pending' && (
@@ -353,7 +374,7 @@ export default function AdminDashboardPage() {
                                 </button>
                               </>
                             )}
-                            {/* Toggle On/Off — only for active or paused */}
+                            {/* Toggle On/Off — active or paused */}
                             {(c.status === 'active' || c.status === 'paused') && (
                               <button
                                 className="btn btn-sm"
@@ -366,19 +387,19 @@ export default function AdminDashboardPage() {
                                 onClick={() => handleToggleCampaign(c.id, c.status)}
                                 disabled={actionLoading === `tog-${c.id}`}
                               >
-                                {actionLoading === `tog-${c.id}` ? '...' : c.status === 'active' ? '⏸️ Hide from Home' : '▶️ Show on Home'}
+                                {actionLoading === `tog-${c.id}` ? '...' : c.status === 'active' ? '🚫 Hide' : '🟢 Show'}
                               </button>
                             )}
+                            {/* Share / Copy Link — always visible */}
                             <button
                               className="btn btn-sm"
-                              style={{ background: '#e2e8f0', color: '#475569' }}
+                              style={{ background: '#e0e7ff', color: '#3730a3', border: '1px solid #a5b4fc', fontWeight: 700 }}
                               onClick={() => {
-                                const url = `${window.location.origin}/campaigns/${c.id}`;
-                                navigator.clipboard.writeText(url);
-                                alert('Campaign link copied to clipboard!');
+                                navigator.clipboard.writeText(`${window.location.origin}/campaigns/${c.id}`);
+                                setMessage({ type: 'success', text: `Link for “${c.title}” copied!` });
                               }}
                             >
-                              🔗 Copy Link
+                              🔗 Share Link
                             </button>
                             <button
                               className="btn btn-secondary btn-sm"

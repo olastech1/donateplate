@@ -64,9 +64,16 @@ export default function CampaignPage() {
               <span style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, backdropFilter: 'blur(4px)' }}>
                 {campaign.category}
               </span>
-              <span style={{ background: campaign.status === 'active' ? 'rgba(74,222,128,0.25)' : 'rgba(251,191,36,0.25)', color: campaign.status === 'active' ? '#4ade80' : '#fbbf24', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, backdropFilter: 'blur(4px)' }}>
-                {campaign.status}
-              </span>
+              {campaign.status === 'active' && (
+                <span style={{ background: 'rgba(74,222,128,0.25)', color: '#4ade80', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, backdropFilter: 'blur(4px)' }}>
+                  active
+                </span>
+              )}
+              {campaign.status === 'paused' && (
+                <span style={{ background: 'rgba(224,231,255,0.3)', color: '#c7d2fe', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, backdropFilter: 'blur(4px)' }}>
+                  🔒 Private — Link Only
+                </span>
+              )}
             </div>
             <h1 style={{ color: '#ffffff', fontSize: '1.9rem', fontWeight: 800, lineHeight: 1.2, margin: '0 0 8px', textShadow: '0 2px 8px rgba(0,0,0,0.5)', fontFamily: 'var(--font-display)' }}>
               {campaign.title}
@@ -80,6 +87,16 @@ export default function CampaignPage() {
         <div className="campaign-layout">
           {/* Left: Content */}
           <div>
+            {/* Private/Hidden notice */}
+            {campaign.status === 'paused' && (
+              <div style={{ margin: '20px 0 0', padding: '14px 18px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '1.3rem' }}>🔒</span>
+                <div>
+                  <strong style={{ color: '#1e40af', display: 'block', marginBottom: '4px' }}>This campaign is not publicly listed</strong>
+                  <span style={{ color: '#3b82f6', fontSize: '0.88rem' }}>You are viewing it via a private share link. It will not appear on the homepage or explore page until it is made active again.</span>
+                </div>
+              </div>
+            )}
 
             {/* Circular Progress & CTA Block */}
             <div style={{ margin: '24px 0', padding: '0', background: 'transparent' }}>
