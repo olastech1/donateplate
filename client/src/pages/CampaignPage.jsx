@@ -39,6 +39,24 @@ export default function CampaignPage() {
     return hours > 0 ? `${hours}h ago` : 'Just now';
   };
 
+  // Inject / remove noindex meta tag based on seo_visible
+  useEffect(() => {
+    if (!campaign) return;
+    const existingTag = document.querySelector('meta[name="robots"][data-campaign]');
+    if (campaign.seo_visible === false) {
+      if (!existingTag) {
+        const meta = document.createElement('meta');
+        meta.name = 'robots';
+        meta.content = 'noindex,nofollow';
+        meta.setAttribute('data-campaign', 'true');
+        document.head.appendChild(meta);
+      }
+    } else {
+      existingTag?.remove();
+    }
+    return () => document.querySelector('meta[name="robots"][data-campaign]')?.remove();
+  }, [campaign]);
+
   return (
     <div className="campaign-detail">
       <div className="container">

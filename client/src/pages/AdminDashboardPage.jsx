@@ -102,6 +102,20 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleToggleSeo = async (id, currentSeoVisible) => {
+    setActionLoading(`seo-${id}`);
+    try {
+      const res = await adminAPI.toggleSeoVisibility(id);
+      const newVal = res.data.data.seo_visible;
+      setPending(prev => prev.map(c => c.id === id ? { ...c, seo_visible: newVal } : c));
+      setMessage({ type: 'success', text: `SEO visibility ${newVal ? 'enabled ✅' : 'disabled 🚫'} successfully.` });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to toggle SEO.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
   const handleToggleCampaign = async (id, currentStatus) => {
     setActionLoading(`tog-${id}`);
     try {
@@ -390,7 +404,23 @@ export default function AdminDashboardPage() {
                                 {actionLoading === `tog-${c.id}` ? '...' : c.status === 'active' ? '🚫 Hide' : '🟢 Show'}
                               </button>
                             )}
-                            {/* Share / Copy Link — always visible */}
+                             {/* SEO Visibility Toggle */}
+                             {(c.status === 'active' || c.status === 'paused') && (
+                               <button
+                                 className="btn btn-sm"
+                                 style={{
+                                   background: c.seo_visible !== false ? '#e0f2fe' : '#fee2e2',
+                                   color: c.seo_visible !== false ? '#0369a1' : '#b91c1c',
+                                   border: `1px solid ${c.seo_visible !== false ? '#7dd3fc' : '#fca5a5'}`,
+                                   fontWeight: 700
+                                 }}
+                                 onClick={() => handleToggleSeo(c.id, c.seo_visible)}
+                                 disabled={actionLoading === `seo-${c.id}`}
+                               >
+                                 {actionLoading === `seo-${c.id}` ? '...' : c.seo_visible !== false ? '🌐 SEO On' : '🚫 SEO Off'}
+                               </button>
+                             )}
+                             {/* Share / Copy Link — always visible */}
                             <button
                               className="btn btn-sm"
                               style={{ background: '#e0e7ff', color: '#3730a3', border: '1px solid #a5b4fc', fontWeight: 700 }}

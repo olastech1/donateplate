@@ -20,6 +20,7 @@ router.get('/campaigns', adminController.getAllCampaigns);
 router.put('/campaigns/:id/approve', adminController.approveCampaign);
 router.put('/campaigns/:id/reject', adminController.rejectCampaign);
 router.put('/campaigns/:id/toggle', adminController.toggleCampaign);
+router.put('/campaigns/:id/seo', adminController.toggleSeoVisibility);
 router.delete('/campaigns/:id', adminController.deleteCampaign);
 
 // Donations

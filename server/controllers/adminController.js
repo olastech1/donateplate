@@ -171,6 +171,28 @@ const toggleCampaign = async (req, res) => {
   }
 };
 
+const toggleSeoVisibility = async (req, res) => {
+  try {
+    const current = await pool.query('SELECT seo_visible FROM campaigns WHERE id = $1', [req.params.id]);
+    if (current.rows.length === 0) return res.status(404).json({ success: false, message: 'Campaign not found.' });
+
+    const newVal = !current.rows[0].seo_visible;
+    const result = await pool.query(
+      `UPDATE campaigns SET seo_visible = $1 WHERE id = $2 RETURNING *`,
+      [newVal, req.params.id]
+    );
+
+    res.json({
+      success: true,
+      message: `SEO visibility ${newVal ? 'enabled' : 'disabled'}.`,
+      data: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Toggle SEO error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
 // ─── KYC Verification ─────────────────────────────────────
 
 const getAllKyc = async (req, res) => {
@@ -469,6 +491,7 @@ const verifyPendingDonations = async (req, res) => {
 module.exports = {
   getAllUsers, updateUser, deleteUser,
   getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign, toggleCampaign,
+  toggleSeoVisibility,
   getPendingWithdrawals, approveWithdrawal, rejectWithdrawal,
   getAllKyc, approveKyc, rejectKyc,
   getAllDonations,

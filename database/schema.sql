@@ -97,6 +97,8 @@ CREATE TABLE campaigns (
     status          VARCHAR(20) NOT NULL DEFAULT 'pending'
                         CHECK (status IN ('pending', 'active', 'paused', 'closed', 'rejected')),
 
+    seo_visible     BOOLEAN NOT NULL DEFAULT TRUE,
+
     deadline        TIMESTAMP WITH TIME ZONE,
     created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()
