@@ -56,11 +56,12 @@ const getButtonHtml = (url, text) => `
  */
 const sendEmail = async (to, subject, htmlContent, previewText = '') => {
   try {
-    const smtpHost = await getSetting('smtp_host') || process.env.SMTP_HOST || 'smtp.gmail.com';
-    const smtpPort = await getSetting('smtp_port') || process.env.SMTP_PORT || '587';
-    const smtpUser = await getSetting('smtp_user') || process.env.SMTP_USER;
-    const smtpPass = await getSetting('smtp_pass') || process.env.SMTP_PASS;
-    const smtpFrom = await getSetting('smtp_from') || process.env.SMTP_FROM || '"Donate Plea" <noreply@donateplea.com>';
+    // Env vars take priority; fall back to DB settings only if env is not set
+    const smtpHost = process.env.SMTP_HOST || await getSetting('smtp_host') || 'smtp.gmail.com';
+    const smtpPort = process.env.SMTP_PORT || await getSetting('smtp_port') || '587';
+    const smtpUser = process.env.SMTP_USER || await getSetting('smtp_user');
+    const smtpPass = process.env.SMTP_PASS || await getSetting('smtp_pass');
+    const smtpFrom = process.env.SMTP_FROM || await getSetting('smtp_from') || '"Donate Plea" <noreply@donateplea.com>';
 
     if (!smtpUser || !smtpPass) {
       console.log(`[EMAIL MOCK] To: ${to} | Subject: ${subject}`);
