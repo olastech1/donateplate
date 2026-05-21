@@ -54,12 +54,14 @@ export default function CreatorDashboardPage() {
           const res = await campaignAPI.getMyCampaigns();
           setCampaigns(res.data.data);
         } else if (tab === 'withdrawals') {
-          const [withRes, campRes] = await Promise.all([
+          const [withRes, campRes, profileRes] = await Promise.all([
             withdrawalAPI.getMyWithdrawals(),
-            campaignAPI.getMyCampaigns()
+            campaignAPI.getMyCampaigns(),
+            userAPI.getMe()
           ]);
           setWithdrawals(withRes.data.data);
           setCampaigns(campRes.data.data.filter(c => parseFloat(c.current_amount) > 0));
+          setUserData(profileRes.data.data);
         } else if (tab === 'kyc' || tab === 'profile') {
           const res = await userAPI.getMe();
           setUserData(res.data.data);
@@ -280,10 +282,48 @@ export default function CreatorDashboardPage() {
               <div className="animate-in">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                   <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)' }}>Withdrawals</h2>
-                  {!showWithdrawForm && campaigns.length > 0 && (
+                  {!showWithdrawForm && campaigns.length > 0 && userData?.kyc_status === 'verified' && (
                     <button className="btn btn-primary" onClick={() => setShowWithdrawForm(true)}>Request Payout</button>
                   )}
                 </div>
+
+                {/* KYC Gate — shown when not verified */}
+                {userData && userData.kyc_status !== 'verified' && (
+                  <div style={{
+                    marginBottom: '24px', padding: '24px',
+                    background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
+                    border: '1px solid #fcd34d', borderRadius: 'var(--radius-md)',
+                    display: 'flex', gap: '16px', alignItems: 'flex-start'
+                  }}>
+                    <div style={{ fontSize: '2rem', flexShrink: 0 }}>🛡️</div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', color: '#92400e', margin: '0 0 6px' }}>
+                        Identity Verification Required
+                      </h3>
+                      <p style={{ color: '#78350f', fontSize: '0.9rem', margin: '0 0 16px' }}>
+                        {userData.kyc_status === 'pending'
+                          ? 'Your identity documents are under review. Withdrawals will be unlocked once your KYC is approved (usually 24–48 hours).'
+                          : 'You must verify your identity before requesting a payout. This is required to prevent fraud and protect all donors.'}
+                      </p>
+                      {userData.kyc_status !== 'pending' && (
+                        <button
+                          className="btn btn-primary"
+                          style={{ background: '#d97706', border: 'none' }}
+                          onClick={() => setTab('kyc')}
+                        >
+                          🪪 Complete Identity Verification
+                        </button>
+                      )}
+                      {userData.kyc_status === 'pending' && (
+                        <span style={{
+                          display: 'inline-block', padding: '6px 14px',
+                          background: '#fde68a', borderRadius: '20px',
+                          fontWeight: 700, fontSize: '0.85rem', color: '#92400e'
+                        }}>⏳ Review in Progress</span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {showWithdrawForm && (
                   <div className="card animate-in" style={{ marginBottom: '24px' }}>
