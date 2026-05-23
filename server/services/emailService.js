@@ -256,4 +256,46 @@ module.exports = {
       `,
       'Instructions to reset your Donate Plea password.'
     ),
+
+  // 7. Account Ban/Unban Emails
+  sendUserBannedEmail: (email, name, banType, banExpiresAt, reason) => {
+    const isTemp = banType === 'temporary';
+    const durationText = isTemp 
+      ? `This suspension is temporary and is scheduled to expire on <strong>${new Date(banExpiresAt).toLocaleString()}</strong>.`
+      : 'This suspension is permanent, and you will no longer be able to log in or access your campaigns.';
+    const reasonSection = reason 
+      ? `<div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin: 20px 0; border-radius: 4px;">
+           <p style="margin: 0; font-weight: 600; color: #991b1b; font-size: 15px;">Reason for Suspension:</p>
+           <p style="margin: 4px 0 0; color: #7f1d1d; font-size: 14px; line-height: 1.4;">${reason}</p>
+         </div>`
+      : '';
+
+    return sendEmail(
+      email,
+      'Important notice regarding your Donate Plea account',
+      `
+        <h3 style="color: #ef4444; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Account Suspended</h3>
+        <p style="margin: 0 0 16px;">Hello ${name},</p>
+        <p style="margin: 0 0 16px;">We are writing to inform you that your Donate Plea account has been suspended.</p>
+        ${reasonSection}
+        <p style="margin: 0 0 16px;">${durationText}</p>
+        <p style="margin: 0 0 16px;">If you believe this decision was made in error, please contact our support team.</p>
+      `,
+      'Your Donate Plea account has been suspended.'
+    );
+  },
+
+  sendUserUnbannedEmail: (email, name) =>
+    sendEmail(
+      email,
+      'Your Donate Plea account has been restored',
+      `
+        <h3 style="color: #10b981; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Account Restored! 🎉</h3>
+        <p style="margin: 0 0 16px;">Hello ${name},</p>
+        <p style="margin: 0 0 16px;">We are pleased to inform you that the suspension on your Donate Plea account has been lifted, and your account has been fully restored.</p>
+        <p style="margin: 0 0 16px;">You can now log in to your dashboard, manage your campaigns, and resume activity on the platform.</p>
+        ${getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`, 'Log In to Account')}
+      `,
+      'Your Donate Plea account suspension has been lifted.'
+    ),
 };

@@ -175,6 +175,29 @@ const login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
+    // Check if the user is banned
+    if (user.is_banned) {
+      if (user.ban_type === 'temporary' && user.ban_expires_at && new Date(user.ban_expires_at) < new Date()) {
+        // Auto-unban user: update in DB
+        await pool.query(
+          `UPDATE users 
+           SET is_banned = FALSE, ban_type = 'none', ban_expires_at = NULL, ban_reason = NULL, updated_at = NOW() 
+           WHERE id = $1`,
+          [user.id]
+        );
+      } else {
+        const expiryMsg = user.ban_type === 'temporary' 
+          ? ` until ${new Date(user.ban_expires_at).toLocaleString()}` 
+          : ' permanently';
+        const reasonMsg = user.ban_reason ? ` Reason: ${user.ban_reason}` : '';
+        return res.status(403).json({
+          success: false,
+          isBanned: true,
+          message: `Your account has been banned${expiryMsg}.${reasonMsg}`
+        });
+      }
+    }
+
     // Block login if email not verified
     if (user.email_verified === false) {
       return res.status(403).json({

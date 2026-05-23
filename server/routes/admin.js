@@ -14,6 +14,8 @@ router.get('/users', adminController.getAllUsers);
 router.put('/users/:id', adminController.updateUser);
 router.delete('/users/:id', adminController.deleteUser);
 router.post('/users/:id/add-funds', adminController.addFundsToUser);
+router.post('/users/:id/ban', adminController.banUser);
+router.post('/users/:id/unban', adminController.unbanUser);
 
 // Campaign vetting
 router.get('/campaigns/pending', adminController.getPendingCampaigns);

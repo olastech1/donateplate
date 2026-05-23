@@ -91,6 +91,8 @@ export const adminAPI = {
   toggleSeoVisibility: (id) => api.put(`/admin/campaigns/${id}/seo`),
   addFunds: (id, amount) => api.post(`/admin/campaigns/${id}/add-funds`, { amount }),
   addUserFunds: (id, amount) => api.post(`/admin/users/${id}/add-funds`, { amount }),
+  banUser: (id, data) => api.post(`/admin/users/${id}/ban`, data),
+  unbanUser: (id) => api.post(`/admin/users/${id}/unban`),
 };
 
 export default api;

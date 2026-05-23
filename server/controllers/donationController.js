@@ -25,12 +25,19 @@ const initiateDonation = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Amount must be greater than zero.' });
     }
 
-    // Verify campaign is active
+    // Verify campaign is active and creator is not banned
     const campResult = await pool.query(
-      'SELECT id, title, status FROM campaigns WHERE id = $1', [campaign_id]
+      `SELECT c.id, c.title, c.status, u.is_banned 
+       FROM campaigns c
+       JOIN users u ON c.creator_id = u.id
+       WHERE c.id = $1`,
+      [campaign_id]
     );
     if (campResult.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Campaign not found.' });
+    }
+    if (campResult.rows[0].is_banned) {
+      return res.status(403).json({ success: false, message: 'This campaign is suspended because the creator has been banned.' });
     }
     if (!['active', 'paused'].includes(campResult.rows[0].status)) {
       return res.status(400).json({ success: false, message: 'Campaign not accepting donations.' });

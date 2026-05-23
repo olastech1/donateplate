@@ -26,6 +26,11 @@ CREATE TABLE users (
     kyc_document_type VARCHAR(50),
     kyc_document_url TEXT,
     stripe_kyc_session_id VARCHAR(255),
+    is_banned       BOOLEAN DEFAULT FALSE,
+    ban_type        VARCHAR(20) DEFAULT 'none'
+                        CHECK (ban_type IN ('none', 'temporary', 'permanent')),
+    ban_expires_at  TIMESTAMP WITH TIME ZONE,
+    ban_reason      TEXT,
     avatar_url      TEXT,
     reset_token     VARCHAR(255),
     reset_token_expires TIMESTAMP WITH TIME ZONE,

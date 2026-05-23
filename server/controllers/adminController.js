@@ -10,7 +10,7 @@ const emailService = require('../services/emailService');
 const getAllUsers = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, name, email, role, kyc_status, created_at FROM users ORDER BY created_at DESC`
+      `SELECT id, name, email, role, kyc_status, is_banned, ban_type, ban_expires_at, ban_reason, created_at FROM users ORDER BY created_at DESC`
     );
     res.json({ success: true, data: result.rows });
   } catch (err) {
@@ -603,8 +603,95 @@ const addFundsToUser = async (req, res) => {
   }
 };
 
+const banUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ban_type, duration_days, reason } = req.body;
+
+    if (!['temporary', 'permanent'].includes(ban_type)) {
+      return res.status(400).json({ success: false, message: 'Invalid ban type. Must be temporary or permanent.' });
+    }
+
+    if (id === req.user.id) {
+      return res.status(400).json({ success: false, message: 'You cannot ban yourself.' });
+    }
+
+    let ban_expires_at = null;
+    if (ban_type === 'temporary') {
+      if (!duration_days || isNaN(duration_days) || duration_days <= 0) {
+        return res.status(400).json({ success: false, message: 'Valid duration in days is required for temporary bans.' });
+      }
+      ban_expires_at = new Date(Date.now() + duration_days * 24 * 60 * 60 * 1000);
+    }
+
+    const userRes = await pool.query(
+      `UPDATE users 
+       SET is_banned = TRUE, 
+           ban_type = $1, 
+           ban_expires_at = $2, 
+           ban_reason = $3, 
+           updated_at = NOW()
+       WHERE id = $4
+       RETURNING id, name, email, role, kyc_status, is_banned, ban_type, ban_expires_at, ban_reason, created_at`,
+      [ban_type, ban_expires_at, reason || null, id]
+    );
+
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const user = userRes.rows[0];
+
+    // Send email notification
+    await emailService.sendUserBannedEmail(
+      user.email,
+      user.name,
+      user.ban_type,
+      user.ban_expires_at,
+      user.ban_reason
+    );
+
+    res.json({ success: true, message: 'User banned successfully.', data: user });
+  } catch (err) {
+    console.error('Ban user error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+const unbanUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const userRes = await pool.query(
+      `UPDATE users 
+       SET is_banned = FALSE, 
+           ban_type = 'none', 
+           ban_expires_at = NULL, 
+           ban_reason = NULL, 
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING id, name, email, role, kyc_status, is_banned, ban_type, ban_expires_at, ban_reason, created_at`,
+      [id]
+    );
+
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const user = userRes.rows[0];
+
+    // Send email notification
+    await emailService.sendUserUnbannedEmail(user.email, user.name);
+
+    res.json({ success: true, message: 'User unbanned successfully.', data: user });
+  } catch (err) {
+    console.error('Unban user error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
 module.exports = {
-  getAllUsers, updateUser, deleteUser,
+  getAllUsers, updateUser, deleteUser, banUser, unbanUser,
   getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign, toggleCampaign,
   toggleSeoVisibility,
   getPendingWithdrawals, approveWithdrawal, rejectWithdrawal,

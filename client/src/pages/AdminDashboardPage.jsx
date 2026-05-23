@@ -30,6 +30,10 @@ export default function AdminDashboardPage() {
   const [verifyResult, setVerifyResult] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [previewDocument, setPreviewDocument] = useState(null);
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [banForm, setBanForm] = useState({ ban_type: 'temporary', duration_days: 7, reason: '' });
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [selectedUserName, setSelectedUserName] = useState('');
 
   // Guard: only admins
   useEffect(() => {
@@ -170,6 +174,45 @@ export default function AdminDashboardPage() {
       setUsersList(resUsers.data.data);
     } catch (err) {
       setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to add funds to user.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleUserBan = async (e) => {
+    e.preventDefault();
+    if (!selectedUserId) return;
+    setActionLoading(`user-ban-${selectedUserId}`);
+    try {
+      const res = await adminAPI.banUser(selectedUserId, {
+        ban_type: banForm.ban_type,
+        duration_days: banForm.ban_type === 'temporary' ? parseInt(banForm.duration_days) : null,
+        reason: banForm.reason
+      });
+      setMessage({ type: 'success', text: res.data.message });
+      setShowBanModal(false);
+      setBanForm({ ban_type: 'temporary', duration_days: 7, reason: '' });
+      // Refresh list
+      const resUsers = await adminAPI.getUsers();
+      setUsersList(resUsers.data.data);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to ban user.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleUserUnban = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to unban user "${name}"?`)) return;
+    setActionLoading(`user-unban-${id}`);
+    try {
+      const res = await adminAPI.unbanUser(id);
+      setMessage({ type: 'success', text: res.data.message });
+      // Refresh list
+      const resUsers = await adminAPI.getUsers();
+      setUsersList(resUsers.data.data);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to unban user.' });
     } finally {
       setActionLoading('');
     }
@@ -648,10 +691,17 @@ export default function AdminDashboardPage() {
                               <td style={{ padding: '12px' }}>
                                 <span className={`badge ${u.role === 'admin' ? 'badge-primary' : 'badge-category'}`}>{u.role}</span>
                               </td>
-                              <td style={{ padding: '12px' }}>
-                                <span className={`badge ${u.kyc_status === 'verified' ? 'badge-success' : u.kyc_status === 'pending' ? 'badge-warning' : 'badge-danger'}`}>
-                                  {u.kyc_status}
-                                </span>
+                               <td style={{ padding: '12px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                                  <span className={`badge ${u.kyc_status === 'verified' ? 'badge-success' : u.kyc_status === 'pending' ? 'badge-warning' : 'badge-danger'}`}>
+                                    {u.kyc_status}
+                                  </span>
+                                  {u.is_banned && (
+                                    <span className="badge" style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fca5a5', fontWeight: 700, fontSize: '0.75rem', padding: '2px 6px' }}>
+                                      BANNED ({u.ban_type.toUpperCase()})
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{new Date(u.created_at).toLocaleDateString()}</td>
                               <td style={{ padding: '12px', textAlign: 'right' }}>
@@ -674,6 +724,33 @@ export default function AdminDashboardPage() {
                                 }} disabled={actionLoading === `user-${u.id}`} style={{ marginRight: '8px' }}>
                                   {actionLoading === `user-${u.id}` ? 'Saving...' : 'Edit'}
                                 </button>
+                                
+                                {u.id !== user.id && (
+                                  u.is_banned ? (
+                                    <button 
+                                      className="btn btn-sm" 
+                                      style={{ background: '#3b82f6', color: 'white', border: '1px solid #2563eb', fontWeight: 700, marginRight: '8px' }}
+                                      onClick={() => handleUserUnban(u.id, u.name)}
+                                      disabled={actionLoading === `user-unban-${u.id}`}
+                                    >
+                                      {actionLoading === `user-unban-${u.id}` ? '...' : '✅ Unban'}
+                                    </button>
+                                  ) : (
+                                    <button 
+                                      className="btn btn-sm" 
+                                      style={{ background: '#ef4444', color: 'white', border: '1px solid #dc2626', fontWeight: 700, marginRight: '8px' }}
+                                      onClick={() => {
+                                        setSelectedUserId(u.id);
+                                        setSelectedUserName(u.name);
+                                        setShowBanModal(true);
+                                      }}
+                                      disabled={actionLoading === `user-ban-${u.id}`}
+                                    >
+                                      🚫 Ban
+                                    </button>
+                                  )
+                                )}
+
                                 <button className="btn btn-danger btn-sm" onClick={() => handleDeleteUser(u.id)} disabled={actionLoading === `user-del-${u.id}`}>
                                   {actionLoading === `user-del-${u.id}` ? 'Deleting...' : 'Delete'}
                                 </button>
@@ -832,6 +909,135 @@ export default function AdminDashboardPage() {
           </>
         )}
       </div>
+
+      {/* ── Ban User Modal ── */}
+      {showBanModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15,23,42,0.75)', backdropFilter: 'blur(4px)',
+          zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }} onClick={(e) => { if (e.target === e.currentTarget) setShowBanModal(false); }}>
+          <div style={{
+            background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '480px',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', overflow: 'hidden'
+          }}>
+            {/* Modal Header */}
+            <div style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', padding: '24px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: 0, color: '#fff', fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}>🚫 Ban User</h3>
+                <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem' }}>
+                  Banning: <strong>{selectedUserName}</strong>
+                </p>
+              </div>
+              <button onClick={() => setShowBanModal(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '8px', color: '#fff', width: '32px', height: '32px', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleUserBan} style={{ padding: '28px' }}>
+              {/* Ban Type */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: 'var(--slate-700)', marginBottom: '10px' }}>Ban Type</label>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  {['temporary', 'permanent'].map(type => (
+                    <label key={type} style={{
+                      flex: 1, display: 'flex', alignItems: 'center', gap: '10px',
+                      padding: '14px 16px', borderRadius: '10px', cursor: 'pointer',
+                      border: `2px solid ${banForm.ban_type === type ? (type === 'permanent' ? '#ef4444' : '#f97316') : 'var(--border)'}`,
+                      background: banForm.ban_type === type ? (type === 'permanent' ? '#fef2f2' : '#fff7ed') : '#f8fafc',
+                      transition: 'all 0.2s'
+                    }}>
+                      <input
+                        type="radio"
+                        name="ban_type"
+                        value={type}
+                        checked={banForm.ban_type === type}
+                        onChange={e => setBanForm(f => ({ ...f, ban_type: e.target.value }))}
+                        style={{ accentColor: type === 'permanent' ? '#ef4444' : '#f97316' }}
+                      />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.88rem', color: type === 'permanent' ? '#dc2626' : '#ea580c', textTransform: 'capitalize' }}>
+                          {type === 'temporary' ? '⏱ Temporary' : '🔒 Permanent'}
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          {type === 'temporary' ? 'Expires after X days' : 'No expiry date'}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Duration (only for temporary) */}
+              {banForm.ban_type === 'temporary' && (
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: 'var(--slate-700)', marginBottom: '8px' }}>
+                    Duration (days)
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {[1, 3, 7, 14, 30].map(d => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setBanForm(f => ({ ...f, duration_days: d }))}
+                        style={{
+                          padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+                          border: `2px solid ${banForm.duration_days === d ? '#f97316' : 'var(--border)'}`,
+                          background: banForm.duration_days === d ? '#fff7ed' : '#f8fafc',
+                          color: banForm.duration_days === d ? '#ea580c' : 'var(--text-secondary)'
+                        }}
+                      >{d}d</button>
+                    ))}
+                    <input
+                      type="number"
+                      min={1}
+                      max={365}
+                      value={banForm.duration_days}
+                      onChange={e => setBanForm(f => ({ ...f, duration_days: parseInt(e.target.value) || 1 }))}
+                      style={{ width: '80px', padding: '6px 10px', borderRadius: '8px', border: '2px solid var(--border)', fontSize: '0.88rem', fontFamily: 'var(--font-body)' }}
+                      placeholder="Custom"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Reason */}
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: 'var(--slate-700)', marginBottom: '8px' }}>
+                  Reason <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(sent in email)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  className="form-input"
+                  placeholder="Describe why this user is being banned…"
+                  value={banForm.reason}
+                  onChange={e => setBanForm(f => ({ ...f, reason: e.target.value }))}
+                  style={{ resize: 'vertical', fontFamily: 'var(--font-body)', lineHeight: 1.5 }}
+                />
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                  onClick={() => setShowBanModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn"
+                  style={{ flex: 1, background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', border: 'none', fontWeight: 700 }}
+                  disabled={actionLoading === `user-ban-${selectedUserId}`}
+                >
+                  {actionLoading === `user-ban-${selectedUserId}` ? '⏳ Banning...' : `🚫 Ban ${banForm.ban_type === 'temporary' ? `for ${banForm.duration_days}d` : 'Permanently'}`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Document Preview Modal */}
       {previewDocument && (

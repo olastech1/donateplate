@@ -38,7 +38,7 @@ const listActiveCampaigns = async (req, res) => {
       SELECT c.*, u.name AS creator_name, u.avatar_url AS creator_avatar
       FROM campaigns c
       JOIN users u ON c.creator_id = u.id
-      WHERE c.status = 'active'
+      WHERE c.status = 'active' AND u.is_banned = FALSE
     `;
     const params = [];
     let paramIndex = 1;
@@ -96,7 +96,7 @@ const getCampaignById = async (req, res) => {
     const { id } = req.params;
 
     const result = await pool.query(
-      `SELECT c.*, u.name AS creator_name, u.avatar_url AS creator_avatar
+      `SELECT c.*, u.name AS creator_name, u.avatar_url AS creator_avatar, u.is_banned AS creator_is_banned
        FROM campaigns c
        JOIN users u ON c.creator_id = u.id
        WHERE c.id = $1`,
@@ -107,6 +107,13 @@ const getCampaignById = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Campaign not found.'
+      });
+    }
+
+    if (result.rows[0].creator_is_banned) {
+      return res.status(403).json({
+        success: false,
+        message: 'This campaign is suspended because the creator account has been banned.'
       });
     }
 
