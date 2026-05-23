@@ -447,6 +447,9 @@ export default function CreatorDashboardPage() {
                         <div className="form-group">
                           <label className="form-label">Amount ($) <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>(Min. $50)</span></label>
                           <input type="number" className="form-input" required min="50" step="0.01" value={withdrawForm.amount} onChange={e => setWithdrawForm({...withdrawForm, amount: e.target.value})} />
+                          <p style={{ fontSize: '0.8rem', color: 'var(--emerald-600)', marginTop: '4px' }}>
+                            Note: A 1% platform fee will be deducted from your withdrawal.
+                          </p>
                         </div>
                         
                         <div className="form-group">

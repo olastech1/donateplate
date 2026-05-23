@@ -642,23 +642,15 @@ export default function AdminDashboardPage() {
                               </button>
                             </div>
                           )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* ── Withdrawals Tab ── */}
+                   {/* ── Withdrawals Tab ── */}
             {tab === 'withdrawals' && (
               <div className="animate-in">
                 {withdrawals.length === 0 ? (
                   <div className="card" style={{ textAlign: 'center' }}>
                     <div className="card-body" style={{ padding: '60px 20px' }}>
                       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>💰</div>
-                      <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)' }}>No pending withdrawals</h3>
-                      <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>All withdrawal requests have been processed.</p>
+                      <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)' }}>No withdrawals found</h3>
+                      <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>There are no withdrawal requests yet.</p>
                     </div>
                   </div>
                 ) : (
@@ -669,7 +661,17 @@ export default function AdminDashboardPage() {
                           <div>
                             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--slate-800)' }}>{w.campaign_title}</h3>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Requested by {w.creator_name}</p>
-                            <p style={{ color: 'var(--emerald-600)', fontWeight: 700, fontSize: '1.2rem', marginTop: '8px' }}>${Number(w.amount).toLocaleString()}</p>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '8px' }}>
+                              <p style={{ color: 'var(--emerald-600)', fontWeight: 700, fontSize: '1.2rem' }}>
+                                ${Number(w.amount).toLocaleString()}
+                              </p>
+                              {w.fee > 0 && (
+                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                  (Fee: ${Number(w.fee).toFixed(2)} → Net: <strong>${Number(w.net_amount).toLocaleString()}</strong>)
+                                </span>
+                              )}
+                            </div>
+                            
                             {w.payout_method === 'crypto' ? (
                               <p style={{ fontSize: '0.85rem', marginTop: '4px' }}>
                                 <span className="badge badge-category" style={{ background: '#e0f2fe', color: '#0369a1', marginRight: '6px' }}>🪙 Crypto ({w.crypto_network})</span>
@@ -688,18 +690,26 @@ export default function AdminDashboardPage() {
                               )
                             )}
                           </div>
-                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            {w.payout_method === 'stripe' && (
-                              <button className="btn btn-sm" style={{ background: '#6366f1', color: '#fff', fontWeight: 600 }} onClick={() => handleWithdrawalAction(w.id, 'approve', 'stripe')} disabled={actionLoading === w.id}>
-                                ⚡ Approve & Disburse via Stripe
-                              </button>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            {w.status === 'pending' ? (
+                              <>
+                                {w.payout_method === 'stripe' && (
+                                  <button className="btn btn-sm" style={{ background: '#6366f1', color: '#fff', fontWeight: 600 }} onClick={() => handleWithdrawalAction(w.id, 'approve', 'stripe')} disabled={actionLoading === w.id}>
+                                    ⚡ Approve & Disburse via Stripe
+                                  </button>
+                                )}
+                                <button className="btn btn-success btn-sm" onClick={() => handleWithdrawalAction(w.id, 'approve', 'manual')} disabled={actionLoading === w.id}>
+                                  ✅ Approve (Manual Payment)
+                                </button>
+                                <button className="btn btn-danger btn-sm" onClick={() => handleWithdrawalAction(w.id, 'reject')} disabled={actionLoading === w.id}>
+                                  ❌ Reject
+                                </button>
+                              </>
+                            ) : (
+                              <span className={`badge ${w.status === 'approved' || w.status === 'processed' ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.9rem', padding: '6px 12px' }}>
+                                Status: {w.status.toUpperCase()}
+                              </span>
                             )}
-                            <button className="btn btn-success btn-sm" onClick={() => handleWithdrawalAction(w.id, 'approve', 'manual')} disabled={actionLoading === w.id}>
-                              ✅ Approve (Manual Payment)
-                            </button>
-                            <button className="btn btn-danger btn-sm" onClick={() => handleWithdrawalAction(w.id, 'reject')} disabled={actionLoading === w.id}>
-                              ❌ Reject
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -707,7 +717,6 @@ export default function AdminDashboardPage() {
                   ))
                 )}
               </div>
-            )}
 
             {/* ── Users Tab ── */}
             {tab === 'users' && (

@@ -89,18 +89,23 @@ const requestWithdrawal = async (req, res) => {
       });
     }
 
+    const fee = parseFloat((parsedAmount * 0.01).toFixed(2));
+    const netAmount = parsedAmount - fee;
+
     const result = await pool.query(
       `INSERT INTO withdrawals (
-        campaign_id, creator_id, amount, payout_method,
+        campaign_id, creator_id, amount, fee, net_amount, payout_method,
         bank_name, account_number, account_name,
         crypto_network, crypto_address
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
         campaign_id, 
         creatorId, 
         parsedAmount, 
+        fee,
+        netAmount,
         payout_method,
         payout_method === 'bank' ? bank_name : null,
         payout_method === 'bank' ? account_number : null,

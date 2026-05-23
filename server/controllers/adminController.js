@@ -286,7 +286,7 @@ const getPendingWithdrawals = async (req, res) => {
     const result = await pool.query(
       `SELECT w.*, u.name AS creator_name, c.title AS campaign_title
        FROM withdrawals w JOIN users u ON w.creator_id = u.id JOIN campaigns c ON w.campaign_id = c.id
-       WHERE w.status = 'pending' ORDER BY w.created_at ASC`
+       ORDER BY CASE WHEN w.status = 'pending' THEN 0 ELSE 1 END, w.created_at DESC`
     );
     res.json({ success: true, data: result.rows });
   } catch (err) {
@@ -320,7 +320,9 @@ const approveWithdrawal = async (req, res) => {
       const stripeSecretKey = await getStripeSecretKey();
       const stripe = require('stripe')(stripeSecretKey);
 
-      const amountInCents = Math.round(parseFloat(wd.amount) * 100);
+      // Use net_amount if available (after 1% fee), fallback to amount
+      const payoutAmount = wd.net_amount ? wd.net_amount : wd.amount;
+      const amountInCents = Math.round(parseFloat(payoutAmount) * 100);
       
       try {
         await stripe.transfers.create({
