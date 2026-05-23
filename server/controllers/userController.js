@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { getStripeSecretKey } = require('../config/settings');
 
 // Update KYC status
 const submitKyc = async (req, res) => {
@@ -70,4 +71,113 @@ const getMe = async (req, res) => {
   }
 }
 
-module.exports = { submitKyc, getMe };
+const createStripeKycSession = async (req, res) => {
+  try {
+    const { id: userId } = req.user;
+    const stripeSecretKey = await getStripeSecretKey();
+    const stripe = require('stripe')(stripeSecretKey);
+
+    const frontendUrl = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    // Create Stripe Identity VerificationSession
+    const session = await stripe.identity.verificationSessions.create({
+      type: 'document',
+      metadata: {
+        user_id: userId
+      },
+      options: {
+        document: {
+          require_matching_selfie: true,
+          require_live_capture: true
+        }
+      },
+      return_url: `${frontendUrl}/kyc/callback?session_id={PROVISIONAL_VERIFICATION_SESSION_ID}`
+    });
+
+    // Update user kyc_status to pending (started the process)
+    await pool.query(
+      `UPDATE users SET kyc_status = 'pending', updated_at = NOW() WHERE id = $1`,
+      [userId]
+    );
+
+    res.json({
+      success: true,
+      url: session.url,
+      session_id: session.id
+    });
+  } catch (err) {
+    console.error('Create Stripe KYC Session error:', err);
+    res.status(500).json({ success: false, message: 'Failed to initiate identity verification.' });
+  }
+};
+
+const syncStripeKycSession = async (req, res) => {
+  try {
+    const { session_id } = req.query;
+    const { id: userId } = req.user;
+
+    if (!session_id) {
+      return res.status(400).json({ success: false, message: 'Session ID is required.' });
+    }
+
+    const stripeSecretKey = await getStripeSecretKey();
+    const stripe = require('stripe')(stripeSecretKey);
+
+    // Retrieve verification session from Stripe
+    const session = await stripe.identity.verificationSessions.retrieve(session_id, {
+      expand: ['verified_outputs']
+    });
+
+    // Security check: Ensure this session belongs to the requesting user
+    if (session.metadata.user_id !== userId) {
+      return res.status(403).json({ success: false, message: 'Unauthorized verification attempt.' });
+    }
+
+    let status = 'pending';
+    let message = 'Verification is processing. We will update your status shortly.';
+
+    if (session.status === 'verified') {
+      status = 'verified';
+      message = 'Your identity has been fully verified!';
+
+      const verifiedOutputs = session.verified_outputs || {};
+      const dob = verifiedOutputs.dob ? `${verifiedOutputs.dob.year}-${String(verifiedOutputs.dob.month).padStart(2, '0')}-${String(verifiedOutputs.dob.day).padStart(2, '0')}` : null;
+      const firstName = verifiedOutputs.first_name || '';
+      const lastName = verifiedOutputs.last_name || '';
+      const fullName = [firstName, lastName].filter(Boolean).join(' ') || null;
+      
+      const addr = verifiedOutputs.address || {};
+      const fullAddress = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ') || null;
+
+      await pool.query(
+        `UPDATE users
+         SET kyc_status = 'verified',
+             kyc_full_name = COALESCE($1, kyc_full_name),
+             kyc_dob = COALESCE($2::date, kyc_dob),
+             kyc_address = COALESCE($3, kyc_address),
+             kyc_document_type = 'stripe_identity',
+             updated_at = NOW()
+         WHERE id = $4`,
+        [fullName, dob, fullAddress, userId]
+      );
+    } else if (session.status === 'requires_input') {
+      status = 'rejected';
+      message = 'Verification failed. Please try again with clear document photos.';
+      await pool.query(
+        `UPDATE users SET kyc_status = 'rejected', updated_at = NOW() WHERE id = $1`,
+        [userId]
+      );
+    }
+
+    res.json({
+      success: true,
+      status,
+      message
+    });
+  } catch (err) {
+    console.error('Sync Stripe KYC error:', err);
+    res.status(500).json({ success: false, message: 'Failed to check verification status.' });
+  }
+};
+
+module.exports = { submitKyc, getMe, createStripeKycSession, syncStripeKycSession };

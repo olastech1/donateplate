@@ -18,6 +18,7 @@ import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import CreatorDashboardPage from './pages/CreatorDashboardPage';
+import KycCallbackPage from './pages/KycCallbackPage';
 import { useAuth } from './context/AuthContext';
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="/campaigns/create" element={<CreateCampaignPage />} />
           <Route path="/track/:sessionId" element={<TrackingPage />} />
           <Route path="/donation/callback" element={<DonationCallbackPage />} />
+          <Route path="/kyc/callback" element={<KycCallbackPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

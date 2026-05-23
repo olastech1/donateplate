@@ -34,10 +34,8 @@ export default function CreatorDashboardPage() {
     campaign_id: '', amount: '', payout_method: 'bank', bank_name: '', account_number: '', account_name: '', crypto_network: 'USDT (TRC20)', crypto_address: ''
   });
 
-  // KYC Form State
-  const [kycForm, setKycForm] = useState({
-    full_name: '', dob: '', address: '', document_type: 'passport', document_url: ''
-  });
+  // KYC State
+  const [kycLoading, setKycLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/login');
@@ -75,33 +73,20 @@ export default function CreatorDashboardPage() {
     fetchData();
   }, [tab, user]);
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'File size must be less than 2MB' });
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setKycForm(prev => ({ ...prev, document_url: reader.result }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleKycSubmit = async (e) => {
-    e.preventDefault();
+  const handleStartStripeKyc = async () => {
     try {
-      setLoading(true);
-      const res = await userAPI.submitKyc(kycForm);
-      setUserData(res.data.data);
-      setMessage({ type: 'success', text: res.data.message });
+      setKycLoading(true);
+      setMessage({ type: '', text: '' });
+      const res = await userAPI.createStripeKycSession();
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      } else {
+        setMessage({ type: 'error', text: 'Failed to start Stripe Identity session.' });
+      }
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to submit KYC.' });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to initialize verification.' });
     } finally {
-      setLoading(false);
+      setKycLoading(false);
     }
   };
 
@@ -526,51 +511,49 @@ export default function CreatorDashboardPage() {
                     </div>
 
                     {(userData.kyc_status === 'not_submitted' || userData.kyc_status === 'rejected') && (
-                      <div style={{ background: 'var(--bg-secondary)', padding: '24px', borderRadius: 'var(--radius-md)' }}>
-                        <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Submit Documents</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px' }}>
-                          Please provide your true and accurate information. Uploading a valid document will trigger our automated verification system.
+                      <div style={{
+                        background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+                        border: '1px dashed var(--border)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '40px 24px',
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '16px'
+                      }}>
+                        <div style={{ fontSize: '3rem' }}>🔒</div>
+                        <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)', margin: 0 }}>
+                          Secure Verification via Stripe Identity
+                        </h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '460px', margin: 0, lineHeight: 1.5 }}>
+                          We use Stripe Identity to securely verify your legal documents (passport, driver's license, or national ID) and match them with a quick selfie. Your data is encrypted and handled completely by Stripe.
                         </p>
-                        <form onSubmit={handleKycSubmit}>
-                          <div className="grid grid-2" style={{ marginBottom: '16px' }}>
-                            <div className="form-group">
-                              <label className="form-label">Full Legal Name</label>
-                              <input type="text" className="form-input" required value={kycForm.full_name} onChange={e => setKycForm({...kycForm, full_name: e.target.value})} placeholder="e.g. John Doe" />
-                            </div>
-                            <div className="form-group">
-                              <label className="form-label">Date of Birth</label>
-                              <input type="date" className="form-input" required value={kycForm.dob} onChange={e => setKycForm({...kycForm, dob: e.target.value})} />
-                            </div>
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Residential Address</label>
-                            <input type="text" className="form-input" required value={kycForm.address} onChange={e => setKycForm({...kycForm, address: e.target.value})} placeholder="Full address" />
-                          </div>
-                          <div className="grid grid-2" style={{ marginBottom: '16px' }}>
-                            <div className="form-group">
-                              <label className="form-label">Document Type</label>
-                              <select className="form-input" value={kycForm.document_type} onChange={e => setKycForm({...kycForm, document_type: e.target.value})}>
-                                <option value="passport">Passport</option>
-                                <option value="drivers_license">Driver's License</option>
-                                <option value="national_id">National ID</option>
-                              </select>
-                            </div>
-                            <div className="form-group">
-                              <label className="form-label">Upload Document Photo (Max 2MB)</label>
-                              <input type="file" className="form-input" required accept="image/*,.pdf" onChange={handleFileUpload} />
-                              {kycForm.document_url && <span style={{ fontSize: '0.8rem', color: 'var(--emerald-600)', marginTop: '4px', display: 'block' }}>✅ Document attached</span>}
-                            </div>
-                          </div>
-                          <button type="submit" className="btn btn-primary" disabled={loading || !kycForm.document_url}>
-                            {loading ? 'Submitting...' : 'Submit & Verify'}
-                          </button>
-                        </form>
+                        <button
+                          onClick={handleStartStripeKyc}
+                          disabled={kycLoading}
+                          className="btn btn-primary"
+                          style={{
+                            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                            border: 'none',
+                            padding: '12px 28px',
+                            fontWeight: 600,
+                            fontSize: '1rem',
+                            boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.2), 0 2px 4px -1px rgba(99, 102, 241, 0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {kycLoading ? 'Preparing session...' : '🔒 Verify with Stripe Identity'}
+                        </button>
                       </div>
                     )}
                     
                     {userData.kyc_status === 'pending' && (
                       <div className="alert alert-warning">
-                        Your documents are currently being reviewed by our admin team. This usually takes 24-48 hours.
+                        Your identity verification session is currently processing via Stripe Identity. This process usually completes within a few minutes.
                       </div>
                     )}
 

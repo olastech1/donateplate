@@ -208,6 +208,49 @@ const stripeWebhook = async (req, res) => {
       }
     }
 
+    // Handle Stripe Identity Webhook Events
+    if (event.type === 'identity.verification_session.verified') {
+      const session = event.data.object;
+      const userId = session.metadata.user_id;
+
+      const fullSession = await stripe.identity.verificationSessions.retrieve(session.id, {
+        expand: ['verified_outputs']
+      });
+
+      const verifiedOutputs = fullSession.verified_outputs || {};
+      const dob = verifiedOutputs.dob ? `${verifiedOutputs.dob.year}-${String(verifiedOutputs.dob.month).padStart(2, '0')}-${String(verifiedOutputs.dob.day).padStart(2, '0')}` : null;
+      const firstName = verifiedOutputs.first_name || '';
+      const lastName = verifiedOutputs.last_name || '';
+      const fullName = [firstName, lastName].filter(Boolean).join(' ') || null;
+      
+      const addr = verifiedOutputs.address || {};
+      const fullAddress = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ') || null;
+
+      await pool.query(
+        `UPDATE users
+         SET kyc_status = 'verified',
+             kyc_full_name = COALESCE($1, kyc_full_name),
+             kyc_dob = COALESCE($2::date, kyc_dob),
+             kyc_address = COALESCE($3, kyc_address),
+             kyc_document_type = 'stripe_identity',
+             updated_at = NOW()
+         WHERE id = $4`,
+        [fullName, dob, fullAddress, userId]
+      );
+      console.log(`[IDENTITY WEBHOOK] User ${userId} successfully verified via session ${session.id}`);
+    }
+
+    if (event.type === 'identity.verification_session.requires_input') {
+      const session = event.data.object;
+      const userId = session.metadata.user_id;
+
+      await pool.query(
+        `UPDATE users SET kyc_status = 'rejected', updated_at = NOW() WHERE id = $1`,
+        [userId]
+      );
+      console.log(`[IDENTITY WEBHOOK] User ${userId} verification failed (requires_input) for session ${session.id}`);
+    }
+
     // Always respond 200
     res.status(200).json({ received: true });
   } catch (err) {
