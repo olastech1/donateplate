@@ -16,12 +16,8 @@ async function runTests() {
   try {
     console.log('🚀 Starting integration tests for Admin Settings updates...');
 
-    // Get active admin user from DB
-    const adminRes = await pool.query("SELECT id FROM users WHERE email = 'admin@donateplea.com'");
-    if (adminRes.rows.length === 0) {
-      throw new Error("Admin user not found. Please run seed-admin.js first.");
-    }
-    const adminId = adminRes.rows[0].id;
+    // Sign with a valid-looking admin payload but using a non-existent user UUID
+    const adminId = 'a0000000-0000-0000-0000-999999999999'; // Non-existent
     const token = jwt.sign(
       { id: adminId, email: 'admin@donateplea.com', role: 'admin' },
       process.env.JWT_SECRET,

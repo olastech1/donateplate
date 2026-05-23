@@ -54,20 +54,48 @@ async function setSetting(key, value, updatedBy = null) {
 
   const isEncrypted = check.rows[0].is_encrypted;
 
-  if (isEncrypted) {
-    await pool.query(
-      `UPDATE platform_settings
-       SET setting_value = pgp_sym_encrypt($1, $2), updated_by = $3, updated_at = NOW()
-       WHERE setting_key = $4`,
-      [value, ENCRYPTION_KEY, updatedBy, key]
-    );
-  } else {
-    await pool.query(
-      `UPDATE platform_settings
-       SET setting_value = $1, updated_by = $2, updated_at = NOW()
-       WHERE setting_key = $3`,
-      [value, updatedBy, key]
-    );
+  if (isEncrypted && (!ENCRYPTION_KEY || ENCRYPTION_KEY.trim() === '')) {
+    throw new Error('Platform settings encryption key (SETTINGS_ENCRYPTION_KEY) is not configured on the server. Please add it to your environment variables.');
+  }
+
+  try {
+    if (isEncrypted) {
+      await pool.query(
+        `UPDATE platform_settings
+         SET setting_value = pgp_sym_encrypt($1, $2), updated_by = $3, updated_at = NOW()
+         WHERE setting_key = $4`,
+        [value, ENCRYPTION_KEY, updatedBy, key]
+      );
+    } else {
+      await pool.query(
+        `UPDATE platform_settings
+         SET setting_value = $1, updated_by = $2, updated_at = NOW()
+         WHERE setting_key = $3`,
+        [value, updatedBy, key]
+      );
+    }
+  } catch (err) {
+    // Catch foreign key constraint violation (updated_by user ID doesn't exist)
+    if (err.code === '23503') {
+      console.warn(`[SETTINGS] updated_by user ${updatedBy} not found in DB. Retrying update with updated_by = NULL.`);
+      if (isEncrypted) {
+        await pool.query(
+          `UPDATE platform_settings
+           SET setting_value = pgp_sym_encrypt($1, $2), updated_by = NULL, updated_at = NOW()
+           WHERE setting_key = $3`,
+          [value, ENCRYPTION_KEY, key]
+        );
+      } else {
+        await pool.query(
+          `UPDATE platform_settings
+           SET setting_value = $1, updated_by = NULL, updated_at = NOW()
+           WHERE setting_key = $2`,
+          [value, key]
+        );
+      }
+    } else {
+      throw err;
+    }
   }
 }
 
