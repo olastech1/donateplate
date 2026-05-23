@@ -94,10 +94,14 @@ const createStripeKycSession = async (req, res) => {
       return_url: `${frontendUrl}/kyc/callback?session_id={PROVISIONAL_VERIFICATION_SESSION_ID}`
     });
 
-    // Update user kyc_status to pending (started the process)
+    // Update user kyc_status to pending and save the session ID in the DB
     await pool.query(
-      `UPDATE users SET kyc_status = 'pending', updated_at = NOW() WHERE id = $1`,
-      [userId]
+      `UPDATE users 
+       SET kyc_status = 'pending', 
+           stripe_kyc_session_id = $1, 
+           updated_at = NOW() 
+       WHERE id = $2`,
+      [session.id, userId]
     );
 
     res.json({
@@ -113,8 +117,16 @@ const createStripeKycSession = async (req, res) => {
 
 const syncStripeKycSession = async (req, res) => {
   try {
-    const { session_id } = req.query;
+    let { session_id } = req.query;
     const { id: userId } = req.user;
+
+    // Fallback: If session_id is missing or is the literal placeholder, retrieve it from the database
+    if (!session_id || session_id === '{PROVISIONAL_VERIFICATION_SESSION_ID}') {
+      const dbUser = await pool.query('SELECT stripe_kyc_session_id FROM users WHERE id = $1', [userId]);
+      if (dbUser.rows.length > 0) {
+        session_id = dbUser.rows[0].stripe_kyc_session_id;
+      }
+    }
 
     if (!session_id) {
       return res.status(400).json({ success: false, message: 'Session ID is required.' });

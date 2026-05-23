@@ -25,6 +25,7 @@ CREATE TABLE users (
     kyc_address     TEXT,
     kyc_document_type VARCHAR(50),
     kyc_document_url TEXT,
+    stripe_kyc_session_id VARCHAR(255),
     avatar_url      TEXT,
     reset_token     VARCHAR(255),
     reset_token_expires TIMESTAMP WITH TIME ZONE,
