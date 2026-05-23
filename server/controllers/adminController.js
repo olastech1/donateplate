@@ -488,6 +488,51 @@ const verifyPendingDonations = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/admin/campaigns/:id/add-funds
+ * Allows an admin to add mock/manual funds to a campaign's balance.
+ * Inserts a success donation record set in the past so that it is immediately available to withdraw.
+ */
+const addFundsToCampaign = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount } = req.body;
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Valid positive amount is required.' });
+    }
+
+    // Verify campaign exists
+    const campaignRes = await pool.query('SELECT title, creator_id FROM campaigns WHERE id = $1', [id]);
+    if (campaignRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Campaign not found.' });
+    }
+
+    const campaign = campaignRes.rows[0];
+    const { v4: uuidv4 } = require('uuid');
+    const mockSessionId = `admin_add_${uuidv4()}`;
+    const mockIntentId = `pi_admin_add_${uuidv4()}`;
+
+    // Insert donation record in the past (e.g. 2 months ago) to ensure it is immediately available for withdrawal
+    const result = await pool.query(
+      `INSERT INTO donations (campaign_id, amount, guest_name, guest_email, status, stripe_checkout_session_id, stripe_payment_intent_id, created_at)
+       VALUES ($1, $2, 'Platform Adjustment', 'admin@donateplea.com', 'success', $3, $4, NOW() - INTERVAL '2 months')
+       RETURNING id, amount, created_at`,
+      [id, parsedAmount, mockSessionId, mockIntentId]
+    );
+
+    res.json({
+      success: true,
+      message: `Successfully added $${parsedAmount.toFixed(2)} to campaign "${campaign.title}".`,
+      data: result.rows[0]
+    });
+  } catch (err) {
+    console.error('Add funds error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error.' });
+  }
+};
+
 module.exports = {
   getAllUsers, updateUser, deleteUser,
   getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign, toggleCampaign,
@@ -497,5 +542,6 @@ module.exports = {
   getAllDonations,
   getPlatformStats,
   getSettings, updateSetting, getStripeStatus, testEmail,
-  verifyPendingDonations
+  verifyPendingDonations,
+  addFundsToCampaign
 };

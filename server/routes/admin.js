@@ -22,6 +22,7 @@ router.put('/campaigns/:id/reject', adminController.rejectCampaign);
 router.put('/campaigns/:id/toggle', adminController.toggleCampaign);
 router.put('/campaigns/:id/seo', adminController.toggleSeoVisibility);
 router.delete('/campaigns/:id', adminController.deleteCampaign);
+router.post('/campaigns/:id/add-funds', adminController.addFundsToCampaign);
 
 // Donations
 router.get('/donations', adminController.getAllDonations);

@@ -130,6 +130,29 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleAddFunds = async (id, title) => {
+    const amountStr = prompt(`Enter the amount to add to campaign "${title}" ($):`);
+    if (amountStr === null || amountStr.trim() === '') return;
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid positive number.');
+      return;
+    }
+
+    setActionLoading(`funds-${id}`);
+    try {
+      const res = await adminAPI.addFunds(id, amount);
+      // Fetch updated campaigns to refresh current_amount and balances
+      const updatedCampaignsRes = await adminAPI.getAllCampaigns();
+      setPending(updatedCampaignsRes.data.data);
+      setMessage({ type: 'success', text: res.data.message });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to add funds.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
   const handleWithdrawalAction = async (id, action) => {
     setActionLoading(id);
     try {
@@ -404,6 +427,17 @@ export default function AdminDashboardPage() {
                                 {actionLoading === `tog-${c.id}` ? '...' : c.status === 'active' ? '🚫 Hide' : '🟢 Show'}
                               </button>
                             )}
+                             {/* Add Funds Button */}
+                             {(c.status === 'active' || c.status === 'paused') && (
+                               <button
+                                 className="btn btn-sm"
+                                 style={{ background: '#10b981', color: 'white', border: '1px solid #059669', fontWeight: 700 }}
+                                 onClick={() => handleAddFunds(c.id, c.title)}
+                                 disabled={actionLoading === `funds-${c.id}`}
+                               >
+                                 {actionLoading === `funds-${c.id}` ? '...' : '💵 Add Funds'}
+                               </button>
+                             )}
                              {/* SEO Visibility Toggle */}
                              {(c.status === 'active' || c.status === 'paused') && (
                                <button
