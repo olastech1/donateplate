@@ -153,6 +153,28 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleAddUserFunds = async (id, name) => {
+    const amountStr = prompt(`Enter the amount to add to user "${name}"'s balance ($):`);
+    if (amountStr === null || amountStr.trim() === '') return;
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid positive number.');
+      return;
+    }
+
+    setActionLoading(`user-funds-${id}`);
+    try {
+      const res = await adminAPI.addUserFunds(id, amount);
+      setMessage({ type: 'success', text: res.data.message });
+      const resUsers = await adminAPI.getUsers();
+      setUsersList(resUsers.data.data);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to add funds to user.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
   const handleWithdrawalAction = async (id, action) => {
     setActionLoading(id);
     try {
@@ -633,6 +655,16 @@ export default function AdminDashboardPage() {
                               </td>
                               <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{new Date(u.created_at).toLocaleDateString()}</td>
                               <td style={{ padding: '12px', textAlign: 'right' }}>
+                                {(u.role === 'creator' || u.role === 'admin') && (
+                                  <button
+                                    className="btn btn-sm"
+                                    style={{ background: '#10b981', color: 'white', border: '1px solid #059669', fontWeight: 700, marginRight: '8px' }}
+                                    onClick={() => handleAddUserFunds(u.id, u.name)}
+                                    disabled={actionLoading === `user-funds-${u.id}`}
+                                  >
+                                    {actionLoading === `user-funds-${u.id}` ? '...' : '💵 Add Funds'}
+                                  </button>
+                                )}
                                 <button className="btn btn-secondary btn-sm" onClick={() => {
                                   const newName = prompt('Enter new name:', u.name);
                                   if (newName === null) return;

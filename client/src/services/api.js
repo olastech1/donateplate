@@ -90,6 +90,7 @@ export const adminAPI = {
   verifyPendingDonations: () => api.post('/admin/donations/verify-pending'),
   toggleSeoVisibility: (id) => api.put(`/admin/campaigns/${id}/seo`),
   addFunds: (id, amount) => api.post(`/admin/campaigns/${id}/add-funds`, { amount }),
+  addUserFunds: (id, amount) => api.post(`/admin/users/${id}/add-funds`, { amount }),
 };
 
 export default api;

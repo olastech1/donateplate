@@ -533,6 +533,76 @@ const addFundsToCampaign = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/admin/users/:id/add-funds
+ * Allows an admin to add funds directly to a user's balance.
+ * Finds or automatically creates an active campaign for the user, and inserts a successful past donation.
+ */
+const addFundsToUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount } = req.body;
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Valid positive amount is required.' });
+    }
+
+    // Verify user exists and is a creator or admin
+    const userRes = await pool.query('SELECT name, role FROM users WHERE id = $1', [id]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const targetUser = userRes.rows[0];
+    if (targetUser.role !== 'creator' && targetUser.role !== 'admin') {
+      return res.status(400).json({ success: false, message: 'Funds can only be added to creators or admins.' });
+    }
+
+    // Find if this user already has an active or paused campaign
+    let campaignId = null;
+    const campaignRes = await pool.query(
+      `SELECT id FROM campaigns 
+       WHERE creator_id = $1 AND status IN ('active', 'paused') 
+       ORDER BY created_at DESC LIMIT 1`,
+      [id]
+    );
+
+    if (campaignRes.rows.length > 0) {
+      campaignId = campaignRes.rows[0].id;
+    } else {
+      // Create a default adjustment campaign for the user so they have a place to withdraw from
+      console.log(`[ADMIN ADJUSTMENT] Creator ${id} has no campaign. Creating 'General Balance Adjustment' campaign.`);
+      const newCampaign = await pool.query(
+        `INSERT INTO campaigns (creator_id, title, description, category, goal_amount, status)
+         VALUES ($1, $2, $3, 'general', 1000000.00, 'active')
+         RETURNING id`,
+        [id, 'General Balance Adjustment', 'System-generated campaign for platform wallet balance adjustments.']
+      );
+      campaignId = newCampaign.rows[0].id;
+    }
+
+    const { v4: uuidv4 } = require('uuid');
+    const mockSessionId = `admin_add_user_${uuidv4()}`;
+    const mockIntentId = `pi_admin_add_user_${uuidv4()}`;
+
+    // Insert successful donation record in the past (2 months ago) to ensure it is immediately available
+    await pool.query(
+      `INSERT INTO donations (campaign_id, amount, guest_name, guest_email, status, stripe_checkout_session_id, stripe_payment_intent_id, created_at)
+       VALUES ($1, $2, 'Platform Adjustment', 'admin@donateplea.com', 'success', $3, $4, NOW() - INTERVAL '2 months')`,
+      [campaignId, parsedAmount, mockSessionId, mockIntentId]
+    );
+
+    res.json({
+      success: true,
+      message: `Successfully added $${parsedAmount.toFixed(2)} to ${targetUser.name}'s balance.`
+    });
+  } catch (err) {
+    console.error('Add funds to user error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error.' });
+  }
+};
+
 module.exports = {
   getAllUsers, updateUser, deleteUser,
   getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign, toggleCampaign,
@@ -543,5 +613,6 @@ module.exports = {
   getPlatformStats,
   getSettings, updateSetting, getStripeStatus, testEmail,
   verifyPendingDonations,
-  addFundsToCampaign
+  addFundsToCampaign,
+  addFundsToUser
 };
