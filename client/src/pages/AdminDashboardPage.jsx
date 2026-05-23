@@ -352,11 +352,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div style={{
-          display: 'flex', gap: '4px', marginBottom: '28px',
-          background: '#fff', borderRadius: 'var(--radius-md)', padding: '4px',
-          border: '1px solid var(--border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch'
-        }}>
+        <div className="admin-tabs-wrapper" style={{ display: 'flex', gap: '4px', marginBottom: '28px', background: '#fff', borderRadius: 'var(--radius-md)', padding: '4px', border: '1px solid var(--border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} style={{
               flex: 1, flexShrink: 0, padding: '12px 16px', background: tab === t.key ? 'var(--accent)' : 'transparent',
@@ -449,7 +445,7 @@ export default function AdminDashboardPage() {
                   pending.map(c => (
                     <div key={c.id} className="card" style={{ marginBottom: '16px' }}>
                       <div className="card-body" style={{ padding: '24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                        <div className="admin-list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
                           <div style={{ flex: 1, minWidth: '250px' }}>
                             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
                               <span className="badge badge-category">{c.category}</span>
@@ -492,7 +488,7 @@ export default function AdminDashboardPage() {
                               </div>
                             )}
                           </div>
-                          <div style={{ display: 'flex', gap: '8px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                          <div className="admin-actions" style={{ display: 'flex', gap: '8px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                             {c.status === 'pending' && (
                               <>
                                 <button
@@ -597,7 +593,7 @@ export default function AdminDashboardPage() {
                   kycList.map(k => (
                     <div key={k.id} className="card" style={{ marginBottom: '16px' }}>
                       <div className="card-body" style={{ padding: '24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                        <div className="admin-list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
                           <div>
                             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                               <span className={`badge ${k.kyc_status === 'verified' ? 'badge-success' : k.kyc_status === 'pending' ? 'badge-warning' : 'badge-danger'}`}>
@@ -665,7 +661,7 @@ export default function AdminDashboardPage() {
                   withdrawals.map(w => (
                     <div key={w.id} className="card" style={{ marginBottom: '16px' }}>
                       <div className="card-body" style={{ padding: '24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                        <div className="admin-list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                           <div>
                             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--slate-800)' }}>{w.campaign_title}</h3>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Requested by {w.creator_name}</p>
@@ -1227,7 +1223,7 @@ function SettingField({ setting, onSave }) {
           <input
             type={setting.is_encrypted ? 'password' : 'text'}
             className="form-input"
-            style={{ width: '260px', padding: '8px 12px', fontSize: '0.85rem' }}
+            style={{ width: '100%', maxWidth: '260px', padding: '8px 12px', fontSize: '0.85rem' }}
             placeholder={setting.is_encrypted ? 'Enter new key...' : 'Enter value...'}
             value={value}
             onChange={e => setValue(e.target.value)}

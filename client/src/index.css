@@ -639,3 +639,27 @@ img { max-width: 100%; height: auto; display: block; }
   overflow-y: auto;
   box-shadow: var(--shadow-xl);
 }
+
+/* --- Admin Mobile Responsive --- */
+@media (max-width: 768px) {
+  .admin-actions {
+    justify-content: flex-start !important;
+  }
+  .card-body {
+    padding: 16px !important;
+  }
+  .admin-list-item {
+    flex-direction: column;
+    gap: 12px !important;
+  }
+  .admin-list-item > div {
+    min-width: 100% !important;
+  }
+  .admin-tabs-wrapper {
+    padding: 2px !important;
+  }
+  .admin-tabs-wrapper button {
+    padding: 10px 12px !important;
+    font-size: 0.8rem !important;
+  }
+}
