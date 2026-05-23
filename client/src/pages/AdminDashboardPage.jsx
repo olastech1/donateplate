@@ -355,11 +355,11 @@ export default function AdminDashboardPage() {
         <div style={{
           display: 'flex', gap: '4px', marginBottom: '28px',
           background: '#fff', borderRadius: 'var(--radius-md)', padding: '4px',
-          border: '1px solid var(--border)', overflowX: 'auto'
+          border: '1px solid var(--border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch'
         }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} style={{
-              flex: 1, padding: '12px 16px', background: tab === t.key ? 'var(--accent)' : 'transparent',
+              flex: 1, flexShrink: 0, padding: '12px 16px', background: tab === t.key ? 'var(--accent)' : 'transparent',
               color: tab === t.key ? '#fff' : 'var(--text-secondary)',
               border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
               fontWeight: 600, fontSize: '0.85rem', fontFamily: 'var(--font-body)',
@@ -707,7 +707,7 @@ export default function AdminDashboardPage() {
                   <div className="card-body" style={{ padding: '24px' }}>
                     <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)', marginBottom: '16px' }}>Manage Users</h3>
                     <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                      <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                         <thead>
                           <tr style={{ borderBottom: '2px solid var(--slate-200)', textAlign: 'left' }}>
                             <th style={{ padding: '12px' }}>Name</th>
@@ -850,8 +850,8 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="card" style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <div className="card" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', textAlign: 'left' }}>
                       <thead>
                         <tr style={{ background: 'var(--bg-secondary)', borderBottom: '2px solid var(--border)' }}>
                           <th style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--slate-800)' }}>Date</th>
@@ -1196,7 +1196,7 @@ function SettingField({ setting, onSave }) {
       </div>
 
       {editing ? (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           <input
             type={setting.is_encrypted ? 'password' : 'text'}
             className="form-input"
