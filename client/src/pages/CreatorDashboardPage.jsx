@@ -7,7 +7,6 @@ const TABS = [
   { key: 'profile', label: '👤 Profile', icon: '👤' },
   { key: 'campaigns', label: '📢 My Campaigns', icon: '📢' },
   { key: 'withdrawals', label: '💸 Withdrawals', icon: '💸' },
-  { key: 'kyc', label: '🛡️ Identity (KYC)', icon: '🛡️' },
 ];
 
 export default function CreatorDashboardPage() {
@@ -60,7 +59,7 @@ export default function CreatorDashboardPage() {
           setWithdrawals(withRes.data.data);
           setCampaigns(campRes.data.data.filter(c => parseFloat(c.current_amount) > 0));
           setUserData(profileRes.data.data);
-        } else if (tab === 'kyc' || tab === 'profile') {
+        } else if (tab === 'profile') {
           const res = await userAPI.getMe();
           setUserData(res.data.data);
         }
@@ -333,8 +332,8 @@ export default function CreatorDashboardPage() {
                   </div>
                 </div>
 
-                {/* KYC Gate — shown when not verified */}
-                {userData && userData.kyc_status !== 'verified' && (
+                {/* KYC Gate — shown when not verified and user has made $5 or more */}
+                {userData && userData.kyc_status !== 'verified' && (totalAvailable + totalPending) >= 5 && (
                   <div style={{
                     marginBottom: '24px', padding: '24px',
                     background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
@@ -346,18 +345,29 @@ export default function CreatorDashboardPage() {
                       <h3 style={{ fontFamily: 'var(--font-display)', color: '#92400e', margin: '0 0 6px' }}>
                         Identity Verification Required
                       </h3>
-                      <p style={{ color: '#78350f', fontSize: '0.9rem', margin: '0 0 16px' }}>
+                      <p style={{ color: '#78350f', fontSize: '0.9rem', margin: '0 0 16px', lineHeight: 1.4 }}>
                         {userData.kyc_status === 'pending'
                           ? 'Your identity documents are under review. Withdrawals will be unlocked once your KYC is approved (usually 24–48 hours).'
-                          : 'You must verify your identity before requesting a payout. This is required to prevent fraud and protect all donors.'}
+                          : 'You have earned $5 or more! To comply with financial regulations and withdraw your funds, you must verify your identity using Stripe Identity.'}
                       </p>
                       {userData.kyc_status !== 'pending' && (
                         <button
+                          onClick={handleStartStripeKyc}
+                          disabled={kycLoading}
                           className="btn btn-primary"
-                          style={{ background: '#d97706', border: 'none' }}
-                          onClick={() => setTab('kyc')}
+                          style={{
+                            background: 'linear-gradient(135deg, #d97706, #b45309)',
+                            border: 'none',
+                            padding: '10px 20px',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer'
+                          }}
                         >
-                          🪪 Complete Identity Verification
+                          {kycLoading ? 'Preparing session...' : '🔒 Verify with Stripe Identity'}
                         </button>
                       )}
                       {userData.kyc_status === 'pending' && (
@@ -490,82 +500,7 @@ export default function CreatorDashboardPage() {
               </div>
             )}
 
-            {/* ── KYC Tab ── */}
-            {tab === 'kyc' && userData && (
-              <div className="animate-in">
-                <div className="card">
-                  <div className="card-body">
-                    <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)', marginBottom: '16px' }}>Identity Verification (KYC)</h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                      To prevent fraud and ensure trust, all creators must verify their identity before their campaigns can go live or withdraw funds.
-                    </p>
 
-                    <div style={{ padding: '16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <div style={{ fontWeight: 600, color: 'var(--slate-800)' }}>Current Status</div>
-                        <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Your current KYC verification state.</div>
-                      </div>
-                      <span className={`badge ${userData.kyc_status === 'verified' ? 'badge-success' : userData.kyc_status === 'pending' ? 'badge-warning' : userData.kyc_status === 'rejected' ? 'badge-danger' : 'badge-category'}`} style={{ fontSize: '1rem', padding: '6px 12px' }}>
-                        {userData.kyc_status.replace('_', ' ').toUpperCase()}
-                      </span>
-                    </div>
-
-                    {(userData.kyc_status === 'not_submitted' || userData.kyc_status === 'rejected') && (
-                      <div style={{
-                        background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
-                        border: '1px dashed var(--border)',
-                        borderRadius: 'var(--radius-md)',
-                        padding: '40px 24px',
-                        textAlign: 'center',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '16px'
-                      }}>
-                        <div style={{ fontSize: '3rem' }}>🔒</div>
-                        <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)', margin: 0 }}>
-                          Secure Verification via Stripe Identity
-                        </h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '460px', margin: 0, lineHeight: 1.5 }}>
-                          We use Stripe Identity to securely verify your legal documents (passport, driver's license, or national ID) and match them with a quick selfie. Your data is encrypted and handled completely by Stripe.
-                        </p>
-                        <button
-                          onClick={handleStartStripeKyc}
-                          disabled={kycLoading}
-                          className="btn btn-primary"
-                          style={{
-                            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                            border: 'none',
-                            padding: '12px 28px',
-                            fontWeight: 600,
-                            fontSize: '1rem',
-                            boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.2), 0 2px 4px -1px rgba(99, 102, 241, 0.1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {kycLoading ? 'Preparing session...' : '🔒 Verify with Stripe Identity'}
-                        </button>
-                      </div>
-                    )}
-                    
-                    {userData.kyc_status === 'pending' && (
-                      <div className="alert alert-warning">
-                        Your identity verification session is currently processing via Stripe Identity. This process usually completes within a few minutes.
-                      </div>
-                    )}
-
-                    {userData.kyc_status === 'verified' && (
-                      <div className="alert alert-success">
-                        Your identity has been fully verified! You can now launch campaigns and withdraw funds.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
