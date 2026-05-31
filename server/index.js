@@ -16,6 +16,7 @@ const updateRoutes = require('./routes/updates');
 const adminRoutes = require('./routes/admin');
 const userRoutes = require('./routes/users');
 const withdrawalRoutes = require('./routes/withdrawals');
+const settingsRoutes = require('./routes/settings');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -68,6 +69,7 @@ app.use('/api/updates', updateRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/withdrawals', withdrawalRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

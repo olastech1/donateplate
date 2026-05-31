@@ -98,4 +98,8 @@ export const adminAPI = {
   unbanUser: (id) => api.post(`/admin/users/${id}/unban`),
 };
 
+export const settingsAPI = {
+  getPublic: () => api.get('/settings/public'),
+};
+
 export default api;

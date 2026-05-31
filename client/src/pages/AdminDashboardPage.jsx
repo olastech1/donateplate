@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../context/AuthContext';
 import { adminAPI } from '../services/api';
 
@@ -11,6 +13,7 @@ const TABS = [
   { key: 'withdrawals', label: '💸 Withdrawals', icon: '💸' },
   { key: 'donations', label: '💳 All Donations', icon: '💳' },
   { key: 'settings', label: '⚙️ Settings', icon: '⚙️' },
+  { key: 'pages', label: '📄 Edit Pages', icon: '📄' },
 ];
 
 export default function AdminDashboardPage() {
@@ -24,6 +27,8 @@ export default function AdminDashboardPage() {
   const [donations, setDonations] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [settings, setSettings] = useState([]);
+  const [selectedPage, setSelectedPage] = useState('page_about_us');
+  const [pageContent, setPageContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
   const [verifyLoading, setVerifyLoading] = useState(false);
@@ -66,6 +71,9 @@ export default function AdminDashboardPage() {
         } else if (tab === 'donations') {
           const res = await adminAPI.getDonations();
           setDonations(res.data.data);
+        } else if (tab === 'pages') {
+          const res = await adminAPI.getSettings();
+          setSettings(res.data.data);
         } else if (tab === 'settings') {
           const res = await adminAPI.getSettings();
           setSettings(res.data.data);
@@ -78,6 +86,16 @@ export default function AdminDashboardPage() {
     };
     fetchData();
   }, [tab]);
+
+  
+  useEffect(() => {
+    if (tab === 'pages' && settings.length > 0) {
+      const pageSetting = settings.find(s => s.setting_key === selectedPage);
+      if (pageSetting) {
+        setPageContent(pageSetting.setting_value);
+      }
+    }
+  }, [tab, selectedPage, settings]);
 
   const handleCampaignAction = async (id, action) => {
     setActionLoading(id);
@@ -276,6 +294,19 @@ export default function AdminDashboardPage() {
       setMessage({ type: 'success', text: `KYC ${action}d successfully.` });
     } catch (err) {
       setMessage({ type: 'error', text: `Failed to ${action} KYC.` });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  
+  const handlePageSave = async () => {
+    setActionLoading('save-page');
+    try {
+      await adminAPI.updateSetting(selectedPage, pageContent);
+      setMessage({ type: 'success', text: 'Page content updated successfully.' });
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Failed to update page.' });
     } finally {
       setActionLoading('');
     }
@@ -972,6 +1003,46 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             )}
+          
+            {/* ── Pages Tab ── */}
+            {tab === 'pages' && (
+              <div className="animate-in">
+                <div className="card" style={{ marginBottom: '24px' }}>
+                  <div className="card-body" style={{ padding: '24px' }}>
+                    <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '24px' }}>
+                      {['page_about_us', 'page_contact', 'page_privacy_policy', 'page_terms_conditions'].map(key => (
+                        <button
+                          key={key}
+                          className={`btn ${selectedPage === key ? 'btn-primary' : 'btn-secondary'}`}
+                          onClick={() => setSelectedPage(key)}
+                        >
+                          {key.replace('page_', '').replace(/_/g, ' ').toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <div style={{ background: '#fff', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                      <ReactQuill 
+                        theme="snow" 
+                        value={pageContent} 
+                        onChange={setPageContent} 
+                        style={{ height: '400px', borderBottom: 'none' }}
+                      />
+                    </div>
+                    <div style={{ marginTop: '50px', textAlign: 'right' }}>
+                      <button 
+                        className="btn btn-primary" 
+                        onClick={handlePageSave}
+                        disabled={actionLoading === 'save-page'}
+                      >
+                        {actionLoading === 'save-page' ? 'Saving...' : '💾 Save Page'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </>
         )}
       </div>
