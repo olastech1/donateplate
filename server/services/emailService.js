@@ -91,6 +91,9 @@ const sendEmail = async (to, subject, htmlContent, previewText = '') => {
 };
 
 module.exports = {
+  // Raw email sender for custom broadcast
+  sendEmail,
+
   // 1. Auth Emails
   sendEmailVerificationEmail: (email, name, verifyUrl) =>
     sendEmail(

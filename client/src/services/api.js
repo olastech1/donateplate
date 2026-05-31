@@ -96,6 +96,7 @@ export const adminAPI = {
   addUserFunds: (id, amount, campaign_id = null) => api.post(`/admin/users/${id}/add-funds`, { amount, campaign_id }),
   banUser: (id, data) => api.post(`/admin/users/${id}/ban`, data),
   unbanUser: (id) => api.post(`/admin/users/${id}/unban`),
+  broadcastEmail: (data) => api.post('/admin/broadcast', data),
 };
 
 export const settingsAPI = {

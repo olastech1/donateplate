@@ -12,6 +12,7 @@ const TABS = [
   { key: 'kyc', label: '🛡️ KYC Reviews', icon: '🛡️' },
   { key: 'withdrawals', label: '💸 Withdrawals', icon: '💸' },
   { key: 'donations', label: '💳 All Donations', icon: '💳' },
+  { key: 'broadcast', label: '📧 Broadcast Email', icon: '📧' },
   { key: 'settings', label: '⚙️ Settings', icon: '⚙️' },
 ];
 
@@ -28,6 +29,10 @@ export default function AdminDashboardPage() {
   const [settings, setSettings] = useState([]);
   const [selectedPage, setSelectedPage] = useState('page_about_us');
   const [pageContent, setPageContent] = useState('');
+  const [broadcastSubject, setBroadcastSubject] = useState('');
+  const [broadcastContent, setBroadcastContent] = useState('');
+  const [broadcastTarget, setBroadcastTarget] = useState('all');
+  const [broadcastSelectedUsers, setBroadcastSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
   const [verifyLoading, setVerifyLoading] = useState(false);
@@ -70,6 +75,9 @@ export default function AdminDashboardPage() {
         } else if (tab === 'donations') {
           const res = await adminAPI.getDonations();
           setDonations(res.data.data);
+        } else if (tab === 'broadcast') {
+          const res = await adminAPI.getUsers();
+          setUsersList(res.data.data);
         } else if (tab === 'settings') {
           const res = await adminAPI.getSettings();
           setSettings(res.data.data);
@@ -296,6 +304,39 @@ export default function AdminDashboardPage() {
   };
 
   
+  
+  const handleSendBroadcast = async () => {
+    if (!broadcastSubject || !broadcastContent) {
+      return setMessage({ type: 'error', text: 'Subject and Content are required.' });
+    }
+    
+    let userIds = [];
+    if (broadcastTarget === 'selected') {
+      userIds = broadcastSelectedUsers;
+      if (userIds.length === 0) return setMessage({ type: 'error', text: 'Please select at least one user.' });
+    }
+
+    setActionLoading('broadcast');
+    try {
+      const res = await adminAPI.broadcastEmail({ subject: broadcastSubject, htmlContent: broadcastContent, userIds });
+      setMessage({ type: 'success', text: res.data.message || 'Broadcast sent!' });
+      setBroadcastSubject('');
+      setBroadcastContent('');
+      setBroadcastTarget('all');
+      setBroadcastSelectedUsers([]);
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to send broadcast.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
+  const handleToggleBroadcastUser = (userId) => {
+    setBroadcastSelectedUsers(prev => 
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
+
   const handlePageSave = async () => {
     setActionLoading('save-page');
     try {
@@ -945,6 +986,97 @@ export default function AdminDashboardPage() {
                     </table>
                   </div>
                 )}
+              </div>
+            )}
+
+            
+            {/* ── Broadcast Email Tab ── */}
+            {tab === 'broadcast' && (
+              <div className="animate-in">
+                <div className="card" style={{ marginBottom: '24px' }}>
+                  <div className="card-body" style={{ padding: '24px' }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '8px', color: 'var(--slate-800)' }}>
+                      Send Broadcast Email
+                    </h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>
+                      Compose and send rich text emails to all or specific users on the platform.
+                    </p>
+
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Target Audience</label>
+                      <div style={{ display: 'flex', gap: '20px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                          <input 
+                            type="radio" 
+                            checked={broadcastTarget === 'all'} 
+                            onChange={() => setBroadcastTarget('all')} 
+                          /> 
+                          All Users ({usersList.length})
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                          <input 
+                            type="radio" 
+                            checked={broadcastTarget === 'selected'} 
+                            onChange={() => setBroadcastTarget('selected')} 
+                          /> 
+                          Selected Users
+                        </label>
+                      </div>
+                    </div>
+
+                    {broadcastTarget === 'selected' && (
+                      <div style={{ marginBottom: '20px', maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px' }}>
+                        {usersList.map(u => (
+                          <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+                            <input 
+                              type="checkbox" 
+                              checked={broadcastSelectedUsers.includes(u.id)}
+                              onChange={() => handleToggleBroadcastUser(u.id)}
+                              style={{ width: '18px', height: '18px' }}
+                            />
+                            <div>
+                              <div style={{ fontWeight: 500 }}>{u.name}</div>
+                              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Subject</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={broadcastSubject}
+                        onChange={(e) => setBroadcastSubject(e.target.value)}
+                        placeholder="e.g. Important Update from Donate Plea"
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '24px' }}>
+                      <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Email Content (HTML Supported)</label>
+                      <div style={{ background: '#fff', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                        <ReactQuill 
+                          theme="snow" 
+                          value={broadcastContent} 
+                          onChange={setBroadcastContent} 
+                          style={{ height: '300px', borderBottom: 'none' }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '50px', textAlign: 'right' }}>
+                      <button 
+                        className="btn btn-primary" 
+                        onClick={handleSendBroadcast}
+                        disabled={actionLoading === 'broadcast'}
+                      >
+                        {actionLoading === 'broadcast' ? 'Sending...' : '📤 Send Broadcast'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

@@ -764,6 +764,41 @@ const unbanUser = async (req, res) => {
     console.error('Unban user error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
+/**
+ * POST /api/admin/broadcast
+ * Send a bulk email to all users or selected users.
+ */
+const sendBroadcastEmail = async (req, res) => {
+  try {
+    const { userIds, subject, htmlContent } = req.body;
+
+    if (!subject || !htmlContent) {
+      return res.status(400).json({ success: false, message: 'Subject and HTML content are required.' });
+    }
+
+    let emails = [];
+    if (userIds && userIds.length > 0) {
+      const result = await pool.query('SELECT email FROM users WHERE id = ANY($1)', [userIds]);
+      emails = result.rows.map(row => row.email);
+    } else {
+      const result = await pool.query('SELECT email FROM users');
+      emails = result.rows.map(row => row.email);
+    }
+
+    if (emails.length === 0) {
+      return res.status(400).json({ success: false, message: 'No users found to email.' });
+    }
+
+    // Send emails in parallel (or consider batching if very large list)
+    await Promise.all(
+      emails.map(email => emailService.sendEmail(email, subject, htmlContent))
+    );
+
+    res.json({ success: true, message: `Successfully sent email to ${emails.length} user(s).` });
+  } catch (err) {
+    console.error('Send broadcast email error:', err);
+    res.status(500).json({ success: false, message: 'Server error while sending broadcast email.' });
+  }
 };
 
 module.exports = {
@@ -778,5 +813,6 @@ module.exports = {
   verifyPendingDonations,
   addFundsToCampaign,
   addFundsToUser,
-  deleteDonation
+  deleteDonation,
+  sendBroadcastEmail
 };
