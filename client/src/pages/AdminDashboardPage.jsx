@@ -13,7 +13,6 @@ const TABS = [
   { key: 'withdrawals', label: '💸 Withdrawals', icon: '💸' },
   { key: 'donations', label: '💳 All Donations', icon: '💳' },
   { key: 'settings', label: '⚙️ Settings', icon: '⚙️' },
-  { key: 'pages', label: '📄 Edit Pages', icon: '📄' },
 ];
 
 export default function AdminDashboardPage() {
@@ -71,9 +70,6 @@ export default function AdminDashboardPage() {
         } else if (tab === 'donations') {
           const res = await adminAPI.getDonations();
           setDonations(res.data.data);
-        } else if (tab === 'pages') {
-          const res = await adminAPI.getSettings();
-          setSettings(res.data.data);
         } else if (tab === 'settings') {
           const res = await adminAPI.getSettings();
           setSettings(res.data.data);
@@ -89,7 +85,7 @@ export default function AdminDashboardPage() {
 
   
   useEffect(() => {
-    if (tab === 'pages' && settings.length > 0) {
+    if (tab === 'settings' && settings.length > 0) {
       const pageSetting = settings.find(s => s.setting_key === selectedPage);
       if (pageSetting) {
         setPageContent(pageSetting.setting_value);
@@ -968,47 +964,14 @@ export default function AdminDashboardPage() {
                     ))}
                   </div>
                 </div>
-
-                <div className="card" style={{ marginBottom: '24px' }}>
-                  <div className="card-body" style={{ padding: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <h3 style={{ fontFamily: 'var(--font-display)', margin: 0, color: 'var(--slate-800)' }}>
-                        Email Server (SMTP)
-                      </h3>
-                      <button className="btn btn-secondary btn-sm" onClick={handleTestEmail} disabled={actionLoading === 'test-email'}>
-                        {actionLoading === 'test-email' ? 'Sending...' : '📧 Send Test Email'}
-                      </button>
-                    </div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>
-                      Configure the automated email system.
-                    </p>
-                    {settings.filter(s => s.setting_key.startsWith('smtp')).map(s => (
-                      <SettingField key={s.setting_key} setting={s} onSave={handleSettingUpdate} />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="card">
+                <div className="card" style={{ marginTop: '24px' }}>
                   <div className="card-body" style={{ padding: '24px' }}>
                     <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '8px', color: 'var(--slate-800)' }}>
-                      Platform Details
+                      Page Contents
                     </h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>
-                      General configuration for Donate Plea.
+                      Edit the content of the public pages.
                     </p>
-                    {settings.filter(s => !s.setting_key.startsWith('stripe') && !s.setting_key.startsWith('smtp')).map(s => (
-                      <SettingField key={s.setting_key} setting={s} onSave={handleSettingUpdate} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          
-            {/* ── Pages Tab ── */}
-            {tab === 'pages' && (
-              <div className="animate-in">
-                <div className="card" style={{ marginBottom: '24px' }}>
-                  <div className="card-body" style={{ padding: '24px' }}>
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '24px' }}>
                       {['page_about_us', 'page_contact', 'page_privacy_policy', 'page_terms_conditions'].map(key => (
                         <button
@@ -1040,8 +1003,43 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                 </div>
+
+                <div className="card" style={{ marginBottom: '24px' }}>
+                  <div className="card-body" style={{ padding: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', margin: 0, color: 'var(--slate-800)' }}>
+                        Email Server (SMTP)
+                      </h3>
+                      <button className="btn btn-secondary btn-sm" onClick={handleTestEmail} disabled={actionLoading === 'test-email'}>
+                        {actionLoading === 'test-email' ? 'Sending...' : '📧 Send Test Email'}
+                      </button>
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>
+                      Configure the automated email system.
+                    </p>
+                    {settings.filter(s => s.setting_key.startsWith('smtp')).map(s => (
+                      <SettingField key={s.setting_key} setting={s} onSave={handleSettingUpdate} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="card-body" style={{ padding: '24px' }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '8px', color: 'var(--slate-800)' }}>
+                      Platform Details
+                    </h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>
+                      General configuration for Donate Plea.
+                    </p>
+                    {settings.filter(s => !s.setting_key.startsWith('stripe') && !s.setting_key.startsWith('smtp') && !s.setting_key.startsWith('page_')).map(s => (
+                      <SettingField key={s.setting_key} setting={s} onSave={handleSettingUpdate} />
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
+          
+            
 
           </>
         )}
