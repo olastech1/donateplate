@@ -88,7 +88,7 @@ export default function AdminDashboardPage() {
     if (tab === 'settings' && settings.length > 0) {
       const pageSetting = settings.find(s => s.setting_key === selectedPage);
       if (pageSetting) {
-        setPageContent(pageSetting.setting_value);
+        setPageContent(pageSetting.display_value);
       }
     }
   }, [tab, selectedPage, settings]);
