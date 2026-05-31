@@ -764,6 +764,8 @@ const unbanUser = async (req, res) => {
     console.error('Unban user error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
+};
+
 /**
  * POST /api/admin/broadcast
  * Send a bulk email to all users or selected users.
