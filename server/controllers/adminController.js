@@ -772,17 +772,33 @@ const unbanUser = async (req, res) => {
  */
 const sendBroadcastEmail = async (req, res) => {
   try {
-    const { userIds, subject, htmlContent } = req.body;
+    const { userIds, targetAudience, subject, htmlContent } = req.body;
 
     if (!subject || !htmlContent) {
       return res.status(400).json({ success: false, message: 'Subject and HTML content are required.' });
     }
 
     let emails = [];
-    if (userIds && userIds.length > 0) {
+    if (targetAudience === 'selected' || (!targetAudience && userIds && userIds.length > 0)) {
       const result = await pool.query('SELECT email FROM users WHERE id = ANY($1)', [userIds]);
       emails = result.rows.map(row => row.email);
+    } else if (targetAudience === 'all_donors') {
+      const result = await pool.query(`
+        SELECT DISTINCT COALESCE(u.email, d.guest_email) as email 
+        FROM donations d 
+        LEFT JOIN users u ON d.user_id = u.id 
+        WHERE d.status = 'success' AND COALESCE(u.email, d.guest_email) IS NOT NULL
+      `);
+      emails = result.rows.map(row => row.email);
+    } else if (targetAudience === 'all') {
+      const result = await pool.query(`
+        SELECT email FROM users 
+        UNION 
+        SELECT COALESCE(u.email, d.guest_email) FROM donations d LEFT JOIN users u ON d.user_id = u.id WHERE d.status = 'success' AND COALESCE(u.email, d.guest_email) IS NOT NULL
+      `);
+      emails = result.rows.map(row => row.email);
     } else {
+      // Default to all_users
       const result = await pool.query('SELECT email FROM users');
       emails = result.rows.map(row => row.email);
     }

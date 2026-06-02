@@ -31,7 +31,7 @@ export default function AdminDashboardPage() {
   const [pageContent, setPageContent] = useState('');
   const [broadcastSubject, setBroadcastSubject] = useState('');
   const [broadcastContent, setBroadcastContent] = useState('');
-  const [broadcastTarget, setBroadcastTarget] = useState('all');
+  const [broadcastTarget, setBroadcastTarget] = useState('all_users');
   const [broadcastSelectedUsers, setBroadcastSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
@@ -318,11 +318,16 @@ export default function AdminDashboardPage() {
 
     setActionLoading('broadcast');
     try {
-      const res = await adminAPI.broadcastEmail({ subject: broadcastSubject, htmlContent: broadcastContent, userIds });
+      const res = await adminAPI.broadcastEmail({ 
+        subject: broadcastSubject, 
+        htmlContent: broadcastContent, 
+        userIds, 
+        targetAudience: broadcastTarget 
+      });
       setMessage({ type: 'success', text: res.data.message || 'Broadcast sent!' });
       setBroadcastSubject('');
       setBroadcastContent('');
-      setBroadcastTarget('all');
+      setBroadcastTarget('all_users');
       setBroadcastSelectedUsers([]);
     } catch (err) {
       setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to send broadcast.' });
@@ -1004,14 +1009,30 @@ export default function AdminDashboardPage() {
 
                     <div style={{ marginBottom: '20px' }}>
                       <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Target Audience</label>
-                      <div style={{ display: 'flex', gap: '20px' }}>
+                      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                          <input 
+                            type="radio" 
+                            checked={broadcastTarget === 'all_users'} 
+                            onChange={() => setBroadcastTarget('all_users')} 
+                          /> 
+                          All Users ({usersList.length})
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                          <input 
+                            type="radio" 
+                            checked={broadcastTarget === 'all_donors'} 
+                            onChange={() => setBroadcastTarget('all_donors')} 
+                          /> 
+                          All Donors
+                        </label>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                           <input 
                             type="radio" 
                             checked={broadcastTarget === 'all'} 
                             onChange={() => setBroadcastTarget('all')} 
                           /> 
-                          All Users ({usersList.length})
+                          Everyone (Users + Donors)
                         </label>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                           <input 
