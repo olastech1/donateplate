@@ -311,13 +311,13 @@ export default function AdminDashboardPage() {
       setActionLoading('export');
       const res = await adminAPI.exportEmails(broadcastTarget);
       
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('link');
-      link.href = url;
-      link.setAttribute('download', `emails-export-${broadcastTarget}-${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.setAttribute('download', `emails-export-${broadcastTarget}-${Date.now()}.csv`);
+      document.body.appendChild(a);
+      a.click();
+      a.parentNode.removeChild(a);
       
       setMessage({ type: 'success', text: 'Email list exported successfully!' });
     } catch (err) {
