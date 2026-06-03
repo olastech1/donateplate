@@ -51,7 +51,8 @@ router.get('/settings/stripe-status', adminController.getStripeStatus);
 router.post('/settings/test-email', adminController.testEmail);
 router.put('/settings/:key', adminController.updateSetting);
 
-// Broadcast emails
+// Broadcast & Export emails
 router.post('/broadcast', adminController.sendBroadcastEmail);
+router.get('/export-emails', adminController.exportEmails);
 
 module.exports = router;

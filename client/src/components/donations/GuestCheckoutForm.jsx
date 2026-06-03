@@ -10,6 +10,7 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [donationType, setDonationType] = useState('one-time');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,7 +32,8 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
       const payload = {
         campaign_id: campaignId,
         amount: parseFloat(amount),
-        is_anonymous: isAnonymous
+        is_anonymous: isAnonymous,
+        donation_type: donationType
       };
       if (!user) {
         payload.guest_name = guestName || 'Guest Donor';
@@ -58,6 +60,27 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
       {error && <div className="alert alert-error">{error}</div>}
 
       <form onSubmit={handleSubmit}>
+        
+        {/* Donation Type Toggle */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <button
+            type="button"
+            className={`btn ${donationType === 'one-time' ? 'btn-primary' : 'btn-outline'}`}
+            style={{ flex: 1, padding: '10px', fontWeight: 600 }}
+            onClick={() => setDonationType('one-time')}
+          >
+            One-time
+          </button>
+          <button
+            type="button"
+            className={`btn ${donationType === 'monthly' ? 'btn-primary' : 'btn-outline'}`}
+            style={{ flex: 1, padding: '10px', fontWeight: 600 }}
+            onClick={() => setDonationType('monthly')}
+          >
+            Monthly
+          </button>
+        </div>
+
         {/* Amount presets */}
         <div className="amount-presets">
           {PRESETS.map(val => (
@@ -130,7 +153,7 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
         </div>
 
         <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading} id="donate-submit-btn">
-          {loading ? 'Redirecting to Stripe...' : `Support${amount ? ` $${Number(amount).toLocaleString()}` : ' This Plea'}`}
+          {loading ? 'Redirecting to Stripe...' : `Support${amount ? ` ${Number(amount).toLocaleString()}` : ' This Plea'} ${donationType === 'monthly' ? '/ month' : ''}`}
         </button>
 
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '12px' }}>

@@ -13,7 +13,7 @@ const emailService = require('../services/emailService');
  */
 const initiateDonation = async (req, res) => {
   try {
-    const { campaign_id, amount, guest_name, guest_email, is_anonymous } = req.body;
+    const { campaign_id, amount, guest_name, guest_email, is_anonymous, donation_type } = req.body;
 
     if (!campaign_id || !amount) {
       return res.status(400).json({ success: false, message: 'Campaign ID and amount are required.' });
@@ -57,10 +57,21 @@ const initiateDonation = async (req, res) => {
 
     const frontendUrl = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:3000';
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    // Create Stripe Checkout Session Configuration
+    const isMonthly = donation_type === 'monthly';
+    const metadataObj = {
+      campaign_id: campaign.id,
+      donor_name: donorName || '',
+      donor_email: donorEmail,
+      is_anonymous: is_anonymous ? 'true' : 'false',
+      user_id: req.user ? req.user.id : '',
+      platform_fee: platformFee.toString(),
+      is_recurring: isMonthly ? 'true' : 'false'
+    };
+
+    const sessionConfig = {
       payment_method_types: ['card'],
-      mode: 'payment',
+      mode: isMonthly ? 'subscription' : 'payment',
       customer_email: donorEmail,
       line_items: [{
         price_data: {
@@ -69,21 +80,23 @@ const initiateDonation = async (req, res) => {
             name: `Donate to: ${campaign.title}`,
             description: `Supporting "${campaign.title}" on Donate Plea`
           },
-          unit_amount: Math.round(parseFloat(amount) * 100)  // Stripe uses cents
+          unit_amount: Math.round(parseFloat(amount) * 100)
         },
         quantity: 1
       }],
-      metadata: {
-        campaign_id: campaign.id,
-        donor_name: donorName || '',
-        donor_email: donorEmail,
-        is_anonymous: is_anonymous ? 'true' : 'false',
-        user_id: req.user ? req.user.id : '',
-        platform_fee: platformFee.toString()
-      },
+      metadata: metadataObj,
       success_url: `${frontendUrl}/donation/callback?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${frontendUrl}/campaigns/${campaign.id}`
-    });
+    };
+
+    if (isMonthly) {
+      sessionConfig.line_items[0].price_data.recurring = { interval: 'month' };
+      sessionConfig.subscription_data = {
+        metadata: metadataObj
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     // Insert pending donation record
     await pool.query(
@@ -211,6 +224,59 @@ const stripeWebhook = async (req, res) => {
             donationAmount,
             campaignTitle
           );
+        }
+      }
+    }
+
+
+    // Handle Recurring Subscription Cycles
+    if (event.type === 'invoice.payment_succeeded') {
+      const invoice = event.data.object;
+      
+      // Ignore the initial creation invoice, checkout.session.completed already handles it
+      if (invoice.billing_reason === 'subscription_create') {
+        console.log('Ignoring subscription_create invoice to avoid double counting.');
+        return res.json({ received: true });
+      }
+
+      const subscriptionId = invoice.subscription;
+      if (subscriptionId) {
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const metadata = subscription.metadata || {};
+        const { campaign_id, donor_name, donor_email, is_anonymous, user_id, platform_fee } = metadata;
+
+        if (campaign_id) {
+          // Log the new recurring donation cycle
+          const result = await pool.query(
+            `INSERT INTO donations
+              (campaign_id, user_id, guest_name, guest_email, amount, platform_fee, is_anonymous, stripe_payment_intent_id, status)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'success') RETURNING *`,
+            [
+              campaign_id,
+              user_id || null,
+              donor_name || null,
+              donor_email || null,
+              invoice.amount_paid / 100,
+              parseFloat(platform_fee || 0),
+              is_anonymous === 'true',
+              invoice.payment_intent || `sub_cycle_${invoice.id}`
+            ]
+          );
+
+          console.log(`✅ Recurring Donation confirmed: ${invoice.id} → ${result.rows[0].amount}`);
+
+          // Send emails for recurring cycle
+          const camp = await pool.query('SELECT title FROM campaigns WHERE id = $1', [campaign_id]);
+          if (camp.rows.length > 0) {
+            const campaignTitle = camp.rows[0].title;
+            const campaignUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/campaigns/${campaign_id}`;
+            const donorDisplayName = is_anonymous === 'true' ? 'An anonymous donor' : (donor_name || 'A generous donor');
+            const donationAmount = invoice.amount_paid / 100;
+
+            if (donor_email) {
+              await emailService.sendDonationReceiptEmail(donor_email, donorDisplayName, donationAmount, campaignTitle, campaignUrl);
+            }
+          }
         }
       }
     }

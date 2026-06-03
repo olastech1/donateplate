@@ -819,6 +819,49 @@ const sendBroadcastEmail = async (req, res) => {
   }
 };
 
+/**
+ * GET /api/admin/export-emails
+ * Export user or donor emails as a CSV file
+ */
+const exportEmails = async (req, res) => {
+  try {
+    const { target } = req.query; // 'all_users', 'all_donors', 'all'
+    let emails = [];
+
+    if (target === 'all_donors') {
+      const result = await pool.query(`
+        SELECT DISTINCT COALESCE(u.email, d.guest_email) as email 
+        FROM donations d 
+        LEFT JOIN users u ON d.user_id = u.id 
+        WHERE d.status = 'success' AND COALESCE(u.email, d.guest_email) IS NOT NULL
+      `);
+      emails = result.rows.map(row => row.email);
+    } else if (target === 'all_users') {
+      const result = await pool.query('SELECT email FROM users');
+      emails = result.rows.map(row => row.email);
+    } else {
+      // 'all'
+      const result = await pool.query(`
+        SELECT email FROM users 
+        UNION 
+        SELECT COALESCE(u.email, d.guest_email) FROM donations d LEFT JOIN users u ON d.user_id = u.id WHERE d.status = 'success' AND COALESCE(u.email, d.guest_email) IS NOT NULL
+      `);
+      emails = result.rows.map(row => row.email);
+    }
+
+    const csvHeader = "Email\n";
+    const csvData = emails.join('\n');
+    const finalCsv = csvHeader + csvData;
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment(`emails-export-${target}-${Date.now()}.csv`);
+    return res.send(finalCsv);
+  } catch (err) {
+    console.error('Export emails error:', err);
+    res.status(500).json({ success: false, message: 'Server error while exporting emails.' });
+  }
+};
+
 module.exports = {
   getAllUsers, updateUser, deleteUser, banUser, unbanUser,
   getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign, toggleCampaign,
@@ -832,5 +875,6 @@ module.exports = {
   addFundsToCampaign,
   addFundsToUser,
   deleteDonation,
-  sendBroadcastEmail
+  sendBroadcastEmail,
+  exportEmails
 };

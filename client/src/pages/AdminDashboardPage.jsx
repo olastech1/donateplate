@@ -305,6 +305,28 @@ export default function AdminDashboardPage() {
 
   
   
+  
+  const handleExportEmails = async () => {
+    try {
+      setActionLoading('export');
+      const res = await adminAPI.exportEmails(broadcastTarget);
+      
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('link');
+      link.href = url;
+      link.setAttribute('download', `emails-export-${broadcastTarget}-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      
+      setMessage({ type: 'success', text: 'Email list exported successfully!' });
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Failed to export emails.' });
+    } finally {
+      setActionLoading('');
+    }
+  };
+
   const handleSendBroadcast = async () => {
     if (!broadcastSubject || !broadcastContent) {
       return setMessage({ type: 'error', text: 'Subject and Content are required.' });
@@ -1003,9 +1025,21 @@ export default function AdminDashboardPage() {
                     <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '8px', color: 'var(--slate-800)' }}>
                       Send Broadcast Email
                     </h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>
-                      Compose and send rich text emails to all or specific users on the platform.
-                    </p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
+                        Compose and send rich text emails to all or specific users on the platform.
+                      </p>
+                      <button 
+                        className="btn btn-sm" 
+                        style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', fontWeight: 600 }}
+                        onClick={handleExportEmails}
+                        disabled={actionLoading === 'export'}
+                      >
+                        {actionLoading === 'export' ? 'Exporting...' : '⬇️ Export Selected Target as CSV'}
+                      </button>
+                    </div>
+
 
                     <div style={{ marginBottom: '20px' }}>
                       <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Target Audience</label>
