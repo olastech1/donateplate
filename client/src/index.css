@@ -663,3 +663,27 @@ img { max-width: 100%; height: auto; display: block; }
     font-size: 0.8rem !important;
   }
 }
+
+
+/* --- Mobile Sticky Bar --- */
+.mobile-sticky-bar {
+  display: none;
+}
+@media (max-width: 900px) {
+  .mobile-sticky-bar {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 20px 24px;
+    z-index: 1000;
+  }
+  .campaign-detail {
+    padding-bottom: 220px; /* Make space for the sticky bar */
+  }
+}

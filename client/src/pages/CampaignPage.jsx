@@ -138,7 +138,7 @@ export default function CampaignPage() {
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button 
                   onClick={() => document.querySelector('.checkout-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                  style={{ flex: 1, padding: '16px', borderRadius: '30px', border: 'none', background: '#bbf7d0', color: '#166534', fontWeight: 700, fontSize: '1.05rem', cursor: 'pointer', transition: 'all 0.2s' }}
+                  style={{ flex: 1, padding: '16px', borderRadius: '30px', border: 'none', background: '#f97316', color: '#ffffff', fontWeight: 700, fontSize: '1.05rem', cursor: 'pointer', transition: 'all 0.2s' }}
                 >
                   Donate
                 </button>
@@ -147,7 +147,7 @@ export default function CampaignPage() {
                     navigator.clipboard.writeText(window.location.href);
                     alert('Campaign link copied to clipboard!');
                   }}
-                  style={{ flex: 1, padding: '16px', borderRadius: '30px', border: 'none', background: '#166534', color: '#ffffff', fontWeight: 700, fontSize: '1.05rem', cursor: 'pointer', transition: 'all 0.2s' }}
+                  style={{ flex: 1, padding: '16px', borderRadius: '30px', border: 'none', background: '#0f172a', color: '#ffffff', fontWeight: 700, fontSize: '1.05rem', cursor: 'pointer', transition: 'all 0.2s' }}
                 >
                   Share
                 </button>
@@ -206,6 +206,44 @@ export default function CampaignPage() {
             <GuestCheckoutForm campaignId={campaign.id} campaignTitle={campaign.title} />
           </div>
         </div>
+
+          {/* Mobile Sticky Bar */}
+          <div className="mobile-sticky-bar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+              {/* Circular Progress */}
+              <div style={{ position: 'relative', width: '52px', height: '52px', flexShrink: 0 }}>
+                <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" strokeWidth="4" />
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f97316" strokeWidth="4" strokeDasharray={`${progress}, 100`} strokeLinecap="round" />
+                </svg>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
+                  {Math.round(progress)}%
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                  ${Number(campaign.current_amount).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>raised</span>
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500 }}>
+                  of ${Number(campaign.goal_amount).toLocaleString()}
+                </div>
+              </div>
+            </div>
+            
+            {donors.length > 0 && (
+              <div style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '16px', fontWeight: 500 }}>
+                <strong style={{ color: '#0f172a' }}>{donors[0].donor_name || 'Anonymous'}</strong> donated ${Number(donors[0].amount).toLocaleString()} <span style={{ color: '#cbd5e1', marginLeft: '4px' }}>›</span>
+              </div>
+            )}
+
+            <button 
+              onClick={() => document.querySelector('.checkout-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              style={{ width: '100%', padding: '16px', borderRadius: '30px', border: 'none', background: '#f97316', color: '#ffffff', fontWeight: 700, fontSize: '1.1rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)' }}
+            >
+              Donate
+            </button>
+          </div>
+
       </div>
     </div>
   );
