@@ -189,15 +189,30 @@ export default function CampaignPage() {
             )}
 
             {tab === 'donors' && (
-              donors.length > 0 ? donors.map(d => (
-                <div key={d.id} className="donor-item">
-                  <div>
-                    <div className="donor-name">{d.donor_name || 'Anonymous'}</div>
-                    <div className="donor-time">{timeAgo(d.created_at)}</div>
+              <div style={{ marginTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    Donations <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '2px 10px', borderRadius: '12px' }}>{campaign.donor_count || donors.length}</span>
                   </div>
-                  <div className="donor-amount">${Number(d.amount).toLocaleString()}</div>
                 </div>
-              )) : <p style={{ color: 'var(--text-muted)' }}>Be the first to donate!</p>
+                {donors.length > 0 ? donors.map(d => {
+                  const name = d.donor_name || 'Anonymous';
+                  const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                  return (
+                    <div key={d.id} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderBottom: '1px solid #f1f5f9' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', border: '1px solid #e2e8f0', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a', fontWeight: 600, fontSize: '0.9rem', flexShrink: 0 }}>
+                        {initials}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '4px', fontSize: '1.05rem' }}>{name}</div>
+                        <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
+                          <strong style={{ color: '#0f172a', fontWeight: 700 }}>${Number(d.amount).toLocaleString()}</strong> <span style={{ margin: '0 4px', color: '#cbd5e1' }}>•</span> {timeAgo(d.created_at)}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }) : <p style={{ color: 'var(--text-muted)' }}>Be the first to donate!</p>}
+              </div>
             )}
           </div>
 
