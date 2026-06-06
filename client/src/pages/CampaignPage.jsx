@@ -18,10 +18,11 @@ export default function CampaignPage() {
       const checkoutForm = document.querySelector('.checkout-container');
       if (checkoutForm) {
         const rect = checkoutForm.getBoundingClientRect();
-        const isFormVisible = rect.top < window.innerHeight;
-        setShowStickyBar(window.scrollY > 400 && !isFormVisible);
+        // Hide the sticky bar when the checkout container enters the viewport (minus 100px padding)
+        const isFormVisible = rect.top < window.innerHeight - 80;
+        setShowStickyBar(window.scrollY > 150 && !isFormVisible);
       } else {
-        setShowStickyBar(window.scrollY > 400);
+        setShowStickyBar(window.scrollY > 150);
       }
     };
     window.addEventListener('scroll', handleScroll);
