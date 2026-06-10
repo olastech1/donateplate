@@ -283,7 +283,7 @@ const getMyCampaigns = async (req, res) => {
               COALESCE(d_avail.available_raised, 0) AS available_raised,
               COALESCE(d_pend.pending_raised, 0) AS pending_raised,
               COALESCE(w.total_withdrawn, 0) AS total_withdrawn,
-              GREATEST(0, COALESCE(d_avail.available_raised, 0) - COALESCE(w.total_withdrawn, 0)) AS available_balance,
+              (COALESCE(d_avail.available_raised, 0) - COALESCE(w.total_withdrawn, 0)) AS available_balance,
               COALESCE(d_pend.pending_raised, 0) AS pending_balance
        FROM campaigns c
        LEFT JOIN (
