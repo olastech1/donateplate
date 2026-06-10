@@ -34,6 +34,7 @@ export const fetchCurrencyData = async () => {
           const ipRes = await fetch('https://ipapi.co/json/');
           if (ipRes.ok) {
             const ipData = await ipRes.json();
+            if (ipData.error) throw new Error('ipapi.co rate limited');
             if (ipData.currency === 'GBP' || ipData.country_code === 'GB') {
               currency = 'GBP';
             } else if (ipData.currency === 'EUR' || ipData.in_eu || ['AT','BE','CY','EE','FI','FR','DE','GR','IE','IT','LV','LT','LU','MT','NL','PT','SK','SI','ES'].includes(ipData.country_code)) {
