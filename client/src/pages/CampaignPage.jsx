@@ -289,14 +289,14 @@ export default function CampaignPage() {
                   ${Number(campaign.current_amount).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>raised</span>
                 </div>
                 <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500 }}>
-                  of ${Number(campaign.goal_amount).toLocaleString()} {formatEquivalent(campaign.goal_amount, currencyData)}
+                  of ${Number(campaign.goal_amount).toLocaleString()} USD
                 </div>
               </div>
             </div>
             
             {donors.length > 0 && (
               <div style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '16px', fontWeight: 500 }}>
-                <strong style={{ color: '#0f172a' }}>{donors[0].donor_name || 'Anonymous'}</strong> donated ${Number(donors[0].amount).toLocaleString()} {formatEquivalent(donors[0].amount, currencyData)} <span style={{ color: '#cbd5e1', marginLeft: '4px' }}>›</span>
+                <strong style={{ color: '#0f172a' }}>{donors[0].donor_name || 'Anonymous'}</strong> donated ${Number(donors[0].amount).toLocaleString()} <span style={{ color: '#cbd5e1', marginLeft: '4px' }}>›</span>
               </div>
             )}
 
