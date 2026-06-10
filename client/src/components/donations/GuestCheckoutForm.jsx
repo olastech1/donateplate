@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { donationAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { useCurrency, formatEquivalent } from '../../utils/currency';
 
 const PRESETS = [10, 25, 50, 100, 250, 500];
 
@@ -14,6 +15,7 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const currencyData = useCurrency();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,7 +101,7 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
 
         {/* Custom amount */}
         <div className="form-group">
-          <label className="form-label">Or enter a custom amount</label>
+          <label className="form-label">Or enter a custom amount (USD)</label>
           <input
             type="number"
             className="form-input"
@@ -109,6 +111,11 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
             min="1"
             id="donation-amount-input"
           />
+          {amount && formatEquivalent(amount, currencyData) && (
+            <div style={{ marginTop: '6px', fontSize: '0.85rem', color: 'var(--slate-600)', fontWeight: 500 }}>
+              Your card will be charged approximately <strong>{formatEquivalent(amount, currencyData).replace('(~ ', '').replace(')', '')}</strong>
+            </div>
+          )}
         </div>
 
         {/* Guest fields */}

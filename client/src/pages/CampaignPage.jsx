@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GuestCheckoutForm from '../components/donations/GuestCheckoutForm';
 import { campaignAPI, updateAPI } from '../services/api';
+import { useCurrency, formatEquivalent } from '../utils/currency';
 
 export default function CampaignPage() {
   const { id } = useParams();
@@ -12,6 +13,7 @@ export default function CampaignPage() {
   const [tab, setTab] = useState('story');
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const currencyData = useCurrency();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -137,17 +139,23 @@ export default function CampaignPage() {
                 
                 <div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                    ${Number(campaign.current_amount).toLocaleString()} <span style={{ fontSize: '1rem', fontWeight: 600 }}>raised</span>
+                    ${Number(campaign.current_amount).toLocaleString()} 
+                    {formatEquivalent(campaign.current_amount, currencyData) && (
+                      <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 600 }}>
+                        {formatEquivalent(campaign.current_amount, currencyData)}
+                      </span>
+                    )}
+                    <span style={{ fontSize: '1rem', fontWeight: 600 }}>raised</span>
                   </div>
                   <div style={{ color: '#64748b', fontSize: '1rem', fontWeight: 500, marginBottom: '8px' }}>
-                    of ${Number(campaign.goal_amount).toLocaleString()} USD
+                    of ${Number(campaign.goal_amount).toLocaleString()} USD {formatEquivalent(campaign.goal_amount, currencyData)}
                   </div>
                   {donors.length > 0 && (
                     <div 
                       onClick={() => setTab('donors')}
                       style={{ fontSize: '0.9rem', color: '#334155', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
                     >
-                      {donors[0].donor_name || 'Anonymous'} donated ${Number(donors[0].amount).toLocaleString()} <span style={{ color: '#94a3b8', marginLeft: '4px' }}>›</span>
+                      {donors[0].donor_name || 'Anonymous'} donated ${Number(donors[0].amount).toLocaleString()} {formatEquivalent(donors[0].amount, currencyData)} <span style={{ color: '#94a3b8', marginLeft: '4px' }}>›</span>
                     </div>
                   )}
                 </div>
@@ -288,14 +296,14 @@ export default function CampaignPage() {
                   ${Number(campaign.current_amount).toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>raised</span>
                 </div>
                 <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500 }}>
-                  of ${Number(campaign.goal_amount).toLocaleString()}
+                  of ${Number(campaign.goal_amount).toLocaleString()} {formatEquivalent(campaign.goal_amount, currencyData)}
                 </div>
               </div>
             </div>
             
             {donors.length > 0 && (
               <div style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '16px', fontWeight: 500 }}>
-                <strong style={{ color: '#0f172a' }}>{donors[0].donor_name || 'Anonymous'}</strong> donated ${Number(donors[0].amount).toLocaleString()} <span style={{ color: '#cbd5e1', marginLeft: '4px' }}>›</span>
+                <strong style={{ color: '#0f172a' }}>{donors[0].donor_name || 'Anonymous'}</strong> donated ${Number(donors[0].amount).toLocaleString()} {formatEquivalent(donors[0].amount, currencyData)} <span style={{ color: '#cbd5e1', marginLeft: '4px' }}>›</span>
               </div>
             )}
 
