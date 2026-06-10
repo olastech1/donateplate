@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 
 let cachedData = null;
 let fetchPromise = null;
@@ -10,7 +10,6 @@ const detectCurrencyFromTimezone = () => {
       return 'GBP';
     }
     if (tz.startsWith('Europe/')) {
-      // Exclude specific non-EU countries if needed, but for simplicity EUR covers most
       return 'EUR';
     }
     return 'USD';
@@ -25,10 +24,8 @@ export const fetchCurrencyData = async () => {
 
   fetchPromise = (async () => {
     try {
-      // 1. Detect Country via TimeZone (Zero-Network, AdBlock safe)
       let currency = detectCurrencyFromTimezone();
 
-      // Fallback network detection if timezone is somehow ambiguous or USD
       if (currency === 'USD') {
         try {
           const ipRes = await fetch('https://ipapi.co/json/');
@@ -45,7 +42,6 @@ export const fetchCurrencyData = async () => {
           }
         } catch (e) {
           try {
-            // Backup IP detection
             const backupIpRes = await fetch('https://ipwho.is/');
             if (backupIpRes.ok) {
               const backupIpData = await backupIpRes.json();
@@ -61,7 +57,6 @@ export const fetchCurrencyData = async () => {
         }
       }
 
-      // 2. Fetch Exchange Rates using a highly-available CDN (AdBlock safe)
       let rate = 1;
       if (currency !== 'USD') {
         try {
@@ -75,7 +70,6 @@ export const fetchCurrencyData = async () => {
               currency = 'USD';
             }
           } else {
-            // Backup API
             const backupRes = await fetch('https://open.er-api.com/v6/latest/USD');
             const backupData = await backupRes.json();
             if (backupData && backupData.rates && backupData.rates[currency]) {
@@ -102,9 +96,6 @@ export const fetchCurrencyData = async () => {
   return fetchPromise;
 };
 
-/**
- * Returns the estimated string (e.g. "~ £39.25 GBP") or null if USD.
- */
 export const formatEquivalent = (usdAmount, currencyData) => {
   if (!currencyData || currencyData.currency === 'USD') return null;
   
@@ -116,10 +107,9 @@ export const formatEquivalent = (usdAmount, currencyData) => {
   return `(~ ${formatter.format(converted)} ${currencyData.currency})`;
 };
 
-/**
- * React Hook for consuming the detected currency.
- */
-export const useCurrency = () => {
+const CurrencyContext = createContext();
+
+export const CurrencyProvider = ({ children }) => {
   const [currencyData, setCurrencyData] = useState({ currency: 'USD', rate: 1 });
   const [loading, setLoading] = useState(true);
 
@@ -130,5 +120,39 @@ export const useCurrency = () => {
     });
   }, []);
 
-  return { ...currencyData, loading };
+  const changeCurrency = async (newCurrency) => {
+    if (newCurrency === 'USD') {
+      setCurrencyData({ currency: 'USD', rate: 1 });
+      return;
+    }
+    
+    let rate = 1;
+    try {
+      const rateRes = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+      if (rateRes.ok) {
+        const rateData = await rateRes.json();
+        const currKey = newCurrency.toLowerCase();
+        if (rateData && rateData.usd && rateData.usd[currKey]) {
+          rate = rateData.usd[currKey];
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setCurrencyData({ currency: newCurrency, rate });
+  };
+
+  return (
+    <CurrencyContext.Provider value={{ ...currencyData, loading, changeCurrency }}>
+      {children}
+    </CurrencyContext.Provider>
+  );
+};
+
+export const useCurrency = () => {
+  const context = useContext(CurrencyContext);
+  if (!context) {
+    return { currency: 'USD', rate: 1, loading: false };
+  }
+  return context;
 };
