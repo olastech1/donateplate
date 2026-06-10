@@ -94,6 +94,7 @@ export const adminAPI = {
   toggleSeoVisibility: (id) => api.put(`/admin/campaigns/${id}/seo`),
   addFunds: (id, amount) => api.post(`/admin/campaigns/${id}/add-funds`, { amount }),
   addUserFunds: (id, amount, campaign_id = null) => api.post(`/admin/users/${id}/add-funds`, { amount, campaign_id }),
+  subtractUserFunds: (id, amount, campaign_id = null) => api.post(`/admin/users/${id}/subtract-funds`, { amount, campaign_id }),
   banUser: (id, data) => api.post(`/admin/users/${id}/ban`, data),
   unbanUser: (id) => api.post(`/admin/users/${id}/unban`),
   broadcastEmail: (data) => api.post('/admin/broadcast', data),

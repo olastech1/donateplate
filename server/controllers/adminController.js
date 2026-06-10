@@ -679,6 +679,81 @@ const addFundsToUser = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/admin/users/:id/subtract-funds
+ * Allows an admin to manually subtract funds from a user's balance.
+ * Inserts a processed withdrawal record to deduct from the available balance.
+ */
+const subtractFundsFromUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount } = req.body;
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Valid positive amount is required.' });
+    }
+
+    // Verify user exists and is a creator or admin
+    const userRes = await pool.query('SELECT name, role FROM users WHERE id = $1', [id]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const targetUser = userRes.rows[0];
+    if (targetUser.role !== 'creator' && targetUser.role !== 'admin') {
+      return res.status(400).json({ success: false, message: 'Funds can only be adjusted for creators or admins.' });
+    }
+
+    let campaignId = req.body.campaign_id;
+
+    if (!campaignId) {
+      // Find if this user already has an active or paused campaign
+      const campaignRes = await pool.query(
+        `SELECT id FROM campaigns 
+         WHERE creator_id = $1 AND status IN ('active', 'paused') 
+         ORDER BY created_at DESC LIMIT 1`,
+        [id]
+      );
+
+      if (campaignRes.rows.length > 0) {
+        campaignId = campaignRes.rows[0].id;
+      } else {
+        // Create a default adjustment campaign for the user
+        console.log(`[ADMIN ADJUSTMENT] Creator ${id} has no campaign. Creating 'General Balance Adjustment' campaign.`);
+        const newCampaign = await pool.query(
+          `INSERT INTO campaigns (creator_id, title, description, category, goal_amount, status)
+           VALUES ($1, $2, $3, 'general', 1000000.00, 'active')
+           RETURNING id`,
+          [id, 'General Balance Adjustment', 'System-generated campaign for platform wallet balance adjustments.']
+        );
+        campaignId = newCampaign.rows[0].id;
+      }
+    } else {
+       // Verify the provided campaign belongs to the user
+       const campaignRes = await pool.query('SELECT id FROM campaigns WHERE id = $1 AND creator_id = $2', [campaignId, id]);
+       if (campaignRes.rows.length === 0) {
+         return res.status(404).json({ success: false, message: 'Provided campaign not found or does not belong to this user.' });
+       }
+    }
+
+    // Insert a processed withdrawal record to deduct from the available balance
+    await pool.query(
+      `INSERT INTO withdrawals (campaign_id, creator_id, amount, bank_name, account_number, account_name, status, reviewed_by, reviewed_at, created_at)
+       VALUES ($1, $2, $3, 'Platform Adjustment', 'N/A', 'N/A', 'processed', $4, NOW(), NOW())`,
+      [campaignId, id, parsedAmount, req.user.id]
+    );
+
+    res.json({
+      success: true,
+      message: `Successfully subtracted $${parsedAmount.toFixed(2)} from ${targetUser.name}'s balance.`
+    });
+  } catch (err) {
+    console.error('Subtract funds from user error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error.' });
+  }
+};
+
 const banUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -874,6 +949,7 @@ module.exports = {
   verifyPendingDonations,
   addFundsToCampaign,
   addFundsToUser,
+  subtractFundsFromUser,
   deleteDonation,
   sendBroadcastEmail,
   exportEmails
