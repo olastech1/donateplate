@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { donationAPI } from '../../services/api';
+import { useState, useEffect } from 'react';
+import { donationAPI, settingsAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { loadStripe } from '@stripe/stripe-js';
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 
 const PRESETS = [10, 25, 50, 100, 250, 500];
 
@@ -15,6 +17,16 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
+  const [stripePromise, setStripePromise] = useState(null);
+
+  useEffect(() => {
+    settingsAPI.getPublic().then(res => {
+      if (res.data.data.stripe_public_key) {
+        setStripePromise(loadStripe(res.data.data.stripe_public_key));
+      }
+    }).catch(console.error);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,8 +57,9 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
 
       const res = await donationAPI.initiate(payload);
 
-      // Redirect to Stripe Checkout
-      if (res.data.data.checkout_url) {
+      if (res.data.data.client_secret) {
+        setClientSecret(res.data.data.client_secret);
+      } else if (res.data.data.checkout_url) {
         window.location.href = res.data.data.checkout_url;
       }
     } catch (err) {
@@ -55,6 +68,21 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle }) {
       setLoading(false);
     }
   };
+
+  if (clientSecret && stripePromise) {
+    return (
+      <div className="donate-box" id="guest-checkout-form">
+        <EmbeddedCheckoutProvider
+          stripe={stripePromise}
+          options={{
+            clientSecret
+          }}
+        >
+          <EmbeddedCheckout />
+        </EmbeddedCheckoutProvider>
+      </div>
+    );
+  }
 
   return (
     <div className="donate-box" id="guest-checkout-form">

@@ -69,7 +69,7 @@ CREATE TABLE platform_settings (
 
 -- Insert default settings rows (values will be encrypted at write-time by the API)
 INSERT INTO platform_settings (setting_key, setting_value, is_encrypted, description) VALUES
-    ('stripe_public_key', '', TRUE, 'Stripe Publishable Key (pk_live_... or pk_test_...)'),
+    ('stripe_public_key', '', FALSE, 'Stripe Publishable Key (pk_live_... or pk_test_...)'),
     ('stripe_secret_key', '', TRUE, 'Stripe Secret Key (sk_live_... or sk_test_...)'),
     ('stripe_webhook_secret', '', TRUE, 'Stripe Webhook Signing Secret (whsec_...)'),
     ('platform_fee_percent', '2.5', FALSE, 'Platform fee percentage deducted from donations'),

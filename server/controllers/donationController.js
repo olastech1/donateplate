@@ -71,6 +71,7 @@ const initiateDonation = async (req, res) => {
     };
 
     const sessionConfig = {
+      ui_mode: 'embedded',
       payment_method_types: ['card'],
       mode: isMonthly ? 'subscription' : 'payment',
       customer_email: donorEmail,
@@ -86,8 +87,7 @@ const initiateDonation = async (req, res) => {
         quantity: 1
       }],
       metadata: metadataObj,
-      success_url: `${frontendUrl}/donation/callback?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${frontendUrl}/campaigns/${campaign.id}`
+      return_url: `${frontendUrl}/donation/callback?session_id={CHECKOUT_SESSION_ID}`
     };
 
     if (isMonthly) {
@@ -119,9 +119,9 @@ const initiateDonation = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Checkout session created. Redirect to Stripe.',
+      message: 'Checkout session created. Render embedded checkout.',
       data: {
-        checkout_url: session.url,
+        client_secret: session.client_secret,
         session_id: session.id
       }
     });
