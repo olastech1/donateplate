@@ -40,8 +40,6 @@ export const campaignAPI = {
 export const userAPI = {
   getMe: () => api.get('/auth/me'),
   submitKyc: (data) => api.post('/users/kyc', data),
-  createStripeKycSession: () => api.post('/users/kyc/stripe-session'),
-  syncStripeKycSession: (sessionId) => api.get(`/users/kyc/stripe-sync?session_id=${sessionId}`),
   createStripeConnectAccount: () => api.post('/users/stripe/connect'),
   getStripeConnectStatus: () => api.get('/users/stripe/status'),
 };

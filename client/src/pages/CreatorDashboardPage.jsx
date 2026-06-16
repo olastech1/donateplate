@@ -38,6 +38,10 @@ export default function CreatorDashboardPage() {
 
   // KYC State
   const [kycLoading, setKycLoading] = useState(false);
+  const [showKycModal, setShowKycModal] = useState(false);
+  const [kycForm, setKycForm] = useState({
+    full_name: '', dob: '', address: '', document_type: 'National ID', document_url: ''
+  });
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/login');
@@ -77,18 +81,26 @@ export default function CreatorDashboardPage() {
     fetchData();
   }, [tab, user]);
 
-  const handleStartStripeKyc = async () => {
+  const handleDocumentUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setKycForm({ ...kycForm, document_url: reader.result });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmitKyc = async (e) => {
+    e.preventDefault();
     try {
       setKycLoading(true);
-      setMessage({ type: '', text: '' });
-      const res = await userAPI.createStripeKycSession();
-      if (res.data.url) {
-        window.location.href = res.data.url;
-      } else {
-        setMessage({ type: 'error', text: 'Failed to start Stripe Identity session.' });
-      }
+      await userAPI.submitKyc(kycForm);
+      setMessage({ type: 'success', text: 'KYC submitted successfully. Awaiting review.' });
+      setShowKycModal(false);
+      setUserData({ ...userData, kyc_status: 'pending' });
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to initialize verification.' });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to submit KYC.' });
     } finally {
       setKycLoading(false);
     }
@@ -373,7 +385,7 @@ export default function CreatorDashboardPage() {
                       </p>
                       {userData.kyc_status !== 'pending' && (
                         <button
-                          onClick={handleStartStripeKyc}
+                          onClick={() => setShowKycModal(true)}
                           disabled={kycLoading}
                           className="btn btn-primary"
                           style={{
@@ -388,7 +400,7 @@ export default function CreatorDashboardPage() {
                             cursor: 'pointer'
                           }}
                         >
-                          {kycLoading ? 'Preparing session...' : '🔒 Verify with Stripe Identity'}
+                          🔒 Verify Identity Manually
                         </button>
                       )}
                       {userData.kyc_status === 'pending' && (
@@ -589,6 +601,53 @@ export default function CreatorDashboardPage() {
                   <button type="button" className="btn btn-secondary" onClick={() => setShowUpdateModal(false)}>Cancel</button>
                   <button type="submit" className="btn btn-primary" disabled={updateLoading || !updateForm.message}>
                     {updateLoading ? 'Posting...' : 'Post Update'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* KYC Modal */}
+      {showKycModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.6)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }}>
+          <div className="card animate-in" style={{ width: '100%', maxWidth: '500px', background: '#fff' }}>
+            <div className="card-body">
+              <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Manual Identity Verification</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '16px' }}>Please provide your details and upload a valid identity document.</p>
+              <form onSubmit={handleSubmitKyc}>
+                <div className="form-group">
+                  <label className="form-label">Full Legal Name</label>
+                  <input type="text" className="form-input" required value={kycForm.full_name} onChange={e => setKycForm({...kycForm, full_name: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Date of Birth</label>
+                  <input type="date" className="form-input" required value={kycForm.dob} onChange={e => setKycForm({...kycForm, dob: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Address</label>
+                  <input type="text" className="form-input" required value={kycForm.address} onChange={e => setKycForm({...kycForm, address: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Document Type</label>
+                  <select className="form-input" required value={kycForm.document_type} onChange={e => setKycForm({...kycForm, document_type: e.target.value})}>
+                    <option value="National ID">National ID Card</option>
+                    <option value="Passport">Passport</option>
+                    <option value="Driver's License">Driver's License</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Upload Document (JPG, PNG, PDF)</label>
+                  <input type="file" className="form-input" accept=".jpg,.jpeg,.png,.pdf" required onChange={handleDocumentUpload} />
+                </div>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowKycModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={kycLoading || !kycForm.document_url}>
+                    {kycLoading ? 'Submitting...' : 'Submit Verification'}
                   </button>
                 </div>
               </form>

@@ -7,8 +7,6 @@ router.use(authenticate);
 
 router.get('/me', userController.getMe);
 router.post('/kyc', userController.submitKyc);
-router.post('/kyc/stripe-session', userController.createStripeKycSession);
-router.get('/kyc/stripe-sync', userController.syncStripeKycSession);
 
 // Stripe Connect
 router.post('/stripe/connect', userController.createStripeConnectAccount);
