@@ -44,6 +44,8 @@ export default function AdminDashboardPage() {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [selectedUserName, setSelectedUserName] = useState('');
   const [addFundsModal, setAddFundsModal] = useState({ open: false, userId: '', userName: '', campaigns: [], selectedCampaign: '', amount: '', actionType: 'add' });
+  const [profileData, setProfileData] = useState({ email: '', currentPassword: '', newPassword: '' });
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Guard: only admins
   useEffect(() => {
@@ -80,16 +82,23 @@ export default function AdminDashboardPage() {
           setUsersList(res.data.data);
         } else if (tab === 'settings') {
           const res = await adminAPI.getSettings();
-          setSettings(res.data.data);
+          setSettings(res.data.data);          
         }
       } catch (err) {
-        setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to load data.' });
+        setMessage({ type: 'error', text: 'Failed to load dashboard data.' });
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, [tab]);
+
+  // Set initial email when user loads
+  useEffect(() => {
+    if (user?.email && !profileData.email) {
+      setProfileData(prev => ({ ...prev, email: user.email }));
+    }
+  }, [user]);
 
   
   useEffect(() => {
@@ -378,6 +387,23 @@ export default function AdminDashboardPage() {
       setMessage({ type: 'error', text: 'Failed to update page.' });
     } finally {
       setActionLoading('');
+    }
+  };
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      setProfileLoading(true);
+      const res = await adminAPI.updateProfile(profileData);
+      if (res.data.success) {
+        alert('Profile updated successfully! You may need to log in again if you changed your password.');
+        setProfileData(prev => ({ ...prev, currentPassword: '', newPassword: '' }));
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setProfileLoading(false);
     }
   };
 
@@ -1143,6 +1169,57 @@ export default function AdminDashboardPage() {
             {/* ── Settings Tab ── */}
             {tab === 'settings' && (
               <div className="animate-in">
+                
+                {/* Admin Security */}
+                <div className="card" style={{ marginBottom: '24px' }}>
+                  <div className="card-body" style={{ padding: '24px' }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '8px', color: 'var(--slate-800)' }}>
+                      Admin Security
+                    </h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>
+                      Update your admin email and password.
+                    </p>
+                    <form onSubmit={handleProfileUpdate}>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--slate-700)' }}>Email Address</label>
+                        <input
+                          type="email"
+                          className="input"
+                          value={profileData.email}
+                          onChange={e => setProfileData({ ...profileData, email: e.target.value })}
+                          required
+                          style={{ width: '100%', maxWidth: '400px' }}
+                        />
+                      </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--slate-700)' }}>Current Password <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(required if changing password)</span></label>
+                        <input
+                          type="password"
+                          className="input"
+                          value={profileData.currentPassword}
+                          onChange={e => setProfileData({ ...profileData, currentPassword: e.target.value })}
+                          style={{ width: '100%', maxWidth: '400px' }}
+                          placeholder="••••••••"
+                        />
+                      </div>
+                      <div style={{ marginBottom: '24px' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--slate-700)' }}>New Password</label>
+                        <input
+                          type="password"
+                          className="input"
+                          value={profileData.newPassword}
+                          onChange={e => setProfileData({ ...profileData, newPassword: e.target.value })}
+                          style={{ width: '100%', maxWidth: '400px' }}
+                          placeholder="Leave blank to keep current"
+                        />
+                      </div>
+                      <button type="submit" className="btn btn-primary" disabled={profileLoading}>
+                        {profileLoading ? 'Saving...' : '💾 Update Profile'}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
                 <div className="card" style={{ marginBottom: '24px' }}>
                   <div className="card-body" style={{ padding: '24px' }}>
                     <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '8px', color: 'var(--slate-800)' }}>

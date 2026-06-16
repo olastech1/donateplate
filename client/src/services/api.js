@@ -99,6 +99,7 @@ export const adminAPI = {
   unbanUser: (id) => api.post(`/admin/users/${id}/unban`),
   broadcastEmail: (data) => api.post('/admin/broadcast', data),
   exportEmails: (target) => api.get(`/admin/export-emails?target=${target}`, { responseType: 'blob' }),
+  updateProfile: (data) => api.put('/admin/profile', data),
 };
 
 export const settingsAPI = {

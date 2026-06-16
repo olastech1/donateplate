@@ -9,6 +9,9 @@ const { authenticate, requireAdmin } = require('../middleware/auth');
 // All admin routes require authentication + admin role
 router.use(authenticate, requireAdmin);
 
+// Admin Profile
+router.put('/profile', adminController.updateAdminProfile);
+
 // User Management
 router.get('/users', adminController.getAllUsers);
 router.put('/users/:id', adminController.updateUser);

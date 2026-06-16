@@ -2,6 +2,7 @@
 // ADMIN CONTROLLER — Platform management + Settings
 // ============================================================
 const pool = require('../config/db');
+const bcrypt = require('bcrypt');
 const { getAllSettings, setSetting, getSetting, getStripePublicKey, getStripeSecretKey } = require('../config/settings');
 const emailService = require('../services/emailService');
 
@@ -431,6 +432,47 @@ const updateSetting = async (req, res) => {
   } catch (err) {
     console.error('Update setting error:', err);
     res.status(500).json({ success: false, message: err.message || 'Server error.' });
+  }
+};
+
+/**
+ * PUT /api/admin/profile
+ * Update admin email and password.
+ */
+const updateAdminProfile = async (req, res) => {
+  try {
+    const { email, currentPassword, newPassword } = req.body;
+    const adminId = req.user.id;
+
+    // Fetch current user
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [adminId]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'User not found.' });
+    
+    const user = result.rows[0];
+
+    // If updating password, require currentPassword
+    if (newPassword) {
+      if (!currentPassword) return res.status(400).json({ success: false, message: 'Current password is required to set a new password.' });
+      const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!isMatch) return res.status(401).json({ success: false, message: 'Incorrect current password.' });
+      
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+      await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, adminId]);
+    }
+
+    // If updating email
+    if (email && email.toLowerCase() !== user.email) {
+      // check if email exists
+      const emailCheck = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email.toLowerCase(), adminId]);
+      if (emailCheck.rows.length > 0) return res.status(400).json({ success: false, message: 'Email is already in use.' });
+      
+      await pool.query('UPDATE users SET email = $1 WHERE id = $2', [email.toLowerCase(), adminId]);
+    }
+
+    res.json({ success: true, message: 'Admin profile updated successfully.' });
+  } catch (err) {
+    console.error('Update admin profile error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
 
@@ -946,6 +988,7 @@ module.exports = {
   getAllDonations,
   getPlatformStats,
   getSettings, updateSetting, getStripeStatus, testEmail,
+  updateAdminProfile,
   verifyPendingDonations,
   addFundsToCampaign,
   addFundsToUser,
