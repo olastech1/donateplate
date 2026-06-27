@@ -1,5 +1,5 @@
 {
-  "name": "donate-plea-server",
+  "name": "donatefate-server",
   "version": "1.0.0",
   "description": "Backend API for Donate Fate crowdfunding platform",
   "main": "index.js",
