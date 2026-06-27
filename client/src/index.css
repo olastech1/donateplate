@@ -320,8 +320,11 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
 .navbar-links a:not(.btn):hover { background: var(--slate-100); color: var(--slate-900); }
 .navbar-links a.active { color: var(--accent); background: var(--accent-light); }
 .navbar-hamburger {
-  display: none; background: none; border: none; color: var(--slate-800); cursor: pointer;
+  display: none; background: var(--slate-100); border: none; color: var(--slate-800); cursor: pointer;
+  align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: var(--radius-md);
+  transition: all 0.2s;
 }
+.navbar-hamburger:hover { background: var(--slate-200); color: var(--slate-900); }
 .dropdown-item:hover { background: var(--slate-50); color: var(--accent) !important; }
 
 @media (max-width: 768px) {
