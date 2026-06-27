@@ -35,40 +35,46 @@ function App() {
   }
 
   return (
-    <>
-      <Navbar />
-      <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/campaigns/:id" element={<CampaignPage />} />
-          <Route path="/campaigns/create" element={<CreateCampaignPage />} />
-          <Route path="/track/:sessionId" element={<TrackingPage />} />
-          <Route path="/donation/callback" element={<DonationCallbackPage />} />
-          <Route path="/profile/:id" element={<ProfilePage />} />
+    <Routes>
+      {/* Admin — full-page shell, no shared Navbar/Footer */}
+      <Route path="/admin" element={<AdminDashboardPage />} />
 
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
-          <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/dashboard" element={<CreatorDashboardPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/refund-policy" element={<RefundPolicyPage />} />
-          <Route path="*" element={
-            <div className="page container" style={{ textAlign: 'center' }}>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '4rem', marginBottom: '16px' }}>404</h1>
-              <p style={{ color: 'var(--text-muted)' }}>This page doesn't exist.</p>
-            </div>
-          } />
-        </Routes>
-      </main>
-      <Footer />
-    </>
+      {/* All other pages — wrapped in shared Navbar + Footer */}
+      <Route path="*" element={
+        <>
+          <Navbar />
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+              <Route path="/campaigns/:id" element={<CampaignPage />} />
+              <Route path="/campaigns/create" element={<CreateCampaignPage />} />
+              <Route path="/track/:sessionId" element={<TrackingPage />} />
+              <Route path="/donation/callback" element={<DonationCallbackPage />} />
+              <Route path="/profile/:id" element={<ProfilePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/dashboard" element={<CreatorDashboardPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/refund-policy" element={<RefundPolicyPage />} />
+              <Route path="*" element={
+                <div className="page container" style={{ textAlign: 'center' }}>
+                  <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '4rem', marginBottom: '16px' }}>404</h1>
+                  <p style={{ color: 'var(--text-muted)' }}>This page doesn't exist.</p>
+                </div>
+              } />
+            </Routes>
+          </main>
+          <Footer />
+        </>
+      } />
+    </Routes>
   );
 }
 
