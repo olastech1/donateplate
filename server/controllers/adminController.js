@@ -405,10 +405,10 @@ const getActivityLog = async (req, res) => {
     ]);
 
     const activities = [];
-    recentUsers.rows.forEach(u => activities.push({ id: \`u-\${u.id}\`, type: 'user', text: \`New user registered: \${u.name}\`, date: u.created_at }));
-    recentCampaigns.rows.forEach(c => activities.push({ id: \`c-\${c.id}\`, type: 'campaign', text: \`New campaign created: "\${c.title}"\`, date: c.created_at }));
-    recentDonations.rows.forEach(d => activities.push({ id: \`d-\${d.id}\`, type: 'donation', text: \`New donation of $\${d.amount}\`, date: d.created_at }));
-    recentWithdrawals.rows.forEach(w => activities.push({ id: \`w-\${w.id}\`, type: 'withdrawal', text: \`Withdrawal request for $\${w.amount} (\${w.status})\`, date: w.created_at }));
+    recentUsers.rows.forEach(u => activities.push({ id: `u-${u.id}`, type: 'user', text: `New user registered: ${u.name}`, date: u.created_at }));
+    recentCampaigns.rows.forEach(c => activities.push({ id: `c-${c.id}`, type: 'campaign', text: `New campaign created: "${c.title}"`, date: c.created_at }));
+    recentDonations.rows.forEach(d => activities.push({ id: `d-${d.id}`, type: 'donation', text: `New donation of $${d.amount}`, date: d.created_at }));
+    recentWithdrawals.rows.forEach(w => activities.push({ id: `w-${w.id}`, type: 'withdrawal', text: `Withdrawal request for $${w.amount} (${w.status})`, date: w.created_at }));
 
     // Sort descending by date
     activities.sort((a, b) => new Date(b.date) - new Date(a.date));
