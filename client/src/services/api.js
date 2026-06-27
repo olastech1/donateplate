@@ -58,6 +58,7 @@ export const donationAPI = {
   track: (sessionId) => api.get(`/donations/track/${sessionId}`),
   callback: (sessionId) => api.get(`/donations/callback?session_id=${sessionId}`),
   getRecent: () => api.get('/donations/recent'),
+  getMyDonations: () => api.get('/donations/me'),
 };
 
 // --- Updates ---

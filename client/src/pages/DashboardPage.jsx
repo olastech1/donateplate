@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { campaignAPI, userAPI, withdrawalAPI, updateAPI, recurringAPI, rewardAPI } from '../services/api';
-import { FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat, FiGift, FiPlus, FiArrowLeft, FiLogOut } from 'react-icons/fi';
+import { campaignAPI, userAPI, withdrawalAPI, updateAPI, recurringAPI, rewardAPI, donationAPI } from '../services/api';
+import { FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat, FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart } from 'react-icons/fi';
 
 const TABS = [
   { key: 'profile', label: 'Profile', icon: <FiUser /> },
+  { key: 'impact', label: 'My Impact', icon: <FiHeart /> },
   { key: 'campaigns', label: 'My Campaigns', icon: <FiActivity /> },
   { key: 'subscriptions', label: 'Recurring Donations', icon: <FiRepeat /> },
   { key: 'withdrawals', label: 'Withdrawals', icon: <FiDollarSign /> },
 ];
 
-export default function CreatorDashboardPage() {
+export default function DashboardPage() {
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState('profile');
@@ -19,6 +20,7 @@ export default function CreatorDashboardPage() {
   const [campaigns, setCampaigns] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [myDonations, setMyDonations] = useState([]);
   const [userData, setUserData] = useState(null);
   
   const [loading, setLoading] = useState(true);
@@ -51,9 +53,13 @@ export default function CreatorDashboardPage() {
         ]);
         setWithdrawals(withRes.data.data || []);
         setCampaigns((campRes.data.data || []).filter(c => parseFloat(c.current_amount) > 0));
-      } else if (tab === 'profile') {
+      } else if (tab === 'profile' || tab === 'impact') {
         const res = await userAPI.getMe();
         setUserData(res.data.data);
+        if (tab === 'impact') {
+          const donRes = await donationAPI.getMyDonations();
+          setMyDonations(donRes.data.data || []);
+        }
       } else if (tab === 'subscriptions') {
         const res = await recurringAPI.getMySubscriptions();
         setSubscriptions(res.data.data || []);
@@ -239,6 +245,58 @@ export default function CreatorDashboardPage() {
                       <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{userData.website ? <a href={userData.website} target="_blank" rel="noreferrer" className="text-accent">{userData.website}</a> : 'Not set'}</div>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── IMPACT TAB ── */}
+            {tab === 'impact' && userData && (
+              <div className="space-y-6">
+                <div className="grid grid-3" style={{ gap: '20px' }}>
+                  <div className="card card-glass p-6 text-center">
+                    <div className="text-muted mb-2 font-display">Total Donated</div>
+                    <div className="text-accent" style={{ fontSize: '2.5rem', fontWeight: 800 }}>{formatCurrency(userData.total_donated || 0)}</div>
+                  </div>
+                  <div className="card card-glass p-6 text-center">
+                    <div className="text-muted mb-2 font-display">Campaigns Supported</div>
+                    <div className="text-accent" style={{ fontSize: '2.5rem', fontWeight: 800 }}>{userData.total_campaigns_supported || 0}</div>
+                  </div>
+                </div>
+                
+                <h3 className="font-display mt-8 mb-4">Donation History</h3>
+                <div className="card card-glass overflow-hidden">
+                  {myDonations.length === 0 ? (
+                    <div className="text-center py-6 text-muted">You haven't made any donations yet.</div>
+                  ) : (
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Campaign</th>
+                          <th>Amount</th>
+                          <th>Date</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {myDonations.map(d => (
+                          <tr key={d.id}>
+                            <td>
+                              <Link to={`/campaigns/${d.campaign_id}`} className="font-semibold text-slate-900" style={{ textDecoration: 'none' }}>
+                                {d.campaign_title}
+                              </Link>
+                            </td>
+                            <td className="font-bold text-accent">{formatCurrency(d.amount)}</td>
+                            <td className="text-muted">{new Date(d.created_at).toLocaleDateString()}</td>
+                            <td>
+                              <span className="badge" style={{ background: d.status === 'success' ? 'var(--success-bg)' : 'var(--warning-bg)', color: d.status === 'success' ? 'var(--success)' : 'var(--warning)' }}>
+                                {d.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </div>
             )}

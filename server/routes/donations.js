@@ -4,7 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const donationController = require('../controllers/donationController');
-const { optionalAuth } = require('../middleware/auth');
+const { optionalAuth, authenticate } = require('../middleware/auth');
 
 // Guest-friendly: start a Stripe Checkout session
 router.post('/initiate', optionalAuth, donationController.initiateDonation);
@@ -20,5 +20,8 @@ router.get('/recent', donationController.getRecentDonations);
 
 // Guest tracking by Stripe session ID (public)
 router.get('/track/:sessionId', donationController.trackDonation);
+
+// Authenticated user's donation history
+router.get('/me', authenticate, donationController.getMyDonations);
 
 module.exports = router;

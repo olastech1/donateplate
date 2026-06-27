@@ -454,4 +454,25 @@ const getRecentDonations = async (req, res) => {
   }
 };
 
-module.exports = { initiateDonation, stripeWebhook, trackDonation, donationCallback, getRecentDonations };
+/**
+ * GET /api/donations/me
+ * Gets the current user's donation history
+ */
+const getMyDonations = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT d.*, c.title AS campaign_title, c.cover_image_url AS campaign_image 
+       FROM donations d
+       JOIN campaigns c ON d.campaign_id = c.id
+       WHERE d.user_id = $1
+       ORDER BY d.created_at DESC`,
+      [req.user.id]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error('Get my donations error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+module.exports = { initiateDonation, stripeWebhook, trackDonation, donationCallback, getRecentDonations, getMyDonations };
