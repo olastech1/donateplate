@@ -39,6 +39,9 @@ function App() {
       {/* Admin — full-page shell, no shared Navbar/Footer */}
       <Route path="/admin" element={<AdminDashboardPage />} />
 
+      {/* Dashboard — full-page shell, has its own sidebar */}
+      <Route path="/dashboard" element={<DashboardPage />} />
+
       {/* All other pages — wrapped in shared Navbar + Footer */}
       <Route path="*" element={
         <>
@@ -57,7 +60,6 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
