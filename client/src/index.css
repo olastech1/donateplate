@@ -331,7 +331,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
   .navbar-hamburger { display: flex; }
   .hide-on-mobile { display: none !important; }
   .navbar-links {
-    position: fixed; top: var(--nav-height); left: 0; right: 0; bottom: 0;
+    position: absolute; top: 100%; left: 0; right: 0; height: calc(100vh - var(--nav-height));
     background: #fff; flex-direction: column; padding: 24px; gap: 8px;
     transform: translateY(-10px); opacity: 0; pointer-events: none;
     transition: all 0.3s;
