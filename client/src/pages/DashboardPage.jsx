@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { campaignAPI, userAPI, withdrawalAPI, updateAPI, recurringAPI, rewardAPI, donationAPI } from '../services/api';
-import { FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat, FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart } from 'react-icons/fi';
+import { FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat, FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart, FiShield, FiAlertTriangle } from 'react-icons/fi';
 
 const TABS = [
   { key: 'profile', label: 'Profile', icon: <FiUser /> },
@@ -149,7 +149,7 @@ export default function DashboardPage() {
           </Link>
         </div>
         
-        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+        <div className="dash-nav-container" style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
           {TABS.map(t => (
             <button 
               key={t.key} 
@@ -168,7 +168,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <div style={{ padding: '24px 16px', borderTop: '1px solid var(--slate-800)' }}>
+        <div className="dash-footer-container" style={{ padding: '24px 16px', borderTop: '1px solid var(--slate-800)' }}>
           <button onClick={() => { logout(); navigate('/'); }} className="btn btn-ghost btn-block text-muted" style={{ justifyContent: 'flex-start', padding: '12px 16px' }}>
             <FiLogOut /> Sign Out
           </button>
@@ -213,7 +213,18 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-900)', marginBottom: '4px' }}>{userData.name}</h2>
-                        <div className="badge badge-category">{userData.email}</div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <div className="badge badge-category">{userData.email}</div>
+                          {userData.email_verified ? (
+                            <div className="badge" style={{ background: 'var(--success-bg)', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <FiShield size={12} /> Verified
+                            </div>
+                          ) : (
+                            <div className="badge" style={{ background: 'var(--warning-bg)', color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <FiAlertTriangle size={12} /> Unverified
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <button className="btn btn-outline" onClick={() => {
