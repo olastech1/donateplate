@@ -10,7 +10,7 @@ async function run() {
     const res = await pool.query(`
       UPDATE users 
       SET email_verified = TRUE, role = 'admin' 
-      WHERE email = 'admin@donateplate.com'
+      WHERE email = 'admin@donatefate.com'
       RETURNING id, name, email, role, email_verified;
     `);
     

@@ -8,7 +8,7 @@ async function migrateSmtpSettings() {
       { key: 'smtp_port', value: '587', encrypted: false, desc: 'SMTP Port (usually 587 or 465)' },
       { key: 'smtp_user', value: '', encrypted: false, desc: 'SMTP Username / Email Address' },
       { key: 'smtp_pass', value: '', encrypted: true, desc: 'SMTP Password or App Password' },
-      { key: 'smtp_from', value: '"Donate Plea" <noreply@donateplea.com>', encrypted: false, desc: 'Sender Name and Email' },
+      { key: 'smtp_from', value: '"Donate Fate" <noreply@donatefate.com>', encrypted: false, desc: 'Sender Name and Email' },
     ];
 
     for (const s of settings) {

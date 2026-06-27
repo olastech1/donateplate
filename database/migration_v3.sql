@@ -1,5 +1,5 @@
 -- ============================================================
--- DONATEPLATE — Migration v3: Email Verification
+-- DONATEFATE — Migration v3: Email Verification
 -- Adds missing email verification columns to users table
 -- ============================================================
 

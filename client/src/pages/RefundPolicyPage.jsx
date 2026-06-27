@@ -13,7 +13,7 @@ export default function RefundPolicyPage() {
       <div style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
         <h3 style={{ marginTop: '32px', marginBottom: '12px', color: 'var(--slate-800)', borderLeft: '3px solid var(--accent)', paddingLeft: '12px' }}>1. Overview</h3>
         <p style={{ marginBottom: '16px' }}>
-          At Donate Plea, every contribution matters, and we want you to give with confidence. Donations are processed quickly and securely, and funds may go toward supporting the chosen cause shortly after a donation is made. <strong>Your donation goes directly toward the cause you choose to support.</strong>
+          At Donate Fate, every contribution matters, and we want you to give with confidence. Donations are processed quickly and securely, and funds may go toward supporting the chosen cause shortly after a donation is made. <strong>Your donation goes directly toward the cause you choose to support.</strong>
         </p>
         <p style={{ marginBottom: '16px' }}>
           We know questions occasionally come up, and we review every legitimate concern fairly and in good faith. This policy explains when a refund may be available, how recurring (monthly) donations work, and how to reach us if something doesn't look right.

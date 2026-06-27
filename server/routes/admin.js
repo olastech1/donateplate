@@ -15,6 +15,7 @@ router.put('/profile', adminController.updateAdminProfile);
 // User Management
 router.get('/users', adminController.getAllUsers);
 router.put('/users/:id', adminController.updateUser);
+router.put('/users/:id/verify', adminController.verifyUser);
 router.delete('/users/:id', adminController.deleteUser);
 router.post('/users/:id/add-funds', adminController.addFundsToUser);
 router.post('/users/:id/subtract-funds', adminController.subtractFundsFromUser);

@@ -20,7 +20,7 @@ export default function CampaignCard({ campaign }) {
     <Link to={`/campaigns/${campaign.id}`} className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', textDecoration: 'none', color: 'inherit' }}>
       <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
         <img 
-          src={campaign.cover_image_url || 'https://via.placeholder.com/600x400?text=DonatePlate'} 
+          src={campaign.cover_image_url || 'https://images.unsplash.com/photo-1593113565630-1de62d64020b?auto=format&fit=crop&w=600&q=80'} 
           alt={campaign.title} 
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform var(--transition-spring)' }}
           className="campaign-card-img"

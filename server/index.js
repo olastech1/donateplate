@@ -1,5 +1,5 @@
 // ============================================================
-// DONATEPLATE — Express Server (Stripe + Neon Edition)
+// DONATEFATE — Express Server (Stripe + Neon Edition)
 // ============================================================
 require('dotenv').config();
 const express = require('express');
@@ -81,7 +81,7 @@ app.use('/api/recurring', recurringRoutes);
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
-    message: 'DonatePlate API is running.',
+    message: 'DonateFate API is running.',
     stack: 'Stripe + Neon PSQL',
     timestamp: new Date().toISOString()
   });
@@ -103,7 +103,7 @@ app.use((err, req, res, next) => {
 // ============================================================
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`\n🍽️  DonatePlate API running on port ${PORT}`);
+    console.log(`\n🍽️  DonateFate API running on port ${PORT}`);
     console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
     console.log(`💳 Payment: Stripe Checkout`);
     console.log(`🗄️  Database: Neon PSQL\n`);

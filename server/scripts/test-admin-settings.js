@@ -19,7 +19,7 @@ async function runTests() {
     // Sign with a valid-looking admin payload but using a non-existent user UUID
     const adminId = 'a0000000-0000-0000-0000-999999999999'; // Non-existent
     const token = jwt.sign(
-      { id: adminId, email: 'admin@donateplea.com', role: 'admin' },
+      { id: adminId, email: 'admin@donatefate.com', role: 'admin' },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );

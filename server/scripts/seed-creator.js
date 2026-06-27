@@ -2,7 +2,7 @@ require('dotenv').config();
 const bcrypt = require('bcrypt');
 const pool = require('../config/db');
 
-const CREATOR_EMAIL = 'creator@donateplea.com';
+const CREATOR_EMAIL = 'creator@donatefate.com';
 const CREATOR_PASSWORD = 'creator123';
 const CREATOR_NAME = 'Test Creator';
 

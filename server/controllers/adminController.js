@@ -11,7 +11,7 @@ const emailService = require('../services/emailService');
 const getAllUsers = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, name, email, role, kyc_status, is_banned, ban_type, ban_expires_at, ban_reason, created_at FROM users ORDER BY created_at DESC`
+      `SELECT id, name, email, role, kyc_status, email_verified, is_banned, ban_type, ban_expires_at, ban_reason, created_at FROM users ORDER BY created_at DESC`
     );
     res.json({ success: true, data: result.rows });
   } catch (err) {
@@ -63,6 +63,31 @@ const deleteUser = async (req, res) => {
     res.json({ success: true, message: 'User deleted successfully.' });
   } catch (err) {
     console.error('Delete user error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+const verifyUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `UPDATE users SET email_verified = TRUE, updated_at = NOW() WHERE id = $1 RETURNING id, name, email, email_verified`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const user = result.rows[0];
+
+    // Send email notification
+    await emailService.sendAdminVerifiedEmail(user.email, user.name);
+
+    res.json({ success: true, message: 'User manually verified successfully.', data: user });
+  } catch (err) {
+    console.error('Verify user error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
@@ -685,7 +710,7 @@ const addFundsToCampaign = async (req, res) => {
     // Insert donation record in the past (e.g. 2 months ago) to ensure it is immediately available for withdrawal
     const result = await pool.query(
       `INSERT INTO donations (campaign_id, amount, guest_name, guest_email, status, stripe_checkout_session_id, stripe_payment_intent_id, created_at)
-       VALUES ($1, $2, 'Platform Adjustment', 'admin@donateplea.com', 'success', $3, $4, NOW() - INTERVAL '2 months')
+       VALUES ($1, $2, 'Platform Adjustment', 'admin@donatefate.com', 'success', $3, $4, NOW() - INTERVAL '2 months')
        RETURNING id, amount, created_at`,
       [id, parsedAmount, mockSessionId, mockIntentId]
     );
@@ -766,7 +791,7 @@ const addFundsToUser = async (req, res) => {
     // Insert successful donation record in the past (2 months ago) to ensure it is immediately available
     await pool.query(
       `INSERT INTO donations (campaign_id, amount, guest_name, guest_email, status, stripe_checkout_session_id, stripe_payment_intent_id, created_at)
-       VALUES ($1, $2, 'Platform Adjustment', 'admin@donateplea.com', 'success', $3, $4, NOW() - INTERVAL '2 months')`,
+       VALUES ($1, $2, 'Platform Adjustment', 'admin@donatefate.com', 'success', $3, $4, NOW() - INTERVAL '2 months')`,
       [campaignId, parsedAmount, mockSessionId, mockIntentId]
     );
 
@@ -1039,7 +1064,7 @@ const exportEmails = async (req, res) => {
 };
 
 module.exports = {
-  getAllUsers, updateUser, deleteUser, banUser, unbanUser,
+  getAllUsers, updateUser, deleteUser, verifyUser, banUser, unbanUser,
   getPendingCampaigns, getAllCampaigns, approveCampaign, rejectCampaign, deleteCampaign, toggleCampaign,
   toggleSeoVisibility,
   getPendingWithdrawals, approveWithdrawal, rejectWithdrawal,

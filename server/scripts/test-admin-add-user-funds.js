@@ -16,13 +16,13 @@ async function runTests() {
     console.log('🚀 Starting integration tests for Admin Add User Funds...');
 
     // Get active admin user
-    const adminRes = await pool.query("SELECT id FROM users WHERE email = 'admin@donateplea.com'");
+    const adminRes = await pool.query("SELECT id FROM users WHERE email = 'admin@donatefate.com'");
     if (adminRes.rows.length === 0) {
       throw new Error("Admin user not found. Please seed the DB.");
     }
     const adminId = adminRes.rows[0].id;
     const token = jwt.sign(
-      { id: adminId, email: 'admin@donateplea.com', role: 'admin' },
+      { id: adminId, email: 'admin@donatefate.com', role: 'admin' },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -35,7 +35,7 @@ async function runTests() {
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Get a test creator user (e.g. creator@donateplea.com)
+    // Get a test creator user (e.g. creator@donatefate.com)
     const creatorId = 'f356a3cf-12aa-483e-9603-2a6f27a4c248';
     const creatorRes = await pool.query('SELECT name, role FROM users WHERE id = $1', [creatorId]);
     if (creatorRes.rows.length === 0) {

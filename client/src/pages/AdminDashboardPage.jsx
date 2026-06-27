@@ -315,6 +315,17 @@ export default function AdminDashboardPage() {
     finally { setActionLoading(''); }
   };
 
+  const handleVerifyUser = async (id, name) => {
+    if (!window.confirm(`Manually verify user "${name}"?`)) return;
+    setActionLoading(`verify-${id}`);
+    try {
+      const res = await adminAPI.verifyUser(id);
+      setMessage({ type: 'success', text: res.data.message });
+      const r = await adminAPI.getUsers(); setUsersList(r.data.data);
+    } catch (err) { setMessage({ type: 'error', text: err.response?.data?.message || 'Failed.' }); }
+    finally { setActionLoading(''); }
+  };
+
   const handleWithdrawalAction = async (id, action, method = 'manual') => {
     setActionLoading(id);
     try {
@@ -464,7 +475,7 @@ export default function AdminDashboardPage() {
         {/* Logo */}
         <div className="adm-logo">
           <div className="adm-logo-mark">🍽️</div>
-          <span className="adm-logo-text">DonatePlate</span>
+          <span className="adm-logo-text">DonateFate</span>
           <span className="adm-logo-badge">Admin</span>
         </div>
 
@@ -516,7 +527,7 @@ export default function AdminDashboardPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button className="adm-menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
             <div className="adm-breadcrumb">
-              <span>DonatePlate</span>
+              <span>DonateFate</span>
               <span className="adm-breadcrumb-sep">/</span>
               <span>Admin</span>
               <span className="adm-breadcrumb-sep">/</span>
@@ -674,7 +685,7 @@ export default function AdminDashboardPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px', marginBottom: '18px' }}>
                     <div className="adm-card">
                       <div className="adm-card-body" style={{ textAlign: 'center', padding: '24px' }}>
-                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#EC4899', fontFamily: 'var(--font-display)' }}>{stats.campaigns?.total || 0}</div>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#6366F1', fontFamily: 'var(--font-display)' }}>{stats.campaigns?.total || 0}</div>
                         <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>Total Campaigns</div>
                       </div>
                     </div>
@@ -762,7 +773,7 @@ export default function AdminDashboardPage() {
                                 <tr key={i}>
                                   <td>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
                                   <td><strong>{d.name}</strong></td>
-                                  <td style={{ color: '#EC4899', fontWeight: 700 }}>{fmtMoney(d.total_donated)}</td>
+                                  <td style={{ color: '#6366F1', fontWeight: 700 }}>{fmtMoney(d.total_donated)}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -779,7 +790,7 @@ export default function AdminDashboardPage() {
                     <div className="adm-card-body">
                       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                         {analytics.categoryBreakdown?.map((cat, i) => {
-                          const colors = ['#EC4899','#3b82f6','#10b981','#f59e0b','#8b5cf6','#f97316','#0d9488'];
+                          const colors = ['#6366F1','#3b82f6','#10b981','#f59e0b','#8b5cf6','#f97316','#0d9488'];
                           const c = colors[i % colors.length];
                           return (
                             <div key={i} style={{ flex: '1 1 180px', padding: '16px', background: `${c}10`, border: `1px solid ${c}30`, borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -857,7 +868,7 @@ export default function AdminDashboardPage() {
                             <tr key={u.id}>
                               <td>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #EC4899, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+                                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366F1, #F59E0B)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>
                                     {initials(u.name)}
                                   </div>
                                   <strong>{u.name}</strong>
@@ -865,11 +876,14 @@ export default function AdminDashboardPage() {
                               </td>
                               <td style={{ color: '#64748b' }}>{u.email}</td>
                               <td><Badge status={u.role} /></td>
-                              <td><Badge status={u.kyc_status || 'none'} /></td>
+                              <td><Badge status={u.kyc_status || 'none'} /> {u.email_verified && <span style={{ color: '#10b981', fontSize: '0.8rem' }}>✅ Verified</span>}</td>
                               <td style={{ color: '#94a3b8', fontSize: '0.8rem' }}>{fmtDate(u.created_at)}</td>
                               <td>{u.is_banned ? <Badge status="banned" /> : <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>Active</span>}</td>
                               <td>
                                 <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                  {!u.email_verified && (
+                                    <button className="adm-btn primary xs" onClick={() => handleVerifyUser(u.id, u.name)} disabled={actionLoading === `verify-${u.id}`}>Verify</button>
+                                  )}
                                   {u.is_banned ? (
                                     <button className="adm-btn success xs" onClick={() => handleUserUnban(u.id, u.name)} disabled={actionLoading === `user-unban-${u.id}`}>Unban</button>
                                   ) : (
@@ -1118,7 +1132,7 @@ export default function AdminDashboardPage() {
                       </div>
                       <div className="adm-form-group">
                         <label className="adm-label">Subject Line</label>
-                        <input className="adm-input" placeholder="e.g. Important Update from DonatePlate" value={broadcastSubject} onChange={e => setBroadcastSubject(e.target.value)} />
+                        <input className="adm-input" placeholder="e.g. Important Update from DonateFate" value={broadcastSubject} onChange={e => setBroadcastSubject(e.target.value)} />
                       </div>
                       <div className="adm-form-group">
                         <label className="adm-label">Email Body (HTML)</label>

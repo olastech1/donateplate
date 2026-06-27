@@ -93,6 +93,7 @@ export const recurringAPI = {
 export const adminAPI = {
   getUsers: () => api.get('/admin/users'),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
+  verifyUser: (id) => api.put(`/admin/users/${id}/verify`),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
   getPending: () => api.get('/admin/campaigns/pending'),
   getAllCampaigns: () => api.get('/admin/campaigns'),

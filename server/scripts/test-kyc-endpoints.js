@@ -62,7 +62,7 @@ async function runTests() {
     // Generate JWT token for seeded creator
     const creatorId = 'f356a3cf-12aa-483e-9603-2a6f27a4c248';
     const token = jwt.sign(
-      { id: creatorId, email: 'creator@donateplea.com', role: 'creator' },
+      { id: creatorId, email: 'creator@donatefate.com', role: 'creator' },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );

@@ -1,4 +1,4 @@
-# Donate Plea
+# Donate Fate
 
 A modern crowdfunding donation platform built with React, Node.js/Express, Stripe, and Neon PostgreSQL.
 

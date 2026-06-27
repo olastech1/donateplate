@@ -1,5 +1,5 @@
 /**
- * Admin Account Seeder for Donate Plea
+ * Admin Account Seeder for Donate Fate
  * 
  * Usage: node scripts/seed-admin.js
  * 
@@ -10,7 +10,7 @@ require('dotenv').config();
 const bcrypt = require('bcrypt');
 const pool = require('../config/db');
 
-const ADMIN_EMAIL = 'admin@donateplea.com';
+const ADMIN_EMAIL = 'admin@donatefate.com';
 const ADMIN_PASSWORD = 'admin123';
 const ADMIN_NAME = 'Platform Admin';
 

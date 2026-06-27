@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import GuestCheckoutForm from '../components/donations/GuestCheckoutForm';
 import { campaignAPI, updateAPI, rewardAPI, commentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FiClock, FiTarget, FiUser, FiMessageCircle, FiGift, FiShare2, FiHeart } from 'react-icons/fi';
+import { FiClock, FiTarget, FiUser, FiMessageCircle, FiGift, FiShare2, FiHeart, FiCheckCircle } from 'react-icons/fi';
 
 export default function CampaignPage() {
   const { id } = useParams();
@@ -47,10 +47,10 @@ export default function CampaignPage() {
       commentAPI.list(id)
     ]).then(([campRes, donorRes, updRes, rewRes, comRes]) => {
       setCampaign(campRes.data.data);
-      setDonors(donorRes.data.data);
-      setUpdates(updRes.data.data);
-      setRewards(rewRes.data.data);
-      setComments(comRes.data.data);
+      setDonors(donorRes.data.data || []);
+      setUpdates(updRes.data.data || []);
+      setRewards(rewRes.data.data || []);
+      setComments(comRes.data.data || []);
     }).catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
@@ -127,23 +127,23 @@ export default function CampaignPage() {
   };
 
   return (
-    <div className="campaign-detail">
+    <div className="campaign-detail page animate-fade">
       <div className="container">
         
         {/* Campaign Hero Image */}
-        <div style={{ position: 'relative', marginBottom: '32px' }}>
+        <div style={{ position: 'relative', marginBottom: '40px' }}>
           <img 
-            src={campaign.cover_image_url || 'https://via.placeholder.com/1200x500?text=DonatePlate'} 
+            src={campaign.cover_image_url || 'https://images.unsplash.com/photo-1593113565630-1de62d64020b?auto=format&fit=crop&w=1200&q=80'} 
             alt={campaign.title} 
             className="campaign-hero-img"
           />
           <div style={{ position: 'absolute', top: '24px', left: '24px', display: 'flex', gap: '8px' }}>
-            <span className="badge badge-category" style={{ background: 'var(--bg-glass-strong)', backdropFilter: 'blur(10px)' }}>
-              {campaign.category}
+            <span className="badge badge-category card-glass">
+              {campaign.category.replace('_', ' ').toUpperCase()}
             </span>
             {campaign.status === 'active' && (
-              <span className="badge badge-success" style={{ background: 'rgba(20, 184, 166, 0.9)', color: '#fff' }}>
-                Active
+              <span className="badge badge-success">
+                <FiCheckCircle style={{ marginRight: '4px' }} /> Active
               </span>
             )}
           </div>
@@ -156,22 +156,21 @@ export default function CampaignPage() {
             <h1 className="campaign-title">{campaign.title}</h1>
             
             <div className="campaign-meta">
-              <Link to={`/profile/${campaign.creator_id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontWeight: 600 }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--gradient-warm)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Link to={`/profile/${campaign.creator_id}`} className="flex-center" style={{ gap: '12px', color: 'var(--slate-800)', fontWeight: 600 }}>
+                <div className="profile-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem', border: 'none' }}>
                   {campaign.creator_name.charAt(0).toUpperCase()}
                 </div>
-                {campaign.creator_name}
+                <div>
+                  <div style={{ lineHeight: 1.2 }}>{campaign.creator_name}</div>
+                  <div className="text-muted" style={{ fontSize: '0.8rem', fontWeight: 500 }}>Campaign Organizer</div>
+                </div>
               </Link>
-              <span className="text-muted">•</span>
+              <div style={{ width: '1px', height: '24px', background: 'var(--border)' }}></div>
               <span className="text-muted">Launched {new Date(campaign.created_at).toLocaleDateString()}</span>
             </div>
 
-            {/* Mobile-only Progress (hidden on desktop, handled by sticky bar/donate box) */}
-            <div className="mobile-only" style={{ margin: '24px 0', display: 'none' /* Will use media queries in real CSS, hiding for now as per design */ }}>
-            </div>
-
             {/* Tabs */}
-            <div className="tabs mt-4">
+            <div className="tabs">
               {['story', 'rewards', 'updates', 'comments', 'donors'].map(t => (
                 <button 
                   key={t} 
@@ -187,15 +186,15 @@ export default function CampaignPage() {
             </div>
 
             {/* Tab Content */}
-            <div className="tab-content" style={{ minHeight: '400px' }}>
+            <div className="tab-content">
               
               {/* STORY TAB */}
               {tab === 'story' && (
-                <div className="animate-fade">
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                <div className="animate-in" style={{ animationDelay: '0.1s' }}>
+                  <div className="ql-editor">
                     {campaign.description && campaign.description.length > 500 && !isExpanded ? (
                       <>
-                        {campaign.description.slice(0, 500)}...
+                        <p>{campaign.description.slice(0, 500)}...</p>
                         <div className="mt-3">
                           <button onClick={() => setIsExpanded(true)} className="btn btn-outline btn-sm">
                             Read Full Story
@@ -204,7 +203,7 @@ export default function CampaignPage() {
                       </>
                     ) : (
                       <>
-                        {campaign.description}
+                        <p>{campaign.description}</p>
                         {campaign.description && campaign.description.length > 500 && (
                           <div className="mt-3">
                             <button onClick={() => setIsExpanded(false)} className="btn btn-ghost btn-sm">
@@ -218,21 +217,24 @@ export default function CampaignPage() {
 
                   {/* Rewards preview at bottom of story */}
                   {rewards.length > 0 && (
-                    <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-light)' }}>
-                      <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Featured Rewards</h3>
+                    <div className="mt-6 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '24px' }}>Featured Rewards</h3>
                       <div className="grid grid-2">
                         {rewards.slice(0, 2).map(reward => (
-                          <div key={reward.id} className="reward-card" style={{ cursor: 'pointer' }} onClick={() => { setSelectedReward(reward); document.querySelector('.checkout-container')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                          <div key={reward.id} className="reward-card" onClick={() => { setSelectedReward(reward); document.querySelector('.checkout-container')?.scrollIntoView({ behavior: 'smooth' }); }}>
                             <div className="reward-amount">{formatCurrency(reward.min_amount)}</div>
-                            <div className="reward-title mt-1">{reward.title}</div>
-                            <p className="reward-description mt-1" style={{ fontSize: '0.85rem' }}>
-                              {reward.description?.length > 60 ? reward.description.slice(0, 60) + '...' : reward.description}
+                            <div className="reward-title">{reward.title}</div>
+                            <p className="reward-description">
+                              {reward.description?.length > 80 ? reward.description.slice(0, 80) + '...' : reward.description}
                             </p>
+                            <span className="text-accent" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Select Reward &rarr;</span>
                           </div>
                         ))}
                       </div>
                       {rewards.length > 2 && (
-                         <button onClick={() => setTab('rewards')} className="btn btn-ghost mt-2">View all {rewards.length} rewards</button>
+                         <div className="text-center mt-3">
+                           <button onClick={() => setTab('rewards')} className="btn btn-ghost">View all {rewards.length} rewards</button>
+                         </div>
                       )}
                     </div>
                   )}
@@ -241,49 +243,54 @@ export default function CampaignPage() {
 
               {/* REWARDS TAB */}
               {tab === 'rewards' && (
-                <div className="reward-section animate-fade mt-0">
+                <div className="reward-section animate-in" style={{ animationDelay: '0.1s' }}>
                   {rewards.length > 0 ? rewards.map(reward => (
-                    <div key={reward.id} className="reward-card" onClick={() => { setSelectedReward(reward); document.querySelector('.checkout-container')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ cursor: 'pointer', display: 'flex', gap: '20px' }}>
+                    <div key={reward.id} className="card reward-card flex" style={{ gap: '24px' }} onClick={() => { setSelectedReward(reward); document.querySelector('.checkout-container')?.scrollIntoView({ behavior: 'smooth' }); }}>
                       {reward.image_url && (
-                        <div style={{ width: '120px', height: '120px', flexShrink: 0, borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+                        <div style={{ width: '160px', height: '160px', flexShrink: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
                           <img src={reward.image_url} alt={reward.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                       )}
-                      <div style={{ flex: 1 }}>
-                        <div className="reward-amount">{formatCurrency(reward.min_amount)} or more</div>
-                        <div className="reward-title mt-1">{reward.title}</div>
-                        <p className="reward-description">{reward.description}</p>
-                        <div className="reward-meta">
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <div className="reward-amount">{formatCurrency(reward.min_amount)} <span className="text-muted" style={{ fontSize: '1rem', fontWeight: 500 }}>or more</span></div>
+                        <div className="reward-title">{reward.title}</div>
+                        <p className="reward-description flex-1">{reward.description}</p>
+                        <div className="flex-between mt-2">
                           {reward.max_claims && (
                             <span className="badge badge-category">
                               {reward.claimed_count} / {reward.max_claims} claimed
                               {reward.claimed_count >= reward.max_claims && ' (SOLD OUT)'}
                             </span>
                           )}
-                          <span style={{ color: 'var(--accent)', fontWeight: 600, fontSize: '0.9rem' }}>Select this reward &rarr;</span>
+                          <span className="btn btn-sm btn-primary ml-auto">Select Reward</span>
                         </div>
                       </div>
                     </div>
                   )) : (
-                    <p className="text-muted text-center" style={{ padding: '40px' }}>No reward tiers available for this campaign.</p>
+                    <div className="card card-body text-center py-6">
+                      <FiGift size={48} className="text-muted mx-auto mb-3" />
+                      <p className="text-secondary">No reward tiers available for this campaign.</p>
+                    </div>
                   )}
                 </div>
               )}
 
               {/* COMMENTS TAB */}
               {tab === 'comments' && (
-                <div className="comment-section animate-fade mt-0">
+                <div className="comment-list animate-in" style={{ animationDelay: '0.1s' }}>
                   
                   {user ? (
-                    <form className="comment-form card card-body mb-4" onSubmit={handlePostComment}>
-                      <div className="comment-avatar">{user.name.charAt(0).toUpperCase()}</div>
+                    <form className="comment-form card card-body" onSubmit={handlePostComment}>
+                      <div className="comment-avatar flex-center" style={{ background: 'var(--gradient-cool)', color: '#fff', fontWeight: 600 }}>
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
                       <div style={{ flex: 1 }}>
                         <textarea
                           className="form-textarea"
-                          placeholder="Leave a comment or question..."
+                          placeholder="Leave a comment or question to support the organizer..."
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
-                          style={{ minHeight: '80px', marginBottom: '12px' }}
+                          style={{ minHeight: '100px', marginBottom: '16px' }}
                         />
                         <button type="submit" className="btn btn-primary" disabled={submittingComment || !newComment.trim()}>
                           {submittingComment ? 'Posting...' : 'Post Comment'}
@@ -291,56 +298,40 @@ export default function CampaignPage() {
                       </div>
                     </form>
                   ) : (
-                    <div className="alert alert-info mb-4">
-                      Please <Link to="/login" style={{ textDecoration: 'underline' }}>log in</Link> to leave a comment.
+                    <div className="alert alert-info">
+                      Please <Link to="/login" style={{ textDecoration: 'underline', fontWeight: 600 }}>log in</Link> to leave a comment.
                     </div>
                   )}
 
-                  <div className="comments-list">
+                  <div className="comments-list-wrapper mt-2">
                     {comments.length > 0 ? comments.map(c => (
-                      <div key={c.id} className="comment-item">
-                        <div className="comment-avatar">
+                      <div key={c.id} className="comment-item mb-4">
+                        <div className="comment-avatar flex-center" style={{ background: 'var(--slate-200)', color: 'var(--slate-700)', fontWeight: 600 }}>
                           {c.author_avatar ? <img src={c.author_avatar} alt={c.author_name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : c.author_name.charAt(0).toUpperCase()}
                         </div>
                         <div className="comment-body">
                           <div className="comment-header">
-                            <span className="comment-author">{c.author_name}</span>
-                            {c.author_role === 'admin' && <span className="badge badge-purple" style={{ padding: '2px 6px', fontSize: '0.65rem' }}>Admin</span>}
-                            {c.user_id === campaign.creator_id && <span className="badge badge-accent" style={{ padding: '2px 6px', fontSize: '0.65rem' }}>Creator</span>}
+                            <div>
+                              <span className="comment-author">{c.author_name}</span>
+                              {c.author_role === 'admin' && <span className="badge badge-purple ml-2" style={{ padding: '2px 8px', fontSize: '0.7rem' }}>Admin</span>}
+                              {c.user_id === campaign.creator_id && <span className="badge badge-accent ml-2" style={{ padding: '2px 8px', fontSize: '0.7rem' }}>Creator</span>}
+                            </div>
                             <span className="comment-time">{timeAgo(c.created_at)}</span>
                           </div>
-                          <div className="comment-content">{c.content}</div>
+                          <div className="mt-2" style={{ color: 'var(--slate-800)', lineHeight: 1.6 }}>{c.content}</div>
                           
-                          {/* Replies and Actions could go here */}
                           {(user && (user.role === 'admin' || user.id === c.user_id)) && (
-                            <div className="comment-actions">
-                              <button className="comment-action-btn" onClick={() => handleDeleteComment(c.id)}>Delete</button>
-                            </div>
-                          )}
-
-                          {/* Nested Replies */}
-                          {c.replies && c.replies.length > 0 && (
-                            <div className="comment-replies mt-3">
-                              {c.replies.map(r => (
-                                <div key={r.id} className="comment-item" style={{ padding: '12px 0' }}>
-                                  <div className="comment-avatar" style={{ width: '30px', height: '30px', fontSize: '0.75rem' }}>
-                                    {r.author_name.charAt(0).toUpperCase()}
-                                  </div>
-                                  <div className="comment-body">
-                                    <div className="comment-header">
-                                      <span className="comment-author">{r.author_name}</span>
-                                      <span className="comment-time">{timeAgo(r.created_at)}</span>
-                                    </div>
-                                    <div className="comment-content" style={{ fontSize: '0.9rem' }}>{r.content}</div>
-                                  </div>
-                                </div>
-                              ))}
+                            <div className="mt-3">
+                              <button className="btn btn-ghost btn-sm text-error" onClick={() => handleDeleteComment(c.id)}>Delete</button>
                             </div>
                           )}
                         </div>
                       </div>
                     )) : (
-                      <p className="text-muted text-center" style={{ padding: '40px' }}>No comments yet. Be the first to start the conversation!</p>
+                      <div className="text-center py-6">
+                        <FiMessageCircle size={48} className="text-muted mx-auto mb-3" />
+                        <p className="text-secondary">No comments yet. Be the first to start the conversation!</p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -348,108 +339,120 @@ export default function CampaignPage() {
 
               {/* UPDATES TAB */}
               {tab === 'updates' && (
-                <div className="animate-fade">
+                <div className="animate-in" style={{ animationDelay: '0.1s' }}>
                   {updates.length > 0 ? updates.map(u => (
-                    <div key={u.id} className="card mb-3">
+                    <div key={u.id} className="card mb-4">
                       <div className="card-body">
-                        {u.title && <h4 className="mb-1">{u.title}</h4>}
-                        <p className="text-muted mb-2" style={{ fontSize: '0.85rem' }}>
-                          <FiClock style={{ display: 'inline', marginRight: '4px' }} /> {new Date(u.created_at).toLocaleDateString()}
-                        </p>
-                        <p style={{ color: 'var(--text-secondary)' }}>{u.message}</p>
+                        {u.title && <h3 className="mb-2" style={{ fontFamily: 'var(--font-display)' }}>{u.title}</h3>}
+                        <div className="text-muted mb-3 flex gap-1 items-center" style={{ fontSize: '0.9rem' }}>
+                          <FiClock /> {new Date(u.created_at).toLocaleDateString()}
+                        </div>
+                        <p style={{ color: 'var(--slate-700)', lineHeight: 1.7 }}>{u.message}</p>
                       </div>
                     </div>
                   )) : (
-                    <p className="text-muted text-center" style={{ padding: '40px' }}>No updates posted yet.</p>
+                    <div className="card card-body text-center py-6">
+                      <FiActivity size={48} className="text-muted mx-auto mb-3" />
+                      <p className="text-secondary">No updates posted yet.</p>
+                    </div>
                   )}
                 </div>
               )}
 
               {/* DONORS TAB */}
               {tab === 'donors' && (
-                <div className="animate-fade">
-                  <div className="card card-body mb-4" style={{ textAlign: 'center', background: 'var(--gradient-hero)' }}>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--slate-800)' }}>
-                      {campaign.donor_count || donors.length} Supporters
-                    </h3>
-                    <p className="text-muted">Thank you to everyone who has served generosity.</p>
+                <div className="animate-in" style={{ animationDelay: '0.1s' }}>
+                  <div className="card card-gradient mb-4">
+                    <div className="card-body text-center py-6">
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--slate-900)' }}>
+                        {campaign.donor_count || donors.length} Supporters
+                      </h3>
+                      <p className="text-slate-600">Thank you to everyone who has served generosity.</p>
+                    </div>
                   </div>
 
-                  {donors.length > 0 ? donors.map(d => {
-                    const name = d.donor_name || 'Anonymous';
-                    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                    return (
-                      <div key={d.id} className="donor-item">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div className="profile-avatar" style={{ width: '48px', height: '48px', fontSize: '1rem', boxShadow: 'none' }}>
-                            {initials}
+                  <div className="card">
+                    {donors.length > 0 ? donors.map(d => {
+                      const name = d.donor_name || 'Anonymous';
+                      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                      return (
+                        <div key={d.id} className="donor-item">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+                            <div className="flex-center" style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--slate-100)', color: 'var(--slate-600)', fontWeight: 600 }}>
+                              {initials}
+                            </div>
+                            <div>
+                              <div className="donor-name" style={{ color: 'var(--slate-900)' }}>{name}</div>
+                              <div className="donor-time flex items-center gap-1"><FiClock size={12} /> {timeAgo(d.created_at)}</div>
+                              {d.comment && (
+                                <div style={{ marginTop: '8px', fontSize: '0.95rem', color: 'var(--slate-700)', fontStyle: 'italic', background: 'var(--slate-50)', padding: '8px 12px', borderRadius: '0 8px 8px 8px' }}>
+                                  "{d.comment}"
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <div className="donor-name">{name}</div>
-                            <div className="donor-time">{timeAgo(d.created_at)}</div>
-                            {d.comment && (
-                              <div style={{ marginTop: '4px', fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                                "{d.comment}"
-                              </div>
-                            )}
+                          <div className="donor-amount" style={{ padding: '8px 16px', background: 'var(--success-bg)', borderRadius: 'var(--radius-full)' }}>
+                            {formatCurrency(d.amount)}
                           </div>
                         </div>
-                        <div className="donor-amount">{formatCurrency(d.amount)}</div>
+                      );
+                    }) : (
+                      <div className="card-body text-center py-6">
+                        <FiHeart size={48} className="text-muted mx-auto mb-3" />
+                        <p className="text-secondary">Be the first to donate!</p>
                       </div>
-                    );
-                  }) : (
-                    <p className="text-muted text-center" style={{ padding: '40px' }}>Be the first to donate!</p>
-                  )}
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
           {/* Right Column (Sticky Donation Sidebar) */}
-          <div className="checkout-container">
-            <div style={{ position: 'sticky', top: '92px' }}>
+          <div className="checkout-container hide-on-mobile">
+            <div style={{ position: 'sticky', top: '100px' }}>
               
               {/* Progress Summary Box */}
-              <div className="card mb-3">
+              <div className="card mb-4" style={{ boxShadow: 'var(--shadow-md)' }}>
                 <div className="card-body">
-                  <div className="progress-track mb-3">
+                  <div className="progress-track mb-3" style={{ height: '10px' }}>
                     <div className="progress-fill" style={{ width: `${progress}%` }}></div>
                   </div>
                   
-                  <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--slate-800)', lineHeight: 1 }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--slate-900)', lineHeight: 1 }}>
                     {formatCurrency(campaign.current_amount)}
                   </div>
-                  <div className="text-muted mt-1 mb-3">
+                  <div className="text-muted mt-2 mb-4" style={{ fontSize: '1.05rem' }}>
                     raised of {formatCurrency(campaign.goal_amount)} goal
                   </div>
                   
-                  <div className="grid grid-2 mb-4" style={{ gap: '12px' }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '1.2rem', color: 'var(--slate-800)' }}>{campaign.donor_count || donors.length}</div>
-                      <div className="text-muted" style={{ fontSize: '0.85rem' }}>Donations</div>
+                  <div className="grid grid-2 mb-4" style={{ gap: '16px' }}>
+                    <div style={{ background: 'var(--slate-50)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                      <div style={{ fontWeight: 700, fontSize: '1.3rem', color: 'var(--slate-900)' }}>{campaign.donor_count || donors.length}</div>
+                      <div className="text-muted" style={{ fontSize: '0.9rem' }}>Donations</div>
                     </div>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '1.2rem', color: 'var(--slate-800)' }}>{getDaysLeft(campaign.end_date)}</div>
-                      <div className="text-muted" style={{ fontSize: '0.85rem' }}>Days Left</div>
+                    <div style={{ background: 'var(--slate-50)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                      <div style={{ fontWeight: 700, fontSize: '1.3rem', color: 'var(--slate-900)' }}>{getDaysLeft(campaign.end_date)}</div>
+                      <div className="text-muted" style={{ fontSize: '0.9rem' }}>Days Left</div>
                     </div>
                   </div>
                   
-                  <div className="flex gap-1">
+                  <div className="flex gap-2">
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText(window.location.href);
                         alert('Campaign link copied to clipboard!');
                       }}
-                      className="btn btn-secondary" style={{ flex: 1 }}
+                      className="btn btn-secondary flex-1"
                     >
                       <FiShare2 /> Share
                     </button>
                     <button 
                       onClick={() => {
-                        if (user) { /* Logic to save/follow campaign */ alert('Saved to favorites!'); } 
+                        if (user) { alert('Saved to favorites!'); } 
                         else { alert('Please log in to save campaigns.'); }
                       }}
-                      className="btn btn-secondary" style={{ width: '48px', padding: 0 }}
+                      className="btn btn-secondary" style={{ padding: '0 16px' }}
                       aria-label="Save Campaign"
                     >
                       <FiHeart />
@@ -458,7 +461,7 @@ export default function CampaignPage() {
                 </div>
               </div>
 
-              {/* The Checkout Form */}
+              {/* The Checkout Form Component */}
               <GuestCheckoutForm 
                 campaignId={campaign.id} 
                 campaignTitle={campaign.title} 
@@ -467,7 +470,7 @@ export default function CampaignPage() {
               />
               
               {selectedReward && (
-                <div className="text-center mt-2">
+                <div className="text-center mt-3">
                    <button className="btn btn-ghost btn-sm" onClick={() => setSelectedReward(null)}>Clear Reward Selection</button>
                 </div>
               )}
@@ -476,27 +479,18 @@ export default function CampaignPage() {
         </div>
 
         {/* Mobile Sticky CTA Bar */}
-        <div className={`mobile-sticky-bar ${showStickyBar ? 'visible' : ''}`}>
-          <div className="flex-between mb-2">
-            <div>
-              <div style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--slate-800)' }}>
-                {formatCurrency(campaign.current_amount)}
-              </div>
-              <div className="text-muted" style={{ fontSize: '0.85rem' }}>
-                of {formatCurrency(campaign.goal_amount)}
-              </div>
+        <div className={`mobile-sticky-bar ${showStickyBar ? 'visible' : ''}`} style={{ display: 'none' /* Handled correctly in CSS via media queries, we leave markup here */ }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--slate-900)' }}>
+              {formatCurrency(campaign.current_amount)}
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: 700, color: 'var(--slate-800)' }}>{getDaysLeft(campaign.end_date)} days</div>
-              <div className="text-muted" style={{ fontSize: '0.85rem' }}>left</div>
+            <div className="text-muted" style={{ fontSize: '0.85rem' }}>
+              of {formatCurrency(campaign.goal_amount)}
             </div>
-          </div>
-          <div className="progress-track mb-3" style={{ height: '6px' }}>
-            <div className="progress-fill" style={{ width: `${progress}%` }}></div>
           </div>
           <button 
             onClick={() => document.querySelector('.checkout-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            className="btn btn-primary btn-block btn-lg"
+            className="btn btn-primary" style={{ padding: '12px 32px' }}
           >
             Donate Now
           </button>

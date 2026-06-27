@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
+import { FiMail, FiLock, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -29,10 +30,9 @@ export default function LoginPage() {
     } catch (err) {
       const data = err.response?.data;
       if (data?.code === 'EMAIL_NOT_VERIFIED') {
-        // Show inline resend prompt instead of generic error
         setUnverifiedEmail(data.email || email);
       } else {
-        setError(data?.message || 'Login failed.');
+        setError(data?.message || 'Invalid email or password.');
       }
     } finally {
       setLoading(false);
@@ -52,73 +52,118 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="page container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div className="tracking-card animate-in" id="login-page">
-        <h1 style={{ fontFamily: 'var(--font-display)', textAlign: 'center', marginBottom: '8px' }}>Welcome Back</h1>
-        <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '28px' }}>Sign in to manage your campaigns</p>
-
-        {error && <div className="alert alert-error">{error}</div>}
-
-        {/* Email not verified banner */}
-        {unverifiedEmail && (
-          <div style={{
-            marginBottom: '20px', padding: '16px 20px',
-            background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
-            border: '1px solid #fcd34d', borderRadius: 'var(--radius-md)'
-          }}>
-            <p style={{ margin: '0 0 10px', fontWeight: 600, color: '#92400e' }}>
-              📧 Email not verified
-            </p>
-            <p style={{ margin: '0 0 12px', fontSize: '0.875rem', color: '#78350f' }}>
-              You need to verify your email before logging in. Check your inbox at <strong>{unverifiedEmail}</strong>.
-            </p>
-            {resent ? (
-              <p style={{ margin: 0, fontSize: '0.875rem', color: '#15803d', fontWeight: 600 }}>
-                ✅ Verification email resent! Please check your inbox.
-              </p>
-            ) : (
-              <button
-                className="btn btn-sm"
-                style={{ background: '#d97706', color: '#fff', border: 'none', fontWeight: 600 }}
-                onClick={handleResend}
-                disabled={resending}
-              >
-                {resending ? 'Sending...' : '🔄 Resend verification email'}
-              </button>
-            )}
+    <div className="auth-split">
+      <div className="auth-left">
+        <div>
+          <Link to="/" className="navbar-logo" style={{ color: '#fff' }}>
+            <span style={{ background: '#fff', color: 'var(--accent)', padding: '4px 8px', borderRadius: '8px' }}>DP</span>
+            DonateFate
+          </Link>
+        </div>
+        <div style={{ maxWidth: '440px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '3.5rem', lineHeight: 1.1, marginBottom: '24px' }}>Welcome back to the community.</h1>
+          <p style={{ fontSize: '1.1rem', opacity: 0.9, lineHeight: 1.6 }}>
+            Log in to manage your campaigns, track your impact, and continue serving generosity to those in need.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div style={{ display: 'flex' }}>
+            {[1,2,3,4].map(i => (
+              <div key={i} style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '2px solid var(--accent)', marginLeft: i > 1 ? '-12px' : 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FiCheckCircle size={16} />
+              </div>
+            ))}
           </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input type="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)} required id="login-email" />
+          <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Join 10k+ active donors</span>
+        </div>
+      </div>
+      
+      <div className="auth-right">
+        <div className="auth-form-container animate-fade">
+          <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--slate-900)', marginBottom: '8px' }}>Sign in to your account</h2>
+            <p className="text-secondary">Enter your details to access your dashboard</p>
           </div>
-          <div className="form-group" style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
-              <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none' }}>
-                Forgot Password?
-              </Link>
+
+          {error && (
+            <div className="alert alert-error mb-4" style={{ alignItems: 'center' }}>
+              <FiAlertCircle size={20} />
+              <div>{error}</div>
             </div>
-            <input
-              type="password"
-              className="form-input"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              id="login-password"
-            />
-          </div>
-          <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading} id="login-submit">
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+          )}
 
-        <p style={{ textAlign: 'center', marginTop: '20px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Don't have an account? <Link to="/register">Create one</Link>
-        </p>
+          {unverifiedEmail && (
+            <div className="alert alert-warning mb-4" style={{ flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontWeight: 600 }}>
+                <FiMail size={20} /> Email not verified
+              </div>
+              <p style={{ fontSize: '0.9rem', margin: 0 }}>
+                Check your inbox at <strong>{unverifiedEmail}</strong> for the verification link.
+              </p>
+              {resent ? (
+                <div style={{ color: 'var(--success)', fontWeight: 600, fontSize: '0.9rem', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  <FiCheckCircle /> Verification email resent!
+                </div>
+              ) : (
+                <button
+                  className="btn btn-sm btn-outline"
+                  onClick={handleResend}
+                  disabled={resending}
+                  style={{ alignSelf: 'flex-start', background: '#fff' }}
+                >
+                  {resending ? 'Sending...' : 'Resend verification email'}
+                </button>
+              )}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
+              <div style={{ position: 'relative' }}>
+                <FiMail style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+                <input 
+                  type="email" 
+                  className="form-input" 
+                  style={{ paddingLeft: '44px' }}
+                  value={email} 
+                  onChange={e => setEmail(e.target.value)} 
+                  required 
+                  placeholder="name@example.com"
+                />
+              </div>
+            </div>
+            
+            <div className="form-group" style={{ marginBottom: '32px' }}>
+              <div className="flex-between" style={{ marginBottom: '8px' }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+                <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--accent)', fontWeight: 600 }}>
+                  Forgot Password?
+                </Link>
+              </div>
+              <div style={{ position: 'relative' }}>
+                <FiLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+                <input
+                  type="password"
+                  className="form-input"
+                  style={{ paddingLeft: '44px' }}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+            
+            <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          <p style={{ textAlign: 'center', marginTop: '32px', color: 'var(--slate-500)' }}>
+            Don't have an account? <Link to="/register" style={{ fontWeight: 600 }}>Create one</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

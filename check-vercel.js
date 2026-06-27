@@ -8,8 +8,8 @@ const puppeteer = require('puppeteer');
   page.on('console', msg => console.log('BROWSER CONSOLE:', msg.type(), msg.text()));
   page.on('pageerror', err => console.log('BROWSER ERROR:', err.toString()));
   
-  console.log('Navigating to https://donateplate.vercel.app/');
-  await page.goto('https://donateplate.vercel.app/', { waitUntil: 'networkidle0' });
+  console.log('Navigating to https://donatefate.vercel.app/');
+  await page.goto('https://donatefate.vercel.app/', { waitUntil: 'networkidle0' });
   
   console.log('Done!');
   await browser.close();

@@ -1,5 +1,5 @@
 -- ============================================================
--- DONATEPLATE — Migration v2: New Features
+-- DONATEFATE — Migration v2: New Features
 -- Adds: Comments, Reward Tiers, Recurring Donations, User Profiles
 -- ============================================================
 
@@ -85,8 +85,8 @@ ALTER TABLE donations ADD COLUMN IF NOT EXISTS is_recurring BOOLEAN NOT NULL DEF
 -- ============================================================
 -- 6. UPDATE PLATFORM BRANDING
 -- ============================================================
-UPDATE platform_settings SET setting_value = 'DonatePlate' WHERE setting_key = 'platform_name';
-UPDATE platform_settings SET setting_value = 'support@donateplate.com' WHERE setting_key = 'support_email';
+UPDATE platform_settings SET setting_value = 'DonateFate' WHERE setting_key = 'platform_name';
+UPDATE platform_settings SET setting_value = 'support@donatefate.com' WHERE setting_key = 'support_email';
 
 
 -- ============================================================

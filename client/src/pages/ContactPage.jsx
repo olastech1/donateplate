@@ -20,8 +20,8 @@ export default function ContactPage() {
     <p style="margin-bottom: 24px;">Have a question, concern, or need help with a campaign? Our support team is here for you.</p>
     <div class="card" style="margin-bottom: 32px; padding: 32px;">
       <h3 style="margin-bottom: 16px; color: var(--slate-800);">Get in Touch</h3>
-      <p style="margin-bottom: 12px;"><strong>Email Support:</strong> support@donateplea.com</p>
-      <p style="margin-bottom: 12px;"><strong>Press & Media:</strong> press@donateplea.com</p>
+      <p style="margin-bottom: 12px;"><strong>Email Support:</strong> support@donatefate.com</p>
+      <p style="margin-bottom: 12px;"><strong>Press & Media:</strong> press@donatefate.com</p>
       <p><strong>Response Time:</strong> We aim to respond to all inquiries within 24-48 hours.</p>
     </div>
   `;

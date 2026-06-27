@@ -18,7 +18,7 @@ const getEmailTemplate = (content, previewText = '') => `
     
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); padding: 32px 20px; text-align: center;">
-      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">💜 Donate Plea</h1>
+      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">💜 Donate Fate</h1>
     </div>
     
     <!-- Content -->
@@ -29,7 +29,7 @@ const getEmailTemplate = (content, previewText = '') => `
     <!-- Footer -->
     <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
       <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.5;">
-        © ${new Date().getFullYear()} Donate Plea.<br>
+        © ${new Date().getFullYear()} Donate Fate.<br>
         Every plea deserves an answer.
       </p>
     </div>
@@ -61,7 +61,7 @@ const sendEmail = async (to, subject, htmlContent, previewText = '') => {
     const smtpPort = process.env.SMTP_PORT || await getSetting('smtp_port') || '587';
     const smtpUser = process.env.SMTP_USER || await getSetting('smtp_user');
     const smtpPass = process.env.SMTP_PASS || await getSetting('smtp_pass');
-    const smtpFrom = process.env.SMTP_FROM || await getSetting('smtp_from') || '"Donate Plea" <noreply@donateplea.com>';
+    const smtpFrom = process.env.SMTP_FROM || await getSetting('smtp_from') || '"Donate Fate" <noreply@donatefate.com>';
 
     if (!smtpUser || !smtpPass) {
       console.log(`[EMAIL MOCK] To: ${to} | Subject: ${subject}`);
@@ -98,31 +98,45 @@ module.exports = {
   sendEmailVerificationEmail: (email, name, verifyUrl) =>
     sendEmail(
       email,
-      'Verify your email address — Donate Plea',
+      'Verify your email address — Donate Fate',
       `
         <h3 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Almost there, ${name}! 🎉</h3>
-        <p style="margin: 0 0 16px;">Thanks for signing up for Donate Plea. Before you can log in, we need to confirm your email address.</p>
+        <p style="margin: 0 0 16px;">Thanks for signing up for Donate Fate. Before you can log in, we need to confirm your email address.</p>
         <p style="margin: 0 0 16px;">Click the button below to verify your email. This link expires in <strong>24 hours</strong>.</p>
         ${getButtonHtml(verifyUrl, '✅ Verify My Email Address')}
         <p style="margin-top: 32px; font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 16px;">If you did not create an account, you can safely ignore this email.</p>
       `,
-      'Confirm your email to activate your Donate Plea account.'
+      'Confirm your email to activate your Donate Fate account.'
     ),
 
   sendWelcomeEmail: (email, name) =>
     sendEmail(
       email,
-      'Welcome to Donate Plea!',
+      'Welcome to Donate Fate!',
       `
         <h3 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Welcome, ${name}!</h3>
-        <p style="margin: 0 0 16px;">Your email has been verified and your Donate Plea account is now fully active.</p>
+        <p style="margin: 0 0 16px;">Your email has been verified and your Donate Fate account is now fully active.</p>
         <p style="margin: 0 0 16px;">You can now create campaigns and start raising funds for causes that matter to you.</p>
         ${getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`, 'Go to Dashboard')}
       `,
       'Your account has been verified and is ready to use.'
     ),
 
-  // 2. Campaign Emails
+  // 2. Admin Verification Email
+  sendAdminVerifiedEmail: (email, name) =>
+    sendEmail(
+      email,
+      'Your account has been verified by an admin',
+      `
+        <h3 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Good news, ${name}!</h3>
+        <p style="margin: 0 0 16px;">An administrator has manually reviewed and verified your DonateFate account.</p>
+        <p style="margin: 0 0 16px;">You now have full access to create campaigns and raise funds.</p>
+        ${getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard`, 'Go to Dashboard')}
+      `,
+      'Your account has been manually verified and is ready to use.'
+    ),
+
+  // 3. Campaign Emails
   sendCampaignPendingEmail: (email, title) =>
     sendEmail(
       email, 
@@ -178,7 +192,7 @@ module.exports = {
   sendDonationAlertEmail: (creatorEmail, creatorName, donorName, amount, campaignTitle) =>
     sendEmail(
       creatorEmail,
-      `You just received a $${amount} donation on Donate Plea!`,
+      `You just received a $${amount} donation on Donate Fate!`,
       `
         <h3 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Great news, ${creatorName}! 🎉</h3>
         <p style="margin: 0 0 24px;">Someone just made a donation to your campaign <strong style="color: #9333ea;">"${campaignTitle}"</strong>.</p>
@@ -239,10 +253,10 @@ module.exports = {
       'SMTP Test Successful', 
       `
         <h3 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Success! ✉️</h3>
-        <p style="margin: 0 0 16px;">If you are reading this, your SMTP configuration on Donate Plea is working perfectly.</p>
+        <p style="margin: 0 0 16px;">If you are reading this, your SMTP configuration on Donate Fate is working perfectly.</p>
         <p style="margin: 0 0 16px;">All automated system emails will now be delivered successfully.</p>
       `,
-      'Your SMTP configuration on Donate Plea is working perfectly.'
+      'Your SMTP configuration on Donate Fate is working perfectly.'
     ),
 
   // 6. Password Reset
@@ -252,12 +266,12 @@ module.exports = {
       'Password Reset Request', 
       `
         <h3 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Password Reset</h3>
-        <p style="margin: 0 0 16px;">We received a request to reset your password for your Donate Plea account.</p>
+        <p style="margin: 0 0 16px;">We received a request to reset your password for your Donate Fate account.</p>
         <p style="margin: 0 0 16px;">Click the button below to choose a new secure password. This link will safely expire in 1 hour.</p>
         ${getButtonHtml(resetUrl, 'Reset Your Password')}
         <p style="margin-top: 32px; font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 16px;">If you did not request this, you can safely ignore this email. Your password will not change.</p>
       `,
-      'Instructions to reset your Donate Plea password.'
+      'Instructions to reset your Donate Fate password.'
     ),
 
   // 7. Account Ban/Unban Emails
@@ -275,30 +289,30 @@ module.exports = {
 
     return sendEmail(
       email,
-      'Important notice regarding your Donate Plea account',
+      'Important notice regarding your Donate Fate account',
       `
         <h3 style="color: #ef4444; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Account Suspended</h3>
         <p style="margin: 0 0 16px;">Hello ${name},</p>
-        <p style="margin: 0 0 16px;">We are writing to inform you that your Donate Plea account has been suspended.</p>
+        <p style="margin: 0 0 16px;">We are writing to inform you that your Donate Fate account has been suspended.</p>
         ${reasonSection}
         <p style="margin: 0 0 16px;">${durationText}</p>
         <p style="margin: 0 0 16px;">If you believe this decision was made in error, please contact our support team.</p>
       `,
-      'Your Donate Plea account has been suspended.'
+      'Your Donate Fate account has been suspended.'
     );
   },
 
   sendUserUnbannedEmail: (email, name) =>
     sendEmail(
       email,
-      'Your Donate Plea account has been restored',
+      'Your Donate Fate account has been restored',
       `
         <h3 style="color: #10b981; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Account Restored! 🎉</h3>
         <p style="margin: 0 0 16px;">Hello ${name},</p>
-        <p style="margin: 0 0 16px;">We are pleased to inform you that the suspension on your Donate Plea account has been lifted, and your account has been fully restored.</p>
+        <p style="margin: 0 0 16px;">We are pleased to inform you that the suspension on your Donate Fate account has been lifted, and your account has been fully restored.</p>
         <p style="margin: 0 0 16px;">You can now log in to your dashboard, manage your campaigns, and resume activity on the platform.</p>
         ${getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`, 'Log In to Account')}
       `,
-      'Your Donate Plea account suspension has been lifted.'
+      'Your Donate Fate account suspension has been lifted.'
     ),
 };

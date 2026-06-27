@@ -8,7 +8,7 @@ const pool = new Pool({
 
 async function run() {
   try {
-    const email = 'admin@donateplate.com';
+    const email = 'admin@donatefate.com';
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (result.rows.length === 0) {
       console.log('User not found.');

@@ -80,7 +80,7 @@ const initiateDonation = async (req, res) => {
           currency: 'usd',
           product_data: {
             name: `Donate to: ${campaign.title}`,
-            description: `Supporting "${campaign.title}" on Donate Plea`
+            description: `Supporting "${campaign.title}" on Donate Fate`
           },
           unit_amount: Math.round(parseFloat(amount) * 100)
         },
