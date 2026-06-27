@@ -424,8 +424,18 @@ const getAnalytics = async (req, res) => {
   try {
     const [topCampaigns, topDonors, categories] = await Promise.all([
       pool.query(`SELECT id, title, current_amount, goal_amount, category FROM campaigns WHERE status = 'active' ORDER BY current_amount DESC LIMIT 5`),
-      pool.query(`SELECT COALESCE(donor_user_name, guest_name, 'Anonymous') as name, SUM(amount) as total_donated FROM donations WHERE status = 'success' GROUP BY COALESCE(donor_user_name, guest_name, 'Anonymous') ORDER BY total_donated DESC LIMIT 5`),
-      pool.query(`SELECT category, COUNT(*) as count FROM campaigns GROUP BY category ORDER BY count DESC`)
+      pool.query(`
+        SELECT 
+          COALESCE(u.name, d.guest_name, 'Anonymous') AS name,
+          SUM(d.amount) AS total_donated
+        FROM donations d
+        LEFT JOIN users u ON d.user_id = u.id
+        WHERE d.status = 'success'
+        GROUP BY COALESCE(u.name, d.guest_name, 'Anonymous')
+        ORDER BY total_donated DESC
+        LIMIT 5
+      `),
+      pool.query(`SELECT COALESCE(category, 'general') AS category, COUNT(*) as count FROM campaigns GROUP BY COALESCE(category, 'general') ORDER BY count DESC`)
     ]);
 
     res.json({ 
@@ -441,6 +451,7 @@ const getAnalytics = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
+
 
 // ─── Platform Settings (Dynamic Stripe Keys) ──────────────
 

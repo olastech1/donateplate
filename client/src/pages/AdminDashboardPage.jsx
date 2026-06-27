@@ -1002,7 +1002,7 @@ export default function AdminDashboardPage() {
                             <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
                               Campaign: <strong>{w.campaign_title}</strong> · Creator: {w.creator_name}
                             </div>
-                            <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>{fmtTime(w.requested_at)}</div>
+                            <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>{fmtTime(w.created_at)}</div>
                             {w.payment_method && <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Method: {w.payment_method}</div>}
                           </div>
                           {w.status === 'pending' && (
