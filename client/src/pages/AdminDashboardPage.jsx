@@ -7,6 +7,8 @@ import { adminAPI } from '../services/api';
 
 const TABS = [
   { key: 'overview', label: '📊 Overview', icon: '📊' },
+  { key: 'analytics', label: '📈 Analytics', icon: '📈' },
+  { key: 'activity', label: '🔍 Activity Log', icon: '🔍' },
   { key: 'users', label: '👥 Manage Users', icon: '👥' },
   { key: 'campaigns', label: '📋 Manage Campaigns', icon: '📋' },
   { key: 'kyc', label: '🛡️ KYC Reviews', icon: '🛡️' },
@@ -27,6 +29,11 @@ export default function AdminDashboardPage() {
   const [donations, setDonations] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [settings, setSettings] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
+  const [activityLog, setActivityLog] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedPage, setSelectedPage] = useState('page_about_us');
   const [pageContent, setPageContent] = useState('');
   const [broadcastSubject, setBroadcastSubject] = useState('');
@@ -47,6 +54,12 @@ export default function AdminDashboardPage() {
   const [profileData, setProfileData] = useState({ email: '', currentPassword: '', newPassword: '' });
   const [profileLoading, setProfileLoading] = useState(false);
 
+  // Reset search when changing tabs
+  useEffect(() => {
+    setSearchQuery('');
+    setStatusFilter('all');
+  }, [tab]);
+
   // Guard: only admins
   useEffect(() => {
     if (user && user.role !== 'admin') navigate('/');
@@ -62,6 +75,14 @@ export default function AdminDashboardPage() {
         if (tab === 'overview') {
           const res = await adminAPI.getStats();
           setStats(res.data.data);
+          const act = await adminAPI.getActivityLog();
+          setActivityLog(act.data.data.slice(0, 5)); // Just top 5 for overview
+        } else if (tab === 'analytics') {
+          const res = await adminAPI.getAnalytics();
+          setAnalytics(res.data.data);
+        } else if (tab === 'activity') {
+          const res = await adminAPI.getActivityLog();
+          setActivityLog(res.data.data);
         } else if (tab === 'campaigns') {
           const res = await adminAPI.getAllCampaigns();
           setPending(res.data.data);
@@ -465,31 +486,56 @@ export default function AdminDashboardPage() {
   if (!user || user.role !== 'admin') return null;
 
   return (
-    <div className="page" style={{ background: 'var(--bg-secondary)' }} id="admin-dashboard">
-      <div className="container">
-        {/* Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--slate-800)' }}>
-            Admin Dashboard
-          </h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '4px' }}>
-            Welcome back, {user.name}. Manage your platform.
-          </p>
+    <div className="admin-layout" id="admin-dashboard">
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="admin-sidebar-header">
+          Admin Control Center
         </div>
-
-        {/* Tab Navigation */}
-        <div className="admin-tabs-wrapper" style={{ display: 'flex', gap: '4px', marginBottom: '28px', background: '#fff', borderRadius: 'var(--radius-md)', padding: '4px', border: '1px solid var(--border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div className="admin-nav">
           {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)} style={{
-              flex: 1, flexShrink: 0, padding: '12px 16px', background: tab === t.key ? 'var(--accent)' : 'transparent',
-              color: tab === t.key ? '#fff' : 'var(--text-secondary)',
-              border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-              fontWeight: 600, fontSize: '0.85rem', fontFamily: 'var(--font-body)',
-              transition: 'all 0.2s', whiteSpace: 'nowrap'
-            }}>
-              {t.label}
-            </button>
+            <div 
+              key={t.key} 
+              className={`admin-nav-item ${tab === t.key ? 'active' : ''}`}
+              onClick={() => { setTab(t.key); setSidebarOpen(false); }}
+            >
+              <span className="admin-nav-icon">{t.icon}</span>
+              {t.label.replace(/.*?\s/, '') /* Remove icon from label */}
+              
+              {/* Notification Badges */}
+              {t.key === 'campaigns' && stats?.campaigns?.pending > 0 && (
+                <span className="admin-badge">{stats.campaigns.pending}</span>
+              )}
+              {t.key === 'withdrawals' && withdrawals.length > 0 && (
+                <span className="admin-badge">{withdrawals.length}</span>
+              )}
+              {t.key === 'kyc' && kycList.filter(k => k.kyc_status === 'pending').length > 0 && (
+                <span className="admin-badge">{kycList.filter(k => k.kyc_status === 'pending').length}</span>
+              )}
+            </div>
           ))}
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="admin-content">
+        {/* Header */}
+        <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--slate-800)' }}>
+              {TABS.find(t => t.key === tab)?.label.replace(/.*?\s/, '')}
+            </h1>
+            <p style={{ color: 'var(--text-muted)', marginTop: '4px' }}>
+              Welcome back, {user.name}. Manage your platform.
+            </p>
+          </div>
+          <button 
+            className="btn btn-secondary" 
+            style={{ display: window.innerWidth <= 768 ? 'block' : 'none' }}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            ☰ Menu
+          </button>
         </div>
 
         {/* Messages */}
@@ -506,6 +552,7 @@ export default function AdminDashboardPage() {
             {/* ── Overview Tab ── */}
             {tab === 'overview' && stats && (
               <div className="animate-in">
+                {/* Key Metrics */}
                 <div className="grid grid-4" style={{ marginBottom: '32px' }}>
                   {[
                     { label: 'Total Campaigns', value: stats.campaigns?.total || 0, color: 'var(--slate-800)' },
@@ -523,34 +570,196 @@ export default function AdminDashboardPage() {
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-2">
+
+                {/* Main Dashboard Grid */}
+                <div className="grid grid-2" style={{ marginBottom: '32px' }}>
+                  {/* Revenue Chart */}
                   <div className="card">
                     <div className="card-body" style={{ padding: '24px' }}>
-                      <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>Platform Health</h3>
-                      <div className="tracking-detail-row"><span className="tracking-label">Active Campaigns</span><span className="tracking-value">{stats.campaigns?.active || 0}</span></div>
-                      <div className="tracking-detail-row"><span className="tracking-label">Total Donations</span><span className="tracking-value">{stats.donations?.total_donations || 0}</span></div>
-                      <div className="tracking-detail-row"><span className="tracking-label">Registered Users</span><span className="tracking-value">{stats.users?.total_users || 0}</span></div>
-                      <div className="tracking-detail-row"><span className="tracking-label">Campaign Creators</span><span className="tracking-value">{stats.users?.creators || 0}</span></div>
-                    </div>
-                  </div>
-                  <div className="card">
-                    <div className="card-body" style={{ padding: '24px' }}>
-                      <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>Quick Actions</h3>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <button className="btn btn-secondary btn-block" onClick={() => setTab('campaigns')}>
-                          📋 Manage Campaigns ({stats.campaigns?.total || 0})
-                        </button>
-                        <button className="btn btn-secondary btn-block" onClick={() => setTab('kyc')}>
-                          🛡️ Review Pending KYC
-                        </button>
-                        <button className="btn btn-secondary btn-block" onClick={() => setTab('withdrawals')}>
-                          💸 Process Withdrawals
-                        </button>
-                        <button className="btn btn-secondary btn-block" onClick={() => setTab('settings')}>
-                          ⚙️ Manage Settings
-                        </button>
+                      <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>7-Day Revenue</h3>
+                      <div className="css-chart">
+                        {stats.revenueChart?.map((day, i) => {
+                          const maxAmount = Math.max(...stats.revenueChart.map(d => Number(d.total)), 1);
+                          const heightPct = (Number(day.total) / maxAmount) * 100;
+                          return (
+                            <div key={i} className="chart-bar-container">
+                              <div 
+                                className="chart-bar" 
+                                style={{ height: `${heightPct}%` }}
+                                data-tooltip={`$${Number(day.total).toLocaleString()}`}
+                              />
+                              <div className="chart-label">
+                                {new Date(day.date).toLocaleDateString(undefined, { weekday: 'short' })}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
+                  </div>
+
+                  {/* System Status & Quick Actions */}
+                  <div className="card">
+                    <div className="card-body" style={{ padding: '24px' }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>System Status</h3>
+                      <div className="status-indicator">
+                        <div className="status-dot healthy"></div> All Systems Operational
+                      </div>
+                      <div className="status-indicator">
+                        <div className={`status-dot ${stats.campaigns?.pending > 0 ? 'warning' : 'healthy'}`}></div> 
+                        {stats.campaigns?.pending || 0} Campaigns Pending Review
+                      </div>
+                      <div className="status-indicator">
+                        <div className={`status-dot ${withdrawals.length > 0 ? 'warning' : 'healthy'}`}></div> 
+                        {withdrawals.length} Pending Withdrawals
+                      </div>
+                      
+                      <h3 style={{ fontFamily: 'var(--font-display)', margin: '24px 0 16px', color: 'var(--slate-800)' }}>Quick Actions</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <button className="btn btn-secondary" onClick={() => setTab('campaigns')}>📋 Campaigns</button>
+                        <button className="btn btn-secondary" onClick={() => setTab('kyc')}>🛡️ KYC</button>
+                        <button className="btn btn-secondary" onClick={() => setTab('withdrawals')}>💸 Payouts</button>
+                        <button className="btn btn-secondary" onClick={() => setTab('settings')}>⚙️ Settings</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Activity Mini-Feed */}
+                <div className="card">
+                  <div className="card-body" style={{ padding: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', margin: 0, color: 'var(--slate-800)' }}>Recent Activity</h3>
+                      <button className="btn btn-secondary btn-sm" onClick={() => setTab('activity')}>View All</button>
+                    </div>
+                    <div className="activity-feed">
+                      {activityLog.length === 0 ? (
+                        <p className="text-muted">No recent activity.</p>
+                      ) : (
+                        activityLog.map((log) => (
+                          <div key={log.id} className="activity-item">
+                            <div className="activity-icon">
+                              {log.type === 'donation' ? '💰' : log.type === 'campaign' ? '🎯' : log.type === 'user' ? '👤' : '💸'}
+                            </div>
+                            <div className="activity-content">
+                              <div className="activity-text">{log.text}</div>
+                              <div className="activity-time">{new Date(log.date).toLocaleString()}</div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Analytics Tab ── */}
+            {tab === 'analytics' && analytics && (
+              <div className="animate-in">
+                <div className="grid grid-2" style={{ marginBottom: '32px' }}>
+                  {/* Top Campaigns */}
+                  <div className="card">
+                    <div className="card-body" style={{ padding: '24px' }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>Top Campaigns (Active)</h3>
+                      <div className="table-responsive">
+                        <table className="table">
+                          <thead><tr><th>Campaign</th><th>Raised</th><th>Progress</th></tr></thead>
+                          <tbody>
+                            {analytics.topCampaigns?.map(c => {
+                              const pct = Math.min(100, (Number(c.current_amount) / Number(c.goal_amount)) * 100);
+                              return (
+                                <tr key={c.id}>
+                                  <td style={{ fontWeight: 500 }}>{c.title}</td>
+                                  <td style={{ color: 'var(--emerald-600)', fontWeight: 600 }}>${Number(c.current_amount).toLocaleString()}</td>
+                                  <td>
+                                    <div className="progress-bar"><div className="progress-fill" style={{ width: `${pct}%` }} /></div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Top Donors */}
+                  <div className="card">
+                    <div className="card-body" style={{ padding: '24px' }}>
+                      <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>Top Donors</h3>
+                      <div className="table-responsive">
+                        <table className="table">
+                          <thead><tr><th>Donor Name</th><th>Total Donated</th></tr></thead>
+                          <tbody>
+                            {analytics.topDonors?.map((d, i) => (
+                              <tr key={i}>
+                                <td>
+                                  <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>
+                                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👤'}
+                                  </span>
+                                  <span style={{ fontWeight: 500 }}>{d.name}</span>
+                                </td>
+                                <td style={{ color: 'var(--accent)', fontWeight: 700 }}>${Number(d.total_donated).toLocaleString()}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Categories Breakdown */}
+                <div className="card">
+                  <div className="card-body" style={{ padding: '24px' }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>Campaigns by Category</h3>
+                    <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                      {analytics.categoryBreakdown?.map((cat, i) => (
+                        <div key={i} style={{ 
+                          padding: '16px 24px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)',
+                          flex: '1 1 200px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                          <span style={{ fontWeight: 600, color: 'var(--slate-700)', textTransform: 'capitalize' }}>{cat.category}</span>
+                          <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--coral-500)' }}>{cat.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Activity Log Tab ── */}
+            {tab === 'activity' && (
+              <div className="animate-in card">
+                <div className="card-body" style={{ padding: '24px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '24px', color: 'var(--slate-800)' }}>Platform Activity</h3>
+                  <div className="activity-feed">
+                    {activityLog.length === 0 ? (
+                      <p className="text-muted">No recent activity.</p>
+                    ) : (
+                      activityLog.map((log) => (
+                        <div key={log.id} className="activity-item" style={{ paddingBottom: '20px' }}>
+                          <div className="activity-icon" style={{ width: '40px', height: '40px', fontSize: '1.2rem' }}>
+                            {log.type === 'donation' ? '💰' : log.type === 'campaign' ? '🎯' : log.type === 'user' ? '👤' : '💸'}
+                          </div>
+                          <div className="activity-content">
+                            <div className="activity-text" style={{ fontSize: '1rem', fontWeight: 500 }}>{log.text}</div>
+                            <div className="activity-time" style={{ fontSize: '0.85rem' }}>{new Date(log.date).toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <span className="badge" style={{ 
+                              background: log.type === 'donation' ? 'var(--emerald-100)' : log.type === 'campaign' ? 'var(--coral-100)' : 'var(--slate-100)',
+                              color: log.type === 'donation' ? 'var(--emerald-700)' : log.type === 'campaign' ? 'var(--coral-700)' : 'var(--slate-700)',
+                              textTransform: 'uppercase', fontSize: '0.7rem'
+                            }}>
+                              {log.type}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -559,16 +768,39 @@ export default function AdminDashboardPage() {
             {/* ── Manage Campaigns Tab ── */}
             {tab === 'campaigns' && (
               <div className="animate-in">
-                {pending.length === 0 ? (
+                <div className="admin-filters">
+                  <div className="admin-search">
+                    <input 
+                      type="text" 
+                      placeholder="Search campaigns by title or creator..." 
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <select className="form-select" style={{ width: 'auto' }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="paused">Paused</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+                {pending.filter(c => 
+                  (statusFilter === 'all' || c.status === statusFilter) &&
+                  (c.title.toLowerCase().includes(searchQuery.toLowerCase()) || (c.creator_name || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                ).length === 0 ? (
                   <div className="card" style={{ textAlign: 'center' }}>
                     <div className="card-body" style={{ padding: '60px 20px' }}>
                       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📋</div>
                       <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)' }}>No campaigns</h3>
-                      <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>There are no campaigns on the platform yet.</p>
+                      <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>There are no campaigns matching your filter.</p>
                     </div>
                   </div>
                 ) : (
-                  pending.map(c => (
+                  pending.filter(c => 
+                    (statusFilter === 'all' || c.status === statusFilter) &&
+                    (c.title.toLowerCase().includes(searchQuery.toLowerCase()) || (c.creator_name || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                  ).map(c => (
                     <div key={c.id} className="card" style={{ marginBottom: '16px' }}>
                       <div className="card-body" style={{ padding: '24px' }}>
                         <div className="admin-list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
@@ -852,9 +1084,24 @@ export default function AdminDashboardPage() {
             {/* ── Users Tab ── */}
             {tab === 'users' && (
               <div className="animate-in">
+                <div className="admin-filters">
+                  <div className="admin-search">
+                    <input 
+                      type="text" 
+                      placeholder="Search users by name or email..." 
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <select className="form-select" style={{ width: 'auto' }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                    <option value="all">All Roles</option>
+                    <option value="creator">Creator</option>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
                 <div className="card">
                   <div className="card-body" style={{ padding: '24px' }}>
-                    <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)', marginBottom: '16px' }}>Manage Users</h3>
                     <div style={{ overflowX: 'auto' }}>
                       <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                         <thead>
@@ -868,7 +1115,10 @@ export default function AdminDashboardPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {usersList.map(u => (
+                          {usersList.filter(u => 
+                            (statusFilter === 'all' || u.role === statusFilter) &&
+                            (u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+                          ).map(u => (
                             <tr key={u.id} style={{ borderBottom: '1px solid var(--slate-100)' }}>
                               <td style={{ padding: '12px', fontWeight: 500 }}>{u.name}</td>
                               <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{u.email}</td>
@@ -990,12 +1240,51 @@ export default function AdminDashboardPage() {
                     </div>
                   )}
                 </div>
-                {donations.length === 0 ? (
+                <div className="admin-filters">
+                  <div className="admin-search">
+                    <input 
+                      type="text" 
+                      placeholder="Search donations by campaign or donor..." 
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <select className="form-select" style={{ width: 'auto' }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                    <option value="all">All Status</option>
+                    <option value="success">Success</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                  <button className="btn btn-secondary" onClick={() => {
+                    const csv = [
+                      ['Date', 'Campaign', 'Donor', 'Amount', 'Status'].join(','),
+                      ...donations.map(d => [
+                        new Date(d.created_at).toLocaleDateString(),
+                        `"${d.campaign_title}"`,
+                        `"${d.is_anonymous ? 'Anonymous' : (d.donor_user_name || d.guest_name || 'Guest')}"`,
+                        d.amount,
+                        d.status
+                      ].join(','))
+                    ].join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `donations-export-${Date.now()}.csv`;
+                    a.click();
+                  }}>
+                    📥 Export CSV
+                  </button>
+                </div>
+                {donations.filter(d => 
+                  (statusFilter === 'all' || d.status === statusFilter) &&
+                  (d.campaign_title.toLowerCase().includes(searchQuery.toLowerCase()) || (d.donor_user_name || d.guest_name || 'Guest').toLowerCase().includes(searchQuery.toLowerCase()))
+                ).length === 0 ? (
                   <div className="card" style={{ textAlign: 'center' }}>
                     <div className="card-body" style={{ padding: '60px 20px' }}>
                       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>💳</div>
-                      <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)' }}>No donations yet</h3>
-                      <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>There are no recorded donations on the platform.</p>
+                      <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-800)' }}>No donations found</h3>
+                      <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>There are no donations matching your filter.</p>
                     </div>
                   </div>
                 ) : (
@@ -1011,7 +1300,10 @@ export default function AdminDashboardPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {donations.map(d => (
+                        {donations.filter(d => 
+                          (statusFilter === 'all' || d.status === statusFilter) &&
+                          (d.campaign_title.toLowerCase().includes(searchQuery.toLowerCase()) || (d.donor_user_name || d.guest_name || 'Guest').toLowerCase().includes(searchQuery.toLowerCase()))
+                        ).map(d => (
                           <tr key={d.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
                             <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                               {new Date(d.created_at).toLocaleDateString()} {new Date(d.created_at).toLocaleTimeString()}

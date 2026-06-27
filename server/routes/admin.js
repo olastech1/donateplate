@@ -43,6 +43,8 @@ router.put('/withdrawals/:id/reject', adminController.rejectWithdrawal);
 
 // Platform stats
 router.get('/stats', adminController.getPlatformStats);
+router.get('/activity-log', adminController.getActivityLog);
+router.get('/analytics', adminController.getAnalytics);
 
 // KYC
 router.get('/kyc/all', adminController.getAllKyc);

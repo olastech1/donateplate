@@ -383,13 +383,61 @@ const rejectWithdrawal = async (req, res) => {
 
 const getPlatformStats = async (req, res) => {
   try {
-    const [campaigns, donations, users] = await Promise.all([
+    const [campaigns, donations, users, revenue] = await Promise.all([
       pool.query(`SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'active') AS active, COUNT(*) FILTER (WHERE status = 'pending') AS pending FROM campaigns`),
       pool.query(`SELECT COUNT(*) AS total_donations, COALESCE(SUM(amount), 0) AS total_raised, COUNT(DISTINCT COALESCE(user_id::text, guest_email)) AS unique_donors FROM donations WHERE status = 'success'`),
-      pool.query(`SELECT COUNT(*) AS total_users, COUNT(*) FILTER (WHERE role = 'creator') AS creators FROM users`)
+      pool.query(`SELECT COUNT(*) AS total_users, COUNT(*) FILTER (WHERE role = 'creator') AS creators FROM users`),
+      pool.query(`SELECT DATE(created_at) as date, COALESCE(SUM(amount), 0) as total FROM donations WHERE status = 'success' AND created_at >= NOW() - INTERVAL '7 days' GROUP BY DATE(created_at) ORDER BY DATE(created_at) ASC`)
     ]);
-    res.json({ success: true, data: { campaigns: campaigns.rows[0], donations: donations.rows[0], users: users.rows[0] } });
+    res.json({ success: true, data: { campaigns: campaigns.rows[0], donations: donations.rows[0], users: users.rows[0], revenueChart: revenue.rows } });
   } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+const getActivityLog = async (req, res) => {
+  try {
+    const [recentUsers, recentCampaigns, recentDonations, recentWithdrawals] = await Promise.all([
+      pool.query(`SELECT id, name, created_at FROM users ORDER BY created_at DESC LIMIT 10`),
+      pool.query(`SELECT id, title, creator_id, created_at FROM campaigns ORDER BY created_at DESC LIMIT 10`),
+      pool.query(`SELECT id, amount, campaign_id, created_at FROM donations WHERE status = 'success' ORDER BY created_at DESC LIMIT 10`),
+      pool.query(`SELECT id, amount, status, created_at FROM withdrawals ORDER BY created_at DESC LIMIT 10`)
+    ]);
+
+    const activities = [];
+    recentUsers.rows.forEach(u => activities.push({ id: \`u-\${u.id}\`, type: 'user', text: \`New user registered: \${u.name}\`, date: u.created_at }));
+    recentCampaigns.rows.forEach(c => activities.push({ id: \`c-\${c.id}\`, type: 'campaign', text: \`New campaign created: "\${c.title}"\`, date: c.created_at }));
+    recentDonations.rows.forEach(d => activities.push({ id: \`d-\${d.id}\`, type: 'donation', text: \`New donation of $\${d.amount}\`, date: d.created_at }));
+    recentWithdrawals.rows.forEach(w => activities.push({ id: \`w-\${w.id}\`, type: 'withdrawal', text: \`Withdrawal request for $\${w.amount} (\${w.status})\`, date: w.created_at }));
+
+    // Sort descending by date
+    activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    res.json({ success: true, data: activities.slice(0, 20) });
+  } catch (err) {
+    console.error('Activity log error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+const getAnalytics = async (req, res) => {
+  try {
+    const [topCampaigns, topDonors, categories] = await Promise.all([
+      pool.query(`SELECT id, title, current_amount, goal_amount, category FROM campaigns WHERE status = 'active' ORDER BY current_amount DESC LIMIT 5`),
+      pool.query(`SELECT COALESCE(donor_user_name, guest_name, 'Anonymous') as name, SUM(amount) as total_donated FROM donations WHERE status = 'success' GROUP BY COALESCE(donor_user_name, guest_name, 'Anonymous') ORDER BY total_donated DESC LIMIT 5`),
+      pool.query(`SELECT category, COUNT(*) as count FROM campaigns GROUP BY category ORDER BY count DESC`)
+    ]);
+
+    res.json({ 
+      success: true, 
+      data: {
+        topCampaigns: topCampaigns.rows,
+        topDonors: topDonors.rows,
+        categoryBreakdown: categories.rows
+      }
+    });
+  } catch (err) {
+    console.error('Analytics error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
@@ -986,11 +1034,12 @@ module.exports = {
   getPendingWithdrawals, approveWithdrawal, rejectWithdrawal,
   getAllKyc, approveKyc, rejectKyc,
   getAllDonations,
-  getPlatformStats,
+  getPlatformStats, getActivityLog, getAnalytics,
   getSettings, updateSetting, getStripeStatus, testEmail,
   updateAdminProfile,
   verifyPendingDonations,
   addFundsToCampaign,
+  addUserFunds: addFundsToUser,
   addFundsToUser,
   subtractFundsFromUser,
   deleteDonation,
