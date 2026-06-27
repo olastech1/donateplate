@@ -18,7 +18,7 @@ export default function Home() {
           campaignAPI.getStats()
         ]);
         if (campaignsRes.data.success) {
-          setFeaturedCampaigns(campaignsRes.data.data.campaigns);
+          setFeaturedCampaigns(campaignsRes.data.data || []);
         }
         if (statsRes.data.success) {
           const d = statsRes.data.data;
