@@ -697,22 +697,46 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
 /* Modal */
 .dash-modal { background: #fff; border-radius: var(--radius-xl); width: 100%; max-width: 500px; box-shadow: var(--shadow-xl); animation: fadeUp 0.2s ease; }
 
+/* Mobile bar + overlay (hidden on desktop) */
+.dash-mobile-bar { display: none; }
+.dash-overlay { display: none; }
+.dash-menu-toggle { display: none; }
+
 /* ── Mobile responsive ── */
 @media (max-width: 768px) {
   .dash-shell { grid-template-columns: 1fr; }
+
+  /* Mobile top bar */
+  .dash-mobile-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: #fff;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 110;
+  }
+  .dash-menu-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: var(--radius-md);
+    background: var(--slate-100); border: none; cursor: pointer;
+    color: var(--slate-700); transition: background 0.15s;
+  }
+  .dash-menu-toggle:hover { background: var(--slate-200); }
+
+  /* Overlay */
+  .dash-overlay {
+    display: block; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 119;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Sidebar slides in from left */
   .dash-sidebar {
-    position: relative; width: 100%; height: auto;
-    flex-direction: row; align-items: center;
-    padding: 0; overflow-x: auto;
-    border-bottom: 1px solid var(--slate-800);
+    position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
+    transform: translateX(-100%); transition: transform 0.3s ease;
+    z-index: 120; flex-direction: column;
   }
-  .dash-brand, .dash-user-card, .dash-sidebar-footer { display: none; }
-  .dash-nav {
-    flex-direction: row; padding: 12px; gap: 4px;
-    overflow-x: auto; flex-wrap: nowrap;
-  }
-  .dash-nav-btn { padding: 8px 14px; font-size: 0.82rem; border-radius: var(--radius-full); }
-  .dash-nav-btn span { white-space: nowrap; }
+  .dash-sidebar.open { transform: translateX(0); }
+
   .dash-main { margin-left: 0; padding: 20px 16px; }
   .dash-title { font-size: 1.4rem; }
   .dash-stats { grid-template-columns: 1fr; }

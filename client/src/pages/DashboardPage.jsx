@@ -6,7 +6,7 @@ import {
   FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat,
   FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart, FiShield,
   FiAlertTriangle, FiAlertCircle, FiExternalLink, FiMessageSquare,
-  FiHome, FiTrendingUp, FiEye
+  FiHome, FiTrendingUp, FiEye, FiMenu, FiX
 } from 'react-icons/fi';
 
 /* ── Tab definitions ── */
@@ -27,6 +27,9 @@ export default function DashboardPage() {
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState('overview');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const switchTab = (key) => { setTab(key); setMobileMenuOpen(false); };
 
   /* data */
   const [campaigns, setCampaigns] = useState([]);
@@ -144,8 +147,21 @@ export default function DashboardPage() {
   return (
     <div className="dash-shell">
 
-      {/* ── SIDEBAR (desktop) / TOP BAR (mobile) ── */}
-      <aside className="dash-sidebar">
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && <div className="dash-overlay" onClick={() => setMobileMenuOpen(false)} />}
+
+      {/* Mobile top bar */}
+      <div className="dash-mobile-bar">
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: 'var(--slate-900)', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem' }}>
+          <span style={{ fontSize: '1.1em' }}>🍩</span> DonateFate
+        </Link>
+        <button className="dash-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+        </button>
+      </div>
+
+      {/* ── SIDEBAR ── */}
+      <aside className={`dash-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
         {/* brand */}
         <div className="dash-brand">
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem' }}>
@@ -165,7 +181,7 @@ export default function DashboardPage() {
         {/* nav */}
         <nav className="dash-nav">
           {TABS.map(t => (
-            <button key={t.key} className={`dash-nav-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
+            <button key={t.key} className={`dash-nav-btn ${tab === t.key ? 'active' : ''}`} onClick={() => switchTab(t.key)}>
               {t.icon}<span>{t.label}</span>
             </button>
           ))}
