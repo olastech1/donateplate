@@ -21,7 +21,12 @@ export default function Home() {
           setFeaturedCampaigns(campaignsRes.data.data.campaigns);
         }
         if (statsRes.data.success) {
-          setStats(statsRes.data.data);
+          const d = statsRes.data.data;
+          setStats({
+            total_donated: Number(d.donations?.total_raised || 0),
+            total_campaigns: Number(d.campaigns?.active || 0),
+            total_donors: Number(d.donations?.unique_donors || 0)
+          });
         }
       } catch (err) {
         console.error('Failed to fetch home data', err);
