@@ -19,6 +19,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import CreatorDashboardPage from './pages/CreatorDashboardPage';
+import ProfilePage from './pages/ProfilePage';
 
 import { useAuth } from './context/AuthContext';
 
@@ -44,6 +45,7 @@ function App() {
           <Route path="/campaigns/create" element={<CreateCampaignPage />} />
           <Route path="/track/:sessionId" element={<TrackingPage />} />
           <Route path="/donation/callback" element={<DonationCallbackPage />} />
+          <Route path="/profile/:id" element={<ProfilePage />} />
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

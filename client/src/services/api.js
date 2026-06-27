@@ -42,6 +42,8 @@ export const userAPI = {
   submitKyc: (data) => api.post('/users/kyc', data),
   createStripeConnectAccount: () => api.post('/users/stripe/connect'),
   getStripeConnectStatus: () => api.get('/users/stripe/status'),
+  getPublicProfile: (userId) => api.get(`/users/profile/${userId}`),
+  updateProfile: (data) => api.put('/users/profile', data),
 };
 
 // --- Withdrawals ---
@@ -62,6 +64,29 @@ export const donationAPI = {
 export const updateAPI = {
   list: (campaignId) => api.get(`/updates/${campaignId}`),
   create: (campaignId, data) => api.post(`/updates/${campaignId}`, data),
+};
+
+// --- Comments ---
+export const commentAPI = {
+  list: (campaignId, params) => api.get(`/comments/${campaignId}`, { params }),
+  create: (campaignId, data) => api.post(`/comments/${campaignId}`, data),
+  delete: (commentId) => api.delete(`/comments/${commentId}`),
+};
+
+// --- Reward Tiers ---
+export const rewardAPI = {
+  list: (campaignId) => api.get(`/rewards/${campaignId}`),
+  create: (campaignId, data) => api.post(`/rewards/${campaignId}`, data),
+  update: (rewardId, data) => api.put(`/rewards/${rewardId}`, data),
+  delete: (rewardId) => api.delete(`/rewards/${rewardId}`),
+};
+
+// --- Recurring Donations ---
+export const recurringAPI = {
+  create: (data) => api.post('/recurring', data),
+  getMySubscriptions: () => api.get('/recurring/me'),
+  cancel: (subscriptionId) => api.put(`/recurring/${subscriptionId}/cancel`),
+  getCampaignSubscriptions: (campaignId) => api.get(`/recurring/campaign/${campaignId}`),
 };
 
 // --- Admin ---

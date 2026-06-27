@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { donationAPI } from '../services/api';
+import { FiCheckCircle, FiClock, FiXCircle } from 'react-icons/fi';
 
 export default function TrackingPage() {
   const { sessionId } = useParams();
@@ -15,80 +16,90 @@ export default function TrackingPage() {
       .finally(() => setLoading(false));
   }, [sessionId]);
 
-  if (loading) return <div className="page"><div className="spinner" /></div>;
+  if (loading) return <div className="page flex-center"><div className="spinner" /></div>;
+  
   if (error) return (
-    <div className="page container" style={{ textAlign: 'center' }}>
-      <h2 style={{ marginBottom: '16px' }}>😕 {error}</h2>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>Double-check your tracking link and try again.</p>
-      <Link to="/" className="btn btn-primary">Back to Home</Link>
+    <div className="page container flex-center text-center animate-fade">
+      <div className="card card-glass" style={{ padding: '60px 40px', maxWidth: '500px' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>😕 {error}</h2>
+        <p className="text-muted mb-4">Double-check your tracking link and try again.</p>
+        <Link to="/" className="btn btn-primary">Back to Home</Link>
+      </div>
     </div>
   );
 
   const { donation, campaign, updates } = data;
+  
   const statusConfig = {
-    success: { icon: '✅', label: 'Successful', bg: 'var(--success-bg)', color: 'var(--success)' },
-    pending: { icon: '⏳', label: 'Processing', bg: 'var(--warning-bg)', color: 'var(--warning)' },
-    failed: { icon: '❌', label: 'Failed', bg: 'var(--danger-bg)', color: 'var(--danger)' },
+    success: { icon: <FiCheckCircle size={32} />, label: 'Successful', color: 'var(--emerald-600)' },
+    pending: { icon: <FiClock size={32} />, label: 'Processing', color: 'var(--amber-500)' },
+    failed: { icon: <FiXCircle size={32} />, label: 'Failed', color: 'var(--rose-500)' },
   };
+  
   const status = statusConfig[donation.status] || statusConfig.pending;
 
   return (
-    <div className="page container" id="tracking-page">
-      <div style={{ textAlign: 'center', marginBottom: '40px' }} className="animate-in">
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem' }}>Track Your Donation</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Session: {donation.session_id?.substring(0, 20)}...</p>
-      </div>
-
-      <div className="tracking-card animate-in">
-        <div className="tracking-status">
-          <div className="tracking-status-icon" style={{ background: status.bg, color: status.color }}>{status.icon}</div>
-          <h2 style={{ fontSize: '1.3rem', fontFamily: 'var(--font-display)' }}>Donation {status.label}</h2>
+    <div className="page" style={{ background: 'var(--bg-secondary)', minHeight: '100vh' }}>
+      <div className="container" style={{ maxWidth: '600px' }} id="tracking-page">
+        
+        <div style={{ textAlign: 'center', marginBottom: '40px' }} className="animate-fade">
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--slate-800)', marginBottom: '8px' }}>Track Your Donation</h1>
+          <p className="text-muted">Session: {donation.session_id?.substring(0, 20)}...</p>
         </div>
 
-        <div className="tracking-detail-row">
-          <span className="tracking-label">Amount</span>
-          <span className="tracking-value" style={{ color: 'var(--emerald-600)' }}>${Number(donation.amount).toLocaleString()}</span>
-        </div>
-        <div className="tracking-detail-row">
-          <span className="tracking-label">Date</span>
-          <span className="tracking-value">{new Date(donation.created_at).toLocaleDateString('en-US', { dateStyle: 'long' })}</span>
-        </div>
-        <div className="tracking-detail-row">
-          <span className="tracking-label">Campaign</span>
-          <span className="tracking-value">{campaign.title}</span>
-        </div>
-        <div className="tracking-detail-row">
-          <span className="tracking-label">Progress</span>
-          <span className="tracking-value">{campaign.progress_percent}%</span>
-        </div>
+        <div className="card card-glass animate-fade" style={{ animationDelay: '0.1s' }}>
+          <div className="card-body">
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '32px' }}>
+              <div style={{ color: status.color, marginBottom: '16px' }}>{status.icon}</div>
+              <h2 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-display)', color: 'var(--slate-800)' }}>Donation {status.label}</h2>
+            </div>
 
-        <div style={{ margin: '20px 0' }}>
-          <div className="progress-track" style={{ height: '10px' }}>
-            <div className="progress-fill" style={{ width: `${campaign.progress_percent}%` }} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <span>${Number(campaign.current_amount).toLocaleString()}</span>
-            <span>${Number(campaign.goal_amount).toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
-
-      {updates && updates.length > 0 && (
-        <div style={{ maxWidth: '600px', margin: '40px auto 0' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Campaign Updates</h3>
-          {updates.map(u => (
-            <div key={u.id} className="card" style={{ marginBottom: '12px' }}>
-              <div className="card-body">
-                {u.title && <h4 style={{ marginBottom: '4px' }}>{u.title}</h4>}
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{u.message}</p>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '8px' }}>
-                  {new Date(u.created_at).toLocaleDateString('en-US', { dateStyle: 'medium' })}
-                </p>
+            <div className="grid grid-2" style={{ gap: '20px', marginBottom: '32px' }}>
+              <div style={{ background: 'var(--slate-50)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
+                <div className="text-muted text-sm mb-1">Amount</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--emerald-600)' }}>${Number(donation.amount).toLocaleString()}</div>
+              </div>
+              <div style={{ background: 'var(--slate-50)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
+                <div className="text-muted text-sm mb-1">Date</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{new Date(donation.created_at).toLocaleDateString()}</div>
               </div>
             </div>
-          ))}
+
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
+              <div className="flex-between mb-2">
+                <span className="text-muted">Campaign</span>
+                <Link to={`/campaigns/${campaign.id}`} style={{ fontWeight: 600, color: 'var(--slate-800)' }}>{campaign.title}</Link>
+              </div>
+              
+              <div className="progress-track mt-4 mb-2" style={{ height: '8px' }}>
+                <div className="progress-fill" style={{ width: `${campaign.progress_percent}%` }} />
+              </div>
+              <div className="flex-between text-muted text-sm">
+                <span>${Number(campaign.current_amount).toLocaleString()} raised</span>
+                <span>${Number(campaign.goal_amount).toLocaleString()} goal</span>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+
+        {updates && updates.length > 0 && (
+          <div className="animate-fade" style={{ animationDelay: '0.2s', marginTop: '40px' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', color: 'var(--slate-800)' }}>Latest Campaign Updates</h3>
+            {updates.map(u => (
+              <div key={u.id} className="card card-glass mb-3">
+                <div className="card-body">
+                  <div className="flex-between mb-2">
+                    {u.title && <h4 style={{ margin: 0 }}>{u.title}</h4>}
+                    <span className="text-muted text-sm">{new Date(u.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <p style={{ color: 'var(--text-secondary)' }}>{u.message}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+      </div>
     </div>
   );
 }

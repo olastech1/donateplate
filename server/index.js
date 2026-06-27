@@ -1,5 +1,5 @@
 // ============================================================
-// DONATE PLEA — Express Server (Stripe + Neon Edition)
+// DONATEPLATE — Express Server (Stripe + Neon Edition)
 // ============================================================
 require('dotenv').config();
 const express = require('express');
@@ -17,6 +17,9 @@ const adminRoutes = require('./routes/admin');
 const userRoutes = require('./routes/users');
 const withdrawalRoutes = require('./routes/withdrawals');
 const settingsRoutes = require('./routes/settings');
+const commentRoutes = require('./routes/comments');
+const rewardRoutes = require('./routes/rewards');
+const recurringRoutes = require('./routes/recurring');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -70,12 +73,15 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/withdrawals', withdrawalRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/rewards', rewardRoutes);
+app.use('/api/recurring', recurringRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
-    message: 'Donate Plea API is running.',
+    message: 'DonatePlate API is running.',
     stack: 'Stripe + Neon PSQL',
     timestamp: new Date().toISOString()
   });
@@ -97,7 +103,7 @@ app.use((err, req, res, next) => {
 // ============================================================
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`\n🚀 Donate Plea API running on port ${PORT}`);
+    console.log(`\n🍽️  DonatePlate API running on port ${PORT}`);
     console.log(`📡 Health check: http://localhost:${PORT}/api/health`);
     console.log(`💳 Payment: Stripe Checkout`);
     console.log(`🗄️  Database: Neon PSQL\n`);

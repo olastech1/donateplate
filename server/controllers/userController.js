@@ -143,4 +143,83 @@ const getStripeConnectStatus = async (req, res) => {
   }
 };
 
-module.exports = { submitKyc, getMe, createStripeConnectAccount, getStripeConnectStatus };
+/**
+ * GET /api/users/profile/:userId
+ * Public — returns a user's public profile with their campaigns.
+ */
+const getPublicProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const userResult = await pool.query(
+      `SELECT id, name, avatar_url, bio, location, website, social_links,
+              total_donated, total_campaigns_supported, created_at
+       FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    // Get user's active campaigns
+    const campaignsResult = await pool.query(
+      `SELECT id, title, cover_image_url, goal_amount, current_amount, category, status, created_at
+       FROM campaigns
+       WHERE creator_id = $1 AND status = 'active'
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        ...userResult.rows[0],
+        campaigns: campaignsResult.rows
+      }
+    });
+  } catch (err) {
+    console.error('getPublicProfile error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+/**
+ * PUT /api/users/profile
+ * Auth required — update own profile.
+ */
+const updateProfile = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const { bio, location, website, social_links, avatar_url } = req.body;
+
+    // Validate social_links if provided
+    if (social_links && typeof social_links !== 'object') {
+      return res.status(400).json({ success: false, message: 'social_links must be a JSON object.' });
+    }
+
+    const result = await pool.query(
+      `UPDATE users SET
+        bio = COALESCE($1, bio),
+        location = COALESCE($2, location),
+        website = COALESCE($3, website),
+        social_links = COALESCE($4, social_links),
+        avatar_url = COALESCE($5, avatar_url),
+        updated_at = NOW()
+       WHERE id = $6
+       RETURNING id, name, email, avatar_url, bio, location, website, social_links, total_donated, total_campaigns_supported`,
+      [bio, location, website, social_links ? JSON.stringify(social_links) : null, avatar_url, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    console.error('updateProfile error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+module.exports = { submitKyc, getMe, createStripeConnectAccount, getStripeConnectStatus, getPublicProfile, updateProfile };

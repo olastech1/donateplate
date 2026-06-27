@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { campaignAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { FiImage, FiUploadCloud, FiCheckCircle } from 'react-icons/fi';
 
 const CATEGORIES = [
   { value: 'medical',      label: '🏥 Medical' },
@@ -12,15 +13,12 @@ const CATEGORIES = [
   { value: 'general',     label: '🌍 General' },
 ];
 
-// ── Client-side image compression using Canvas API ────────────
-// Resizes to max 1200×630 and converts to JPEG base64 (~50–150 KB)
 function compressImage(file, maxWidth = 1200, maxHeight = 630, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        // Calculate scaled dimensions
         let { width, height } = img;
         const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
         width  = Math.round(width  * ratio);
@@ -56,8 +54,7 @@ export default function CreateCampaignPage() {
     description: '', cover_image_url: '', deadline: ''
   });
 
-  // Image state
-  const [imagePreview, setImagePreview] = useState('');   // local blob URL for instant preview
+  const [imagePreview, setImagePreview] = useState('');
   const [compressing, setCompressing] = useState(false);
   const [imageError, setImageError] = useState('');
   const [dragOver, setDragOver] = useState(false);
@@ -66,11 +63,10 @@ export default function CreateCampaignPage() {
     if (!authLoading && !user) navigate('/login');
   }, [user, authLoading, navigate]);
 
-  if (authLoading || !user) return <div className="page"><div className="spinner" /></div>;
+  if (authLoading || !user) return <div className="page flex-center"><div className="spinner" /></div>;
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
-  // ── File picked / dropped ─────────────────────────────────
   const handleFileSelect = async (file) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -83,11 +79,9 @@ export default function CreateCampaignPage() {
     }
 
     setImageError('');
-    // Show instant local preview
     setImagePreview(URL.createObjectURL(file));
-
-    // Compress in background
     setCompressing(true);
+    
     try {
       const base64 = await compressImage(file);
       update('cover_image_url', base64);
@@ -112,7 +106,6 @@ export default function CreateCampaignPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // ── Step navigation ───────────────────────────────────────
   const goToStep2 = () => {
     if (!form.title || !form.goal_amount) {
       setError('Title and goal amount are required.');
@@ -148,63 +141,25 @@ export default function CreateCampaignPage() {
     }
   };
 
-  // ── Image drop zone ───────────────────────────────────────
   const ImageZone = () => (
     <div className="form-group">
       <label className="form-label">Cover Image (optional)</label>
-
       {imagePreview ? (
-        <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '12px' }}>
-          <img
-            src={imagePreview}
-            alt="Preview"
-            style={{ width: '100%', height: '220px', objectFit: 'cover', display: 'block' }}
-          />
-
-          {/* Compressing spinner overlay */}
+        <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '12px', boxShadow: 'var(--shadow-md)' }}>
+          <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block' }} />
           {compressing && (
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'rgba(0,0,0,0.55)',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: '10px', color: '#fff'
-            }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px', color: '#fff' }}>
               <div className="spinner" style={{ width: '28px', height: '28px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
               <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Optimising image…</span>
             </div>
           )}
-
-          {/* Hover controls */}
           {!compressing && (
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'rgba(0,0,0,0)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              transition: 'background 0.2s',
-            }}
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'background 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.45)'}
               onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0)'}
             >
-              <button type="button" onClick={() => fileInputRef.current?.click()}
-                style={{ background: '#fff', color: '#0f172a', border: 'none', borderRadius: '8px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}>
-                🔄 Change
-              </button>
-              <button type="button" onClick={handleRemove}
-                style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}>
-                🗑 Remove
-              </button>
-            </div>
-          )}
-
-          {/* Size badge */}
-          {!compressing && form.cover_image_url && (
-            <div style={{
-              position: 'absolute', bottom: '8px', right: '8px',
-              background: 'rgba(0,0,0,0.6)', color: '#fff',
-              fontSize: '0.7rem', padding: '3px 8px', borderRadius: '100px',
-              backdropFilter: 'blur(4px)'
-            }}>
-              ✅ {Math.round(form.cover_image_url.length * 0.75 / 1024)} KB
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="btn btn-sm" style={{ background: '#fff', color: '#0f172a' }}>🔄 Change</button>
+              <button type="button" onClick={handleRemove} className="btn btn-sm" style={{ background: '#ef4444', color: '#fff' }}>🗑 Remove</button>
             </div>
           )}
         </div>
@@ -215,171 +170,127 @@ export default function CreateCampaignPage() {
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           style={{
-            border: `2px dashed ${dragOver ? 'var(--primary)' : 'var(--slate-300)'}`,
-            borderRadius: 'var(--radius-md)',
-            padding: '44px 20px',
-            textAlign: 'center',
-            cursor: 'pointer',
-            background: dragOver ? 'rgba(139,92,246,0.06)' : 'var(--slate-50)',
-            transition: 'all 0.2s',
-            marginBottom: '8px',
+            border: `2px dashed ${dragOver ? 'var(--accent)' : 'var(--slate-300)'}`,
+            borderRadius: 'var(--radius-md)', padding: '60px 20px', textAlign: 'center', cursor: 'pointer',
+            background: dragOver ? 'rgba(249,115,22,0.05)' : 'var(--slate-50)', transition: 'all 0.2s', marginBottom: '8px',
           }}
         >
-          <div style={{ fontSize: '2.8rem', marginBottom: '10px' }}>🖼️</div>
-          <p style={{ fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+          <FiUploadCloud size={48} color={dragOver ? 'var(--accent)' : 'var(--slate-400)'} style={{ marginBottom: '16px' }} />
+          <p style={{ fontWeight: 600, margin: '0 0 4px', color: 'var(--slate-800)' }}>
             {dragOver ? 'Drop it here!' : 'Click to upload or drag & drop'}
           </p>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
             JPG · PNG · WebP · GIF · up to 15 MB
           </p>
         </div>
       )}
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        style={{ display: 'none' }}
-        onChange={e => handleFileSelect(e.target.files[0])}
-      />
-
-      {imageError && (
-        <p style={{ color: 'var(--error)', fontSize: '0.85rem', marginTop: '6px' }}>⚠️ {imageError}</p>
-      )}
-      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-        Images are compressed automatically — no storage account needed.
-      </p>
+      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFileSelect(e.target.files[0])} />
+      {imageError && <p className="text-error" style={{ fontSize: '0.85rem', marginTop: '6px' }}>⚠️ {imageError}</p>}
     </div>
   );
 
-  // ── Render ────────────────────────────────────────────────
   return (
-    <div className="page container" style={{ maxWidth: '700px', margin: '0 auto' }} id="create-campaign-page">
-      <h1 style={{ fontFamily: 'var(--font-display)', textAlign: 'center', marginBottom: '8px' }}>Start a Campaign</h1>
-      <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '40px' }}>Step {step} of 3</p>
+    <div className="page" style={{ background: 'var(--bg-secondary)', minHeight: '100vh' }}>
+      <div className="container" style={{ maxWidth: '700px', margin: '0 auto' }}>
+        
+        <div className="text-center mb-4">
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--slate-800)', marginBottom: '8px' }}>Start a Campaign</h1>
+          <p className="text-muted">Step {step} of 3</p>
+        </div>
 
-      {/* Progress bar */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
-        {[1, 2, 3].map(s => (
-          <div key={s} style={{
-            flex: 1, height: '4px', borderRadius: '100px',
-            background: s <= step ? 'var(--accent)' : 'var(--slate-200)',
-            transition: 'background 0.3s'
-          }} />
-        ))}
+        {/* Progress bar */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '40px' }}>
+          {[1, 2, 3].map(s => (
+            <div key={s} style={{
+              flex: 1, height: '6px', borderRadius: '100px',
+              background: s <= step ? 'var(--accent)' : 'var(--slate-200)',
+              transition: 'background 0.3s'
+            }} />
+          ))}
+        </div>
+
+        <div className="card card-glass animate-in">
+          <div className="card-body">
+            {error && <div className="alert alert-error mb-4">{error}</div>}
+
+            {/* Step 1: Basics */}
+            {step === 1 && (
+              <div className="animate-fade">
+                <div className="form-group">
+                  <label className="form-label">Campaign Title *</label>
+                  <input type="text" className="form-input" value={form.title} onChange={e => update('title', e.target.value)} maxLength={150} placeholder="e.g., Help rebuild the local library" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Category *</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+                    {CATEGORIES.map(c => (
+                      <button key={c.value} type="button" onClick={() => update('category', c.value)} className={`btn ${form.category === c.value ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '10px' }}>
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Funding Goal ($) *</label>
+                  <input type="number" className="form-input" placeholder="e.g., 5000" value={form.goal_amount} onChange={e => update('goal_amount', e.target.value)} min="100" />
+                </div>
+                <button className="btn btn-primary btn-block btn-lg mt-4" onClick={goToStep2}>Continue →</button>
+              </div>
+            )}
+
+            {/* Step 2: Story + Image */}
+            {step === 2 && (
+              <div className="animate-fade">
+                <div className="form-group">
+                  <label className="form-label">Tell Your Story *</label>
+                  <textarea className="form-textarea" style={{ minHeight: '240px' }} placeholder="Share the details of why this campaign matters..." value={form.description} onChange={e => update('description', e.target.value)} />
+                </div>
+                <ImageZone />
+                <div className="flex gap-2 mt-4">
+                  <button className="btn btn-secondary" onClick={() => setStep(1)}>← Back</button>
+                  <button className="btn btn-primary flex-1" onClick={goToStep3} disabled={compressing}>
+                    {compressing ? '⏳ Processing image…' : 'Continue →'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Review */}
+            {step === 3 && (
+              <div className="animate-fade">
+                {form.cover_image_url && (
+                  <div style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '24px', boxShadow: 'var(--shadow-sm)' }}>
+                    <img src={form.cover_image_url} alt="Cover preview" style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block' }} />
+                  </div>
+                )}
+                <div style={{ background: 'var(--slate-50)', padding: '24px', borderRadius: 'var(--radius-md)', marginBottom: '24px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px', fontSize: '1.2rem' }}>Review Details</h3>
+                  <div className="grid grid-2" style={{ gap: '16px' }}>
+                    <div><div className="text-muted text-sm">Title</div><div style={{ fontWeight: 600 }}>{form.title}</div></div>
+                    <div><div className="text-muted text-sm">Category</div><div style={{ fontWeight: 600 }}>{CATEGORIES.find(c => c.value === form.category)?.label}</div></div>
+                    <div><div className="text-muted text-sm">Goal</div><div style={{ fontWeight: 600, color: 'var(--emerald-600)' }}>${Number(form.goal_amount).toLocaleString()}</div></div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Deadline (optional)</label>
+                  <input type="date" className="form-input" value={form.deadline} onChange={e => update('deadline', e.target.value)} />
+                </div>
+                <div className="alert alert-info mb-4" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <FiCheckCircle size={24} />
+                  <div>Your campaign will go live immediately after submission.</div>
+                </div>
+                <div className="flex gap-2">
+                  <button className="btn btn-secondary" onClick={() => setStep(2)}>← Back</button>
+                  <button className="btn btn-primary flex-1 btn-lg" onClick={handleSubmit} disabled={loading}>
+                    {loading ? 'Submitting…' : 'Launch Campaign 🚀'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-
-      {error && <div className="alert alert-error">{error}</div>}
-
-      {/* ── Step 1: Basics ── */}
-      {step === 1 && (
-        <div className="animate-in">
-          <div className="form-group">
-            <label className="form-label">Campaign Title *</label>
-            <input type="text" className="form-input" value={form.title}
-              onChange={e => update('title', e.target.value)} maxLength={150}
-              placeholder="e.g., Help John get surgery" id="campaign-title" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Category *</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-              {CATEGORIES.map(c => (
-                <button key={c.value} type="button"
-                  onClick={() => update('category', c.value)}
-                  className={`amount-preset ${form.category === c.value ? 'active' : ''}`}>
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Funding Goal ($) *</label>
-            <input type="number" className="form-input" placeholder="e.g., 500000"
-              value={form.goal_amount} onChange={e => update('goal_amount', e.target.value)} min="1000" id="campaign-goal" />
-          </div>
-          <button className="btn btn-primary btn-block btn-lg" onClick={goToStep2}>
-            Continue →
-          </button>
-        </div>
-      )}
-
-      {/* ── Step 2: Story + Image ── */}
-      {step === 2 && (
-        <div className="animate-in">
-          <div className="form-group">
-            <label className="form-label">Tell Your Story *</label>
-            <textarea className="form-textarea" style={{ minHeight: '200px' }}
-              placeholder="Share the details of why this campaign matters..."
-              value={form.description} onChange={e => update('description', e.target.value)} />
-          </div>
-
-          <ImageZone />
-
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-secondary btn-block" onClick={() => setStep(1)}>← Back</button>
-            <button className="btn btn-primary btn-block" onClick={goToStep3} disabled={compressing}>
-              {compressing ? '⏳ Processing image…' : 'Continue →'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 3: Review ── */}
-      {step === 3 && (
-        <div className="animate-in">
-          {form.cover_image_url && (
-            <div style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '20px', boxShadow: 'var(--shadow-md)' }}>
-              <img src={form.cover_image_url} alt="Campaign cover"
-                style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }} />
-            </div>
-          )}
-
-          <div className="card" style={{ marginBottom: '24px' }}>
-            <div className="card-body">
-              <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '16px' }}>Review Your Campaign</h3>
-              <div className="tracking-detail-row">
-                <span className="tracking-label">Title</span>
-                <span className="tracking-value">{form.title}</span>
-              </div>
-              <div className="tracking-detail-row">
-                <span className="tracking-label">Category</span>
-                <span className="tracking-value">{form.category}</span>
-              </div>
-              <div className="tracking-detail-row">
-                <span className="tracking-label">Goal</span>
-                <span className="tracking-value">${Number(form.goal_amount).toLocaleString()}</span>
-              </div>
-              <div className="tracking-detail-row">
-                <span className="tracking-label">Cover Image</span>
-                <span className="tracking-value">{form.cover_image_url ? '✅ Uploaded' : '—  No image'}</span>
-              </div>
-              <div className="tracking-detail-row">
-                <span className="tracking-label">Story</span>
-                <span className="tracking-value" style={{ maxWidth: '300px', textAlign: 'right' }}>
-                  {form.description.substring(0, 100)}{form.description.length > 100 ? '…' : ''}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Deadline (optional)</label>
-            <input type="date" className="form-input" value={form.deadline}
-              onChange={e => update('deadline', e.target.value)} id="campaign-deadline" />
-          </div>
-
-          <div className="alert alert-warning" style={{ marginBottom: '20px' }}>
-            ⏳ Your campaign will be reviewed by an admin before going live.
-          </div>
-
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-secondary btn-block" onClick={() => setStep(2)}>← Back</button>
-            <button className="btn btn-primary btn-block btn-lg" onClick={handleSubmit} disabled={loading} id="campaign-submit">
-              {loading ? 'Submitting…' : 'Submit Campaign 🚀'}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
