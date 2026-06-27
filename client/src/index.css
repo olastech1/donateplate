@@ -326,15 +326,17 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
 
 @media (max-width: 768px) {
   .navbar-hamburger { display: flex; }
+  .hide-on-mobile { display: none !important; }
   .navbar-links {
     position: fixed; top: var(--nav-height); left: 0; right: 0; bottom: 0;
-    background: #fff; flex-direction: column; padding: 24px; gap: 16px;
+    background: #fff; flex-direction: column; padding: 24px; gap: 8px;
     transform: translateY(-10px); opacity: 0; pointer-events: none;
     transition: all 0.3s;
     z-index: 999;
+    overflow-y: auto;
   }
   .navbar-links.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
-  .navbar-links a { width: 100%; text-align: center; padding: 12px !important; font-size: 1.1rem !important; }
+  .navbar-links a { width: 100%; padding: 12px !important; font-size: 1.05rem !important; display: flex; align-items: center; }
 }
 
 /* === Footer === */

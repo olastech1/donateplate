@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { campaignAPI, userAPI, withdrawalAPI, updateAPI, recurringAPI, rewardAPI, donationAPI } from '../services/api';
-import { FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat, FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart, FiShield, FiAlertTriangle } from 'react-icons/fi';
+import { FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat, FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart, FiShield, FiAlertTriangle, FiAlertCircle, FiTrendingUp, FiBarChart2 } from 'react-icons/fi';
 
 const TABS = [
   { key: 'profile', label: 'Profile', icon: <FiUser /> },
@@ -142,11 +142,24 @@ export default function DashboardPage() {
     <div className="dash-shell">
       {/* Sidebar Navigation */}
       <div className="dash-sidebar p-4" style={{ paddingTop: '32px' }}>
-        <div style={{ padding: '0 24px 40px' }}>
+        <div style={{ padding: '0 24px 32px' }}>
           <Link to="/" className="navbar-logo" style={{ color: '#fff' }}>
-            <span style={{ background: '#fff', color: 'var(--slate-900)', padding: '4px 8px', borderRadius: '8px' }}>DP</span>
-            DonateFate
+            <span style={{ fontSize: '1.1em', marginRight: '6px' }}>🍩</span>
+            <span style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>DonateFate</span>
           </Link>
+        </div>
+
+        {/* User info in sidebar */}
+        <div style={{ padding: '0 20px 24px', borderBottom: '1px solid var(--slate-800)', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--gradient-sunset)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.1rem', flexShrink: 0 }}>
+              {user.name?.charAt(0).toUpperCase()}
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--slate-500)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.email}</div>
+            </div>
+          </div>
         </div>
         
         <div className="dash-nav-container" style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
@@ -168,27 +181,36 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <div className="dash-footer-container" style={{ padding: '24px 16px', borderTop: '1px solid var(--slate-800)' }}>
-          <button onClick={() => { logout(); navigate('/'); }} className="btn btn-ghost btn-block text-muted" style={{ justifyContent: 'flex-start', padding: '12px 16px' }}>
+        <div className="dash-footer-container" style={{ padding: '16px', borderTop: '1px solid var(--slate-800)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <Link to="/campaigns/create" className="btn btn-primary btn-block" style={{ justifyContent: 'center', marginBottom: '8px' }}>
+            <FiPlus /> New Campaign
+          </Link>
+          <button onClick={() => { logout(); navigate('/'); }} className="btn btn-ghost btn-block text-muted" style={{ justifyContent: 'flex-start', padding: '10px 16px' }}>
             <FiLogOut /> Sign Out
           </button>
-          <Link to="/" className="btn btn-ghost btn-block text-muted mt-1" style={{ justifyContent: 'flex-start', padding: '12px 16px' }}>
-            <FiArrowLeft /> Back to Home
+          <Link to="/" className="btn btn-ghost btn-block text-muted" style={{ justifyContent: 'flex-start', padding: '10px 16px' }}>
+            <FiArrowLeft /> Back to Site
           </Link>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="dash-content">
-        <div className="flex-between mb-4">
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--slate-900)' }}>
-            {TABS.find(t => t.key === tab)?.label}
-          </h1>
-          {tab === 'campaigns' && (
-            <Link to="/campaigns/create" className="btn btn-primary">
-              <FiPlus /> Start New Campaign
-            </Link>
-          )}
+        {/* Dashboard header with quick stats */}
+        <div style={{ background: 'linear-gradient(135deg, #3730A3 0%, #4F46E5 100%)', borderRadius: 'var(--radius-xl)', padding: '28px 32px', marginBottom: '28px', color: '#fff' }}>
+          <div className="flex-between">
+            <div>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 800, color: '#fff', marginBottom: '4px' }}>
+                {TABS.find(t => t.key === tab)?.label}
+              </h1>
+              <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.95rem' }}>Welcome back, {user.name?.split(' ')[0]}!</p>
+            </div>
+            {tab === 'campaigns' && (
+              <Link to="/campaigns/create" className="btn" style={{ background: '#fff', color: 'var(--accent)', fontWeight: 700 }}>
+                <FiPlus /> New Campaign
+              </Link>
+            )}
+          </div>
         </div>
 
         {message.text && (
