@@ -316,7 +316,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleVerifyUser = async (id, name) => {
-    if (!window.confirm(`Manually verify user "${name}"?`)) return;
+    if (!window.confirm(`Manually verify email for user "${name}"?`)) return;
     setActionLoading(`verify-${id}`);
     try {
       const res = await adminAPI.verifyUser(id);
@@ -882,7 +882,7 @@ export default function AdminDashboardPage() {
                               <td>
                                 <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                   {!u.email_verified && (
-                                    <button className="adm-btn primary xs" onClick={() => handleVerifyUser(u.id, u.name)} disabled={actionLoading === `verify-${u.id}`}>Verify</button>
+                                    <button className="adm-btn primary xs" onClick={() => handleVerifyUser(u.id, u.name)} disabled={actionLoading === `verify-${u.id}`}>Verify Email</button>
                                   )}
                                   {u.is_banned ? (
                                     <button className="adm-btn success xs" onClick={() => handleUserUnban(u.id, u.name)} disabled={actionLoading === `user-unban-${u.id}`}>Unban</button>
