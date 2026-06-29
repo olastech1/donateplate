@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { campaignAPI, userAPI, withdrawalAPI, updateAPI, recurringAPI, rewardAPI, donationAPI } from '../services/api';
+import CampaignCard from '../components/campaign/CampaignCard';
 import {
   FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat,
   FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart, FiShield,
@@ -427,6 +428,28 @@ export default function DashboardPage() {
                   <div className="profile-stat-value">{campaigns.length}</div>
                   <div className="profile-stat-label">Campaigns Created</div>
                 </div>
+              </div>
+
+              {/* User's Campaigns */}
+              <div className="animate-in" style={{ animationDelay: '0.2s', marginTop: '48px', marginBottom: '24px' }}>
+                <div className="flex-between mb-4">
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--slate-900)' }}>
+                    Campaigns by {userData.name}
+                  </h3>
+                </div>
+                
+                {campaigns.length > 0 ? (
+                  <div className="grid grid-3">
+                    {campaigns.map(campaign => (
+                      <CampaignCard key={campaign.id} campaign={campaign} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="card text-center" style={{ padding: '60px 24px', background: '#fff', borderRadius: 'var(--radius-xl)', border: '1px dashed var(--border)' }}>
+                    <p className="text-muted" style={{ fontSize: '1.1rem', marginBottom: '16px' }}>You haven't created any active campaigns yet.</p>
+                    <Link to="/campaigns/create" className="btn btn-primary"><FiPlus /> Create Campaign</Link>
+                  </div>
+                )}
               </div>
             </div>
           )}
