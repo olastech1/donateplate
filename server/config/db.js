@@ -6,7 +6,9 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+  // Vercel Postgres integration forcibly injects POSTGRES_URL which points to an empty DB.
+  // We prioritize DATABASE_URL which was set manually by the user to the correct DB.
+  connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
   ssl: {
     rejectUnauthorized: false  // Required for Neon's serverless driver
   }
