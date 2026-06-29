@@ -21,5 +21,6 @@ router.get('/:id/donors', campaignController.getCampaignDonors);
 router.get('/me/all', authenticate, requireCreator, campaignController.getMyCampaigns);
 router.post('/', authenticate, requireCreator, campaignController.createCampaign);
 router.put('/:id', authenticate, requireCreator, campaignController.updateCampaign);
+router.delete('/:id', authenticate, requireCreator, campaignController.deleteCampaign);
 
 module.exports = router;

@@ -33,6 +33,7 @@ export const campaignAPI = {
   getDonors: (id, params) => api.get(`/campaigns/${id}/donors`, { params }),
   create: (data) => api.post('/campaigns', data),
   update: (id, data) => api.put(`/campaigns/${id}`, data),
+  delete: (id) => api.delete(`/campaigns/${id}`),
   getMyCampaigns: () => api.get('/campaigns/me/all'),
 };
 

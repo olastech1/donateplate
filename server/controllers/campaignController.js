@@ -318,6 +318,47 @@ const getMyCampaigns = async (req, res) => {
   }
 };
 
+/**
+ * DELETE /api/campaigns/:id
+ * Delete a campaign (creator who owns it, or admin).
+ */
+const deleteCampaign = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verify ownership (unless admin)
+    if (req.user.role !== 'admin') {
+      const ownership = await pool.query(
+        'SELECT id FROM campaigns WHERE id = $1 AND creator_id = $2',
+        [id, req.user.id]
+      );
+      if (ownership.rows.length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'You can only delete your own campaigns.'
+        });
+      }
+    }
+
+    const result = await pool.query(
+      'DELETE FROM campaigns WHERE id = $1 RETURNING id',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Campaign not found.' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Campaign deleted successfully.'
+    });
+  } catch (err) {
+    console.error('Delete campaign error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
 module.exports = {
   listActiveCampaigns,
   getPublicStats,
@@ -325,5 +366,6 @@ module.exports = {
   getCampaignDonors,
   createCampaign,
   updateCampaign,
+  deleteCampaign,
   getMyCampaigns
 };

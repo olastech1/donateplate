@@ -598,6 +598,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
 
 /* Sidebar nav */
 .dash-nav { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+.dash-nav-section-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--slate-500); padding: 8px 12px 4px; letter-spacing: 0.05em; margin-top: 8px; }
 .dash-nav-btn {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 16px; border-radius: var(--radius-md);

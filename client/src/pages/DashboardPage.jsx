@@ -6,7 +6,7 @@ import {
   FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat,
   FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart, FiShield,
   FiAlertTriangle, FiAlertCircle, FiExternalLink, FiMessageSquare,
-  FiHome, FiTrendingUp, FiEye, FiMenu, FiX
+  FiHome, FiTrendingUp, FiEye, FiMenu, FiX, FiCompass, FiInfo, FiMessageCircle, FiTrash2
 } from 'react-icons/fi';
 
 /* ── Tab definitions ── */
@@ -50,6 +50,8 @@ export default function DashboardPage() {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [rewardForm, setRewardForm] = useState({ title: '', description: '', min_amount: '', max_claims: '' });
+  const [showEditCampaignModal, setShowEditCampaignModal] = useState(false);
+  const [editCampaignForm, setEditCampaignForm] = useState({ title: '', description: '', goal_amount: '' });
 
   /* ── data fetching ── */
   const fetchData = async () => {
@@ -139,6 +141,40 @@ export default function DashboardPage() {
     catch { setMsg({ type: 'error', text: 'Failed to cancel subscription.' }); }
   };
 
+  const handleDeleteCampaign = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) return;
+    try { 
+      await campaignAPI.delete(id); 
+      setMsg({ type: 'success', text: 'Campaign deleted.' });
+      fetchData(); 
+    }
+    catch (err) { 
+      setMsg({ type: 'error', text: err.response?.data?.message || 'Failed to delete campaign.' }); 
+    }
+  };
+
+  const openEditCampaign = (campaign) => {
+    setActiveCampaignId(campaign.id);
+    setEditCampaignForm({
+      title: campaign.title || '',
+      description: campaign.description || '',
+      goal_amount: campaign.goal_amount || ''
+    });
+    setShowEditCampaignModal(true);
+  };
+
+  const handleEditCampaignSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await campaignAPI.update(activeCampaignId, editCampaignForm);
+      setMsg({ type: 'success', text: 'Campaign updated successfully.' });
+      setShowEditCampaignModal(false);
+      fetchData();
+    } catch (err) {
+      setMsg({ type: 'error', text: err.response?.data?.message || 'Failed to update campaign.' });
+    }
+  };
+
   if (authLoading || !user) return <div className="page flex-center"><div className="spinner" /></div>;
 
   /* ═══════════════════════════════════════════════════════════
@@ -180,18 +216,29 @@ export default function DashboardPage() {
 
         {/* nav */}
         <nav className="dash-nav">
+          <div className="dash-nav-section-title">Dashboard</div>
           {TABS.map(t => (
             <button key={t.key} className={`dash-nav-btn ${tab === t.key ? 'active' : ''}`} onClick={() => switchTab(t.key)}>
               {t.icon}<span>{t.label}</span>
             </button>
           ))}
+
+          <div className="dash-nav-section-title" style={{ marginTop: '24px' }}>Site</div>
+          <Link to="/explore" className="dash-nav-btn" style={{ textDecoration: 'none' }}>
+            <FiCompass /><span>Explore</span>
+          </Link>
+          <Link to="/about" className="dash-nav-btn" style={{ textDecoration: 'none' }}>
+            <FiInfo /><span>About</span>
+          </Link>
+          <Link to="/contact" className="dash-nav-btn" style={{ textDecoration: 'none' }}>
+            <FiMessageCircle /><span>Contact</span>
+          </Link>
         </nav>
 
         {/* footer */}
         <div className="dash-sidebar-footer">
           <Link to="/campaigns/create" className="dash-create-btn"><FiPlus /> New Campaign</Link>
           <button onClick={() => { logout(); navigate('/'); }} className="dash-nav-btn" style={{ color: 'var(--slate-400)' }}><FiLogOut /><span>Sign Out</span></button>
-          <Link to="/" className="dash-nav-btn" style={{ color: 'var(--slate-400)', textDecoration: 'none' }}><FiArrowLeft /><span>Back to Site</span></Link>
         </div>
       </aside>
 
@@ -398,6 +445,9 @@ export default function DashboardPage() {
                           {c.status === 'active' && <Link to={`/campaigns/${c.id}`} className="btn btn-sm btn-outline"><FiEye /> View</Link>}
                           <button className="btn btn-sm btn-secondary" onClick={() => { setActiveCampaignId(c.id); setShowUpdateModal(true); }}><FiMessageSquare /> Post Update</button>
                           <button className="btn btn-sm btn-outline" onClick={() => { setActiveCampaignId(c.id); setShowRewardModal(true); }}><FiGift /> Add Reward</button>
+                          {/* Quick Actions */}
+                          <button className="btn btn-sm btn-outline" style={{ color: 'var(--slate-600)', borderColor: 'var(--slate-300)' }} onClick={() => openEditCampaign(c)}><FiEdit3 /> Edit</button>
+                          <button className="btn btn-sm btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleDeleteCampaign(c.id)}><FiTrash2 /> Delete</button>
                         </div>
                       </div>
                     </div>
@@ -517,6 +567,23 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 24 }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowRewardModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary">Save Reward</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditCampaignModal && (
+        <div className="modal-overlay" onClick={() => setShowEditCampaignModal(false)}>
+          <div className="dash-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header"><h3>Edit Campaign</h3><button className="btn btn-icon" onClick={() => setShowEditCampaignModal(false)}>✕</button></div>
+            <form onSubmit={handleEditCampaignSubmit} className="modal-body">
+              <div className="form-group"><label className="form-label">Title *</label><input type="text" className="form-input" required value={editCampaignForm.title} onChange={e => setEditCampaignForm({...editCampaignForm, title: e.target.value})} /></div>
+              <div className="form-group"><label className="form-label">Description *</label><textarea className="form-textarea" rows="4" required value={editCampaignForm.description} onChange={e => setEditCampaignForm({...editCampaignForm, description: e.target.value})} /></div>
+              <div className="form-group"><label className="form-label">Goal Amount ($) *</label><input type="number" className="form-input" min="1" required value={editCampaignForm.goal_amount} onChange={e => setEditCampaignForm({...editCampaignForm, goal_amount: e.target.value})} /></div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 24 }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditCampaignModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Save Changes</button>
               </div>
             </form>
           </div>
