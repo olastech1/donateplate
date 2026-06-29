@@ -94,7 +94,7 @@ export default function GuestCheckoutForm({ campaignId, campaignTitle, selectedR
   }
 
   return (
-    <div className="donate-box card-glass" id="guest-checkout-form">
+    <div className="donate-box" id="guest-checkout-form" style={{ padding: 0, background: 'transparent', boxShadow: 'none', border: 'none' }}>
       <h3 style={{ fontFamily: 'var(--font-display)', marginBottom: '24px', fontSize: '1.3rem', fontWeight: 700 }}>
         Support This Campaign
       </h3>

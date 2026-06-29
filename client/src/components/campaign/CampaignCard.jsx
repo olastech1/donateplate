@@ -82,6 +82,12 @@ export default function CampaignCard({ campaign }) {
             <FiClock /> {getDaysLeft(campaign.end_date)} days left
           </div>
         </div>
+        
+        <div style={{ marginTop: '16px' }}>
+          <div className="btn btn-primary" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+            Donate Now
+          </div>
+        </div>
       </div>
       
       <style>{`

@@ -409,71 +409,89 @@ export default function CampaignPage() {
           </div>
 
           {/* Right Column (Sticky Donation Sidebar) */}
-          <div className="checkout-container hide-on-mobile">
+          <div className="checkout-container hide-on-mobile" style={{ padding: 0, border: 'none', background: 'transparent', boxShadow: 'none' }}>
             <div style={{ position: 'sticky', top: '100px' }}>
               
-              {/* Progress Summary Box */}
-              <div className="card mb-4" style={{ boxShadow: 'var(--shadow-md)' }}>
-                <div className="card-body">
-                  <div className="progress-track mb-3" style={{ height: '10px' }}>
-                    <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+              <div className="card checkout-panel" style={{ boxShadow: 'var(--shadow-xl)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}>
+                <div className="card-body" style={{ padding: '32px' }}>
+                  <div className="progress-track mb-3" style={{ height: '8px', background: 'var(--slate-100)' }}>
+                    <div className="progress-fill" style={{ width: `${progress}%`, background: 'var(--teal-500)', borderRadius: '4px' }}></div>
                   </div>
                   
                   <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--slate-900)', lineHeight: 1 }}>
                     {formatCurrency(campaign.current_amount)}
                   </div>
-                  <div className="text-muted mt-2 mb-4" style={{ fontSize: '1.05rem' }}>
-                    raised of {formatCurrency(campaign.goal_amount)} goal
+                  <div className="text-muted mt-2 mb-4" style={{ fontSize: '1rem', fontWeight: 500 }}>
+                    <span style={{ color: 'var(--slate-700)' }}>raised of {formatCurrency(campaign.goal_amount)} goal</span>
                   </div>
                   
-                  <div className="grid grid-2 mb-4" style={{ gap: '16px' }}>
-                    <div style={{ background: 'var(--slate-50)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ fontWeight: 700, fontSize: '1.3rem', color: 'var(--slate-900)' }}>{campaign.donor_count || donors.length}</div>
-                      <div className="text-muted" style={{ fontSize: '0.9rem' }}>Donations</div>
-                    </div>
-                    <div style={{ background: 'var(--slate-50)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ fontWeight: 700, fontSize: '1.3rem', color: 'var(--slate-900)' }}>{getDaysLeft(campaign.end_date)}</div>
-                      <div className="text-muted" style={{ fontSize: '0.9rem' }}>Days Left</div>
+                  <div className="text-muted mb-6" style={{ fontSize: '0.95rem' }}>
+                    {campaign.donor_count || donors.length} donations
+                  </div>
+                  
+                  <div className="flex flex-col gap-3 mb-6">
+                    <button 
+                      onClick={() => document.getElementById('guest-checkout-form')?.scrollIntoView({ behavior: 'smooth' })}
+                      className="btn btn-primary btn-block btn-lg"
+                      style={{ fontSize: '1.15rem', padding: '16px', background: 'linear-gradient(to right, var(--teal-500), var(--teal-600))', border: 'none', boxShadow: '0 4px 12px rgba(20, 184, 166, 0.25)', borderRadius: 'var(--radius-lg)' }}
+                    >
+                      Donate now
+                    </button>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(window.location.href);
+                          alert('Campaign link copied to clipboard!');
+                        }}
+                        className="btn btn-secondary flex-1"
+                        style={{ fontSize: '1.05rem', padding: '14px', background: 'var(--slate-100)', color: 'var(--slate-900)', border: 'none', borderRadius: 'var(--radius-lg)' }}
+                      >
+                        <FiShare2 /> Share
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (user) { alert('Saved to favorites!'); } 
+                          else { alert('Please log in to save campaigns.'); }
+                        }}
+                        className="btn btn-secondary"
+                        style={{ padding: '14px 20px', background: 'var(--slate-100)', color: 'var(--slate-900)', border: 'none', borderRadius: 'var(--radius-lg)' }}
+                        aria-label="Save Campaign"
+                      >
+                        <FiHeart />
+                      </button>
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(window.location.href);
-                        alert('Campaign link copied to clipboard!');
-                      }}
-                      className="btn btn-secondary flex-1"
-                    >
-                      <FiShare2 /> Share
-                    </button>
-                    <button 
-                      onClick={() => {
-                        if (user) { alert('Saved to favorites!'); } 
-                        else { alert('Please log in to save campaigns.'); }
-                      }}
-                      className="btn btn-secondary" style={{ padding: '0 16px' }}
-                      aria-label="Save Campaign"
-                    >
-                      <FiHeart />
-                    </button>
-                  </div>
+                  {donors.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px 0 8px', borderTop: '1px solid var(--border-light)' }}>
+                      <div className="flex-center" style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--teal-50)', color: 'var(--teal-700)', fontWeight: 700, fontSize: '1.1rem' }}>
+                         {donors[0].donor_name ? donors[0].donor_name.charAt(0).toUpperCase() : 'A'}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--slate-800)', fontSize: '1.05rem' }}>{donors[0].donor_name || 'Anonymous'}</div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--slate-500)', marginTop: '2px' }}>
+                          Recent donation • <span style={{ fontWeight: 600, color: 'var(--teal-600)' }}>{formatCurrency(donors[0].amount)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div style={{ background: 'var(--slate-50)', padding: '32px', borderTop: '1px solid var(--border-light)' }}>
+                  <GuestCheckoutForm 
+                    campaignId={campaign.id} 
+                    campaignTitle={campaign.title} 
+                    selectedReward={selectedReward}
+                    rewards={rewards}
+                  />
+                  
+                  {selectedReward && (
+                    <div className="text-center mt-3">
+                       <button className="btn btn-ghost btn-sm" onClick={() => setSelectedReward(null)}>Clear Reward Selection</button>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* The Checkout Form Component */}
-              <GuestCheckoutForm 
-                campaignId={campaign.id} 
-                campaignTitle={campaign.title} 
-                selectedReward={selectedReward}
-                rewards={rewards}
-              />
-              
-              {selectedReward && (
-                <div className="text-center mt-3">
-                   <button className="btn btn-ghost btn-sm" onClick={() => setSelectedReward(null)}>Clear Reward Selection</button>
-                </div>
-              )}
             </div>
           </div>
         </div>
