@@ -198,7 +198,7 @@ export default function DashboardPage() {
       {/* Mobile top bar */}
       <div className="dash-mobile-bar">
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: 'var(--slate-900)', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem' }}>
-          <span style={{ fontSize: '1.1em' }}>🍩</span> DonateFate
+          <span style={{ fontSize: '1.1em' }}>🍩</span> DonatePlate
         </Link>
         <button className="dash-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
           {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
@@ -210,7 +210,7 @@ export default function DashboardPage() {
         {/* brand */}
         <div className="dash-brand">
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem' }}>
-            <span style={{ fontSize: '1.2em' }}>🍩</span> DonateFate
+            <span style={{ fontSize: '1.2em' }}>🍩</span> DonatePlate
           </Link>
         </div>
 
@@ -411,21 +411,21 @@ export default function DashboardPage() {
               {/* Stats */}
               <div className="profile-stats" style={{ position: 'relative', zIndex: 10, marginTop: '-24px' }}>
                 <div className="profile-stat-card card-glass card-hover">
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--coral-50)', color: 'var(--coral-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(34,211,238,0.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                     <FiHeart size={24} />
                   </div>
                   <div className="profile-stat-value">{currency(userData.total_donated)}</div>
                   <div className="profile-stat-label">Total Impact</div>
                 </div>
                 <div className="profile-stat-card card-glass card-hover">
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--teal-50)', color: 'var(--teal-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(168,85,247,0.1)', color: 'var(--purple-400)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                     <FiTrendingUp size={24} />
                   </div>
                   <div className="profile-stat-value">{userData.total_campaigns_supported || 0}</div>
                   <div className="profile-stat-label">Causes Supported</div>
                 </div>
                 <div className="profile-stat-card card-glass card-hover">
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--amber-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '1.5rem' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(236,72,153,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '1.5rem' }}>
                     🍽️
                   </div>
                   <div className="profile-stat-value">{campaigns.length}</div>
@@ -572,7 +572,7 @@ export default function DashboardPage() {
             <>
               <div className="alert alert-info" style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
                 <FiAlertCircle size={20} />
-                <span>Contact <strong>support@donatefate.com</strong> for manual payouts. Automated payouts coming soon.</span>
+                <span>Contact <strong>support@donateplate.com</strong> for manual payouts. Automated payouts coming soon.</span>
               </div>
               <div className="dash-table-wrap">
                 <table className="dash-table">

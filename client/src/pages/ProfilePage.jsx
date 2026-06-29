@@ -33,7 +33,7 @@ export default function ProfilePage() {
   if (error || !profile) {
     return (
       <div className="page container text-center pt-6">
-        <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--slate-900)' }}>Profile Not Found</h2>
+        <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Profile Not Found</h2>
         <p className="text-muted mt-2">{error}</p>
         <Link to="/explore" className="btn btn-primary mt-4">Explore Campaigns</Link>
       </div>
@@ -91,21 +91,21 @@ export default function ProfilePage() {
         {/* Stats */}
         <div className="profile-stats animate-in" style={{ animationDelay: '0.1s', marginTop: '-24px', position: 'relative', zIndex: 10 }}>
           <div className="profile-stat-card card-glass card-hover">
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--coral-50)', color: 'var(--coral-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(34,211,238,0.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <FiHeart size={24} />
             </div>
             <div className="profile-stat-value">{formatCurrency(profile.total_donated)}</div>
             <div className="profile-stat-label">Total Impact</div>
           </div>
           <div className="profile-stat-card card-glass card-hover">
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--teal-50)', color: 'var(--teal-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(168,85,247,0.1)', color: 'var(--purple-400)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <FiTrendingUp size={24} />
             </div>
             <div className="profile-stat-value">{profile.total_campaigns_supported}</div>
             <div className="profile-stat-label">Causes Supported</div>
           </div>
           <div className="profile-stat-card card-glass card-hover">
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--amber-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '1.5rem' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(236,72,153,0.1)', color: 'var(--pink-400)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '1.5rem' }}>
               🍽️
             </div>
             <div className="profile-stat-value">{profile.campaigns.length}</div>
@@ -116,7 +116,7 @@ export default function ProfilePage() {
         {/* User's Campaigns */}
         <div className="animate-in" style={{ animationDelay: '0.2s', marginTop: '60px' }}>
           <div className="flex-between mb-4">
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--slate-900)' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--text-primary)' }}>
               Campaigns by {profile.name}
             </h3>
           </div>

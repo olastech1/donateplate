@@ -19,16 +19,16 @@ export default function ContactPage() {
   const defaultContent = `
     <p style="margin-bottom: 24px;">Have a question, concern, or need help with a campaign? Our support team is here for you.</p>
     <div class="card" style="margin-bottom: 32px; padding: 32px;">
-      <h3 style="margin-bottom: 16px; color: var(--slate-800);">Get in Touch</h3>
-      <p style="margin-bottom: 12px;"><strong>Email Support:</strong> support@donatefate.com</p>
-      <p style="margin-bottom: 12px;"><strong>Press & Media:</strong> press@donatefate.com</p>
+      <h3 style="margin-bottom: 16px; color: var(--text-primary);">Get in Touch</h3>
+      <p style="margin-bottom: 12px;"><strong>Email Support:</strong> support@donateplate.com</p>
+      <p style="margin-bottom: 12px;"><strong>Press & Media:</strong> press@donateplate.com</p>
       <p><strong>Response Time:</strong> We aim to respond to all inquiries within 24-48 hours.</p>
     </div>
   `;
 
   return (
     <div className="page container" style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px' }}>
-      <h1 style={{ fontFamily: 'var(--font-display)', marginBottom: '24px', color: 'var(--slate-800)' }}>Contact Us</h1>
+      <h1 style={{ fontFamily: 'var(--font-display)', marginBottom: '24px', color: 'var(--text-primary)' }}>Contact Us</h1>
       {loading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading content...</div>
       ) : (

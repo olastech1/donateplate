@@ -475,7 +475,7 @@ export default function AdminDashboardPage() {
         {/* Logo */}
         <div className="adm-logo">
           <div className="adm-logo-mark">🍽️</div>
-          <span className="adm-logo-text">DonateFate</span>
+          <span className="adm-logo-text">DonatePlate</span>
           <span className="adm-logo-badge">Admin</span>
         </div>
 
@@ -527,7 +527,7 @@ export default function AdminDashboardPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button className="adm-menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
             <div className="adm-breadcrumb">
-              <span>DonateFate</span>
+              <span>DonatePlate</span>
               <span className="adm-breadcrumb-sep">/</span>
               <span>Admin</span>
               <span className="adm-breadcrumb-sep">/</span>
@@ -1132,7 +1132,7 @@ export default function AdminDashboardPage() {
                       </div>
                       <div className="adm-form-group">
                         <label className="adm-label">Subject Line</label>
-                        <input className="adm-input" placeholder="e.g. Important Update from DonateFate" value={broadcastSubject} onChange={e => setBroadcastSubject(e.target.value)} />
+                        <input className="adm-input" placeholder="e.g. Important Update from DonatePlate" value={broadcastSubject} onChange={e => setBroadcastSubject(e.target.value)} />
                       </div>
                       <div className="adm-form-group">
                         <label className="adm-label">Email Body (HTML)</label>

@@ -53,7 +53,7 @@ export default function Navbar() {
             <span style={{ color: 'white', fontWeight: 900, fontSize: '1.2rem', fontFamily: 'var(--font-display)' }}>D</span>
           </div>
           <span style={{ color: 'var(--text-primary)' }}>Donate</span>
-          <span className="gradient-text" style={{ marginLeft: '-6px' }}>Fate</span>
+          <span className="gradient-text" style={{ marginLeft: '-6px' }}>Plate</span>
         </Link>
 
         {/* Hamburger — mobile only */}
@@ -72,7 +72,7 @@ export default function Navbar() {
                   {user.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--slate-900)' }}>{user.name}</div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{user.name}</div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{user.email}</div>
                 </div>
               </div>
@@ -91,8 +91,8 @@ export default function Navbar() {
             <>
               <li style={{ height: '1px', background: 'var(--border)', margin: '8px 0', listStyle: 'none' }} />
               <li><Link to="/campaigns/create" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent)', fontWeight: 700, padding: '12px', fontSize: '1.05rem', textDecoration: 'none', borderRadius: 'var(--radius)' }}><FiPlusCircle size={18} /> Start a Campaign</Link></li>
-              <li><Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--slate-800)', borderRadius: 'var(--radius)' }}><FiLayout size={18} /> My Dashboard</Link></li>
-              <li><Link to={`/dashboard?tab=profile`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--slate-800)', borderRadius: 'var(--radius)' }}><FiUser size={18} /> My Profile</Link></li>
+              <li><Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--text-primary)', borderRadius: 'var(--radius)' }}><FiLayout size={18} /> My Dashboard</Link></li>
+              <li><Link to={`/dashboard?tab=profile`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--text-primary)', borderRadius: 'var(--radius)' }}><FiUser size={18} /> My Profile</Link></li>
               {user.role === 'admin' && (
                 <li><Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--warning)', fontWeight: 600, borderRadius: 'var(--radius)' }}><FiShield size={18} /> Admin Panel</Link></li>
               )}
@@ -138,8 +138,8 @@ export default function Navbar() {
                 </button>
 
                 {dropdownOpen && (
-                  <div className="navbar-dropdown animate-fade" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: '#fff', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', minWidth: '230px', overflow: 'hidden', zIndex: 200 }}>
-                    <div style={{ padding: '16px', borderBottom: '1px solid var(--border-light)', background: 'var(--slate-50)' }}>
+                  <div className="navbar-dropdown animate-fade" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', minWidth: '230px', overflow: 'hidden', zIndex: 200 }}>
+                    <div style={{ padding: '16px', borderBottom: '1px solid var(--border-light)', background: 'var(--bg-secondary)' }}>
                       <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{user.name}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.email}</div>
                     </div>

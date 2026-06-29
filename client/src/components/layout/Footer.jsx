@@ -19,7 +19,7 @@ export default function Footer() {
           <div className="footer-brand">
             <Link to="/" className="footer-logo">
               <span style={{ fontSize: '1.2em', marginRight: '6px' }}>🍩</span>
-              <span className="gradient-text">DonateFate</span>
+              <span className="gradient-text">DonatePlate</span>
             </Link>
             <p>Serve generosity. A vibrant crowdfunding platform where every campaign is verified and every donation is tracked transparently.</p>
             
@@ -41,7 +41,7 @@ export default function Footer() {
             <Link to="/explore">Explore Campaigns</Link>
             <Link to="/campaigns/create">Start a Campaign</Link>
             <Link to="/dashboard">Creator Dashboard</Link>
-            <Link to="/about">About DonateFate</Link>
+            <Link to="/about">About DonatePlate</Link>
           </div>
           
           {/* Resources */}
@@ -77,7 +77,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="footer-bottom">
           <div className="footer-bottom-left">
-            <p>Made with <FiHeart size={12} style={{ display: 'inline', verticalAlign: 'middle', color: '#6366F1' }} /> by DonateFate &copy; {year}</p>
+            <p>Made with <FiHeart size={12} style={{ display: 'inline', verticalAlign: 'middle', color: '#6366F1' }} /> by DonatePlate &copy; {year}</p>
           </div>
           <div className="footer-bottom-right">
             <Link to="/terms">Terms</Link>

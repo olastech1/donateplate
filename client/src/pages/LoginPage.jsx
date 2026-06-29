@@ -57,7 +57,7 @@ export default function LoginPage() {
         <div>
           <Link to="/" className="navbar-logo" style={{ color: '#fff' }}>
             <span style={{ background: '#fff', color: 'var(--accent)', padding: '4px 8px', borderRadius: '8px' }}>DP</span>
-            DonateFate
+            DonatePlate
           </Link>
         </div>
         <div style={{ maxWidth: '440px' }}>
@@ -160,7 +160,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', marginTop: '32px', color: 'var(--slate-500)' }}>
+          <p style={{ textAlign: 'center', marginTop: '32px', color: 'var(--text-muted)' }}>
             Don't have an account? <Link to="/register" style={{ fontWeight: 600 }}>Create one</Link>
           </p>
         </div>

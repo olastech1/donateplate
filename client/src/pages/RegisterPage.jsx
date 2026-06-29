@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
-import { FiMail, FiLock, FiUser, FiAlertCircle, FiCheckCircle, FiInbox } from 'react-icons/fi';
+import { FiMail, FiLock, FiUser, FiAlertCircle, FiCheckCircle, FiInbox, FiHeart } from 'react-icons/fi';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -51,7 +51,7 @@ export default function RegisterPage() {
           <div>
             <Link to="/" className="navbar-logo" style={{ color: '#fff' }}>
               <span style={{ background: '#fff', color: 'var(--teal-600)', padding: '4px 8px', borderRadius: '8px' }}>DP</span>
-              DonateFate
+              DonatePlate
             </Link>
           </div>
           <div style={{ maxWidth: '440px' }}>
@@ -111,7 +111,7 @@ export default function RegisterPage() {
         <div>
           <Link to="/" className="navbar-logo" style={{ color: '#fff' }}>
             <span style={{ background: '#fff', color: 'var(--coral-600)', padding: '4px 8px', borderRadius: '8px' }}>DP</span>
-            DonateFate
+            DonatePlate
           </Link>
         </div>
         <div style={{ maxWidth: '440px' }}>
@@ -150,7 +150,7 @@ export default function RegisterPage() {
             <div className="form-group">
               <label className="form-label">Full Name</label>
               <div style={{ position: 'relative' }}>
-                <FiUser style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+                <FiUser style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
                   type="text" 
                   className="form-input" 
@@ -166,7 +166,7 @@ export default function RegisterPage() {
             <div className="form-group">
               <label className="form-label">Email Address</label>
               <div style={{ position: 'relative' }}>
-                <FiMail style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+                <FiMail style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
                   type="email" 
                   className="form-input" 
@@ -182,7 +182,7 @@ export default function RegisterPage() {
             <div className="form-group" style={{ marginBottom: '32px' }}>
               <label className="form-label">Password</label>
               <div style={{ position: 'relative' }}>
-                <FiLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+                <FiLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
                   type="password"
                   className="form-input"
@@ -202,7 +202,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', marginTop: '32px', color: 'var(--slate-500)' }}>
+          <p style={{ textAlign: 'center', marginTop: '32px', color: 'var(--text-muted)' }}>
             Already have an account? <Link to="/login" style={{ fontWeight: 600 }}>Sign in</Link>
           </p>
         </div>
