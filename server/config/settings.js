@@ -49,6 +49,15 @@ async function setSetting(key, value, updatedBy = null) {
   );
 
   if (check.rows.length === 0) {
+    if (key.startsWith('page_')) {
+      // Dynamic page creation! Insert it
+      await pool.query(
+        `INSERT INTO platform_settings (setting_key, setting_value, is_encrypted, description)
+         VALUES ($1, $2, FALSE, 'Dynamic Page')`,
+        [key, value]
+      );
+      return; // We inserted it, so we're done
+    }
     throw new Error(`Setting "${key}" does not exist.`);
   }
 

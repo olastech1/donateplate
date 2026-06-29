@@ -39,6 +39,15 @@ async function setupDatabase() {
     await pool.query(migration3Sql);
     console.log('✅ Migration v3 applied successfully.');
     
+    // 4. Run Migration v4
+    const migration4Path = path.join(__dirname, '../../database/migration_v4.sql');
+    console.log(`📄 Reading migration from: ${migration4Path}`);
+    const migration4Sql = fs.readFileSync(migration4Path, 'utf8');
+    
+    console.log('⚡ Executing migration v4...');
+    await pool.query(migration4Sql);
+    console.log('✅ Migration v4 applied successfully.');
+    
     console.log('🎉 Database setup complete! You are ready to go.');
   } catch (err) {
     console.error('❌ Database setup failed:', err);

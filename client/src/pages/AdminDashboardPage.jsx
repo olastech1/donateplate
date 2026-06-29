@@ -28,6 +28,7 @@ const NAV_GROUPS = [
   {
     label: 'Tools',
     items: [
+      { key: 'pages',      label: 'Pages',           icon: '📄' },
       { key: 'broadcast',  label: 'Broadcast Email', icon: '📧' },
       { key: 'settings',   label: 'Settings',        icon: '⚙️' },
     ]
@@ -139,7 +140,7 @@ export default function AdminDashboardPage() {
 
   // Page content watcher
   useEffect(() => {
-    if (tab === 'settings' && settings.length > 0) {
+    if ((tab === 'settings' || tab === 'pages') && settings.length > 0) {
       const s = settings.find(s => s.setting_key === selectedPage);
       if (s) setPageContent(s.display_value);
     }
@@ -179,7 +180,7 @@ export default function AdminDashboardPage() {
         } else if (tab === 'broadcast') {
           const res = await adminAPI.getUsers();
           setUsersList(res.data.data);
-        } else if (tab === 'settings') {
+        } else if (tab === 'settings' || tab === 'pages') {
           const res = await adminAPI.getSettings();
           setSettings(res.data.data);
         }
@@ -1177,6 +1178,47 @@ export default function AdminDashboardPage() {
               )}
 
               {/* ══ SETTINGS ════════════════════════════════════ */}
+              {tab === 'pages' && (
+                <div className="adm-animate" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '18px', alignItems: 'start' }}>
+                  <div className="adm-card">
+                    <div className="adm-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span className="adm-card-title">📄 Page Manager</span>
+                      <button className="adm-btn primary sm" onClick={() => {
+                        const newPage = window.prompt("Enter new page title (e.g., FAQ):");
+                        if (!newPage) return;
+                        const slug = 'page_' + newPage.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+                        if (settings.find(s => s.setting_key === slug)) {
+                          alert('Page already exists!');
+                          return;
+                        }
+                        setSelectedPage(slug);
+                        setPageContent('');
+                        setSettings([...settings, { setting_key: slug, display_value: '' }]);
+                      }}>+ Add New Page</button>
+                    </div>
+                    <div className="adm-card-body">
+                      <div className="adm-form-group">
+                        <label className="adm-label">Select Page to Edit</label>
+                        <select className="adm-select" value={selectedPage} onChange={e => setSelectedPage(e.target.value)}>
+                          {settings.filter(s => s.setting_key.startsWith('page_')).map(s => (
+                            <option key={s.setting_key} value={s.setting_key}>
+                              {s.setting_key.replace('page_', '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <ReactQuill theme="snow" value={pageContent} onChange={setPageContent} style={{ background: '#fff', borderRadius: '9px', minHeight: '300px' }} />
+                      <button className="adm-btn primary" style={{ marginTop: '14px' }} onClick={handlePageSave} disabled={actionLoading === 'save-page'}>
+                        {actionLoading === 'save-page' ? '⏳ Saving…' : '💾 Save Page'}
+                      </button>
+                      <div style={{ marginTop: '16px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
+                        Public Link: <a href={`/p/${selectedPage.replace('page_', '')}`} target="_blank" rel="noopener noreferrer">/p/{selectedPage.replace('page_', '')}</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {tab === 'settings' && (
                 <div className="adm-animate" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', alignItems: 'start' }}>
 
@@ -1190,48 +1232,25 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Page Content Editor */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                    <div className="adm-card">
-                      <div className="adm-card-header"><span className="adm-card-title">📄 Page Content Editor</span></div>
-                      <div className="adm-card-body">
+                  {/* Admin Profile */}
+                  <div className="adm-card">
+                    <div className="adm-card-header"><span className="adm-card-title">👤 Admin Profile</span></div>
+                    <div className="adm-card-body">
+                      <form onSubmit={handleProfileUpdate}>
                         <div className="adm-form-group">
-                          <label className="adm-label">Page</label>
-                          <select className="adm-select" value={selectedPage} onChange={e => setSelectedPage(e.target.value)}>
-                            {settings.filter(s => s.setting_key.startsWith('page_')).map(s => (
-                              <option key={s.setting_key} value={s.setting_key}>
-                                {s.setting_key.replace('page_', '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                              </option>
-                            ))}
-                          </select>
+                          <label className="adm-label">Email Address</label>
+                          <input className="adm-input" type="email" value={profileData.email} onChange={e => setProfileData(p => ({ ...p, email: e.target.value }))} />
                         </div>
-                        <ReactQuill theme="snow" value={pageContent} onChange={setPageContent} style={{ background: '#fff', borderRadius: '9px' }} />
-                        <button className="adm-btn primary" style={{ marginTop: '14px' }} onClick={handlePageSave} disabled={actionLoading === 'save-page'}>
-                          {actionLoading === 'save-page' ? '⏳ Saving…' : '💾 Save Page'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Admin Profile */}
-                    <div className="adm-card">
-                      <div className="adm-card-header"><span className="adm-card-title">👤 Admin Profile</span></div>
-                      <div className="adm-card-body">
-                        <form onSubmit={handleProfileUpdate}>
-                          <div className="adm-form-group">
-                            <label className="adm-label">Email Address</label>
-                            <input className="adm-input" type="email" value={profileData.email} onChange={e => setProfileData(p => ({ ...p, email: e.target.value }))} />
-                          </div>
-                          <div className="adm-form-group">
-                            <label className="adm-label">Current Password</label>
-                            <input className="adm-input" type="password" placeholder="Enter current password" value={profileData.currentPassword} onChange={e => setProfileData(p => ({ ...p, currentPassword: e.target.value }))} />
-                          </div>
-                          <div className="adm-form-group">
-                            <label className="adm-label">New Password</label>
-                            <input className="adm-input" type="password" placeholder="Leave blank to keep current" value={profileData.newPassword} onChange={e => setProfileData(p => ({ ...p, newPassword: e.target.value }))} />
-                          </div>
-                          <button type="submit" className="adm-btn primary" disabled={profileLoading}>{profileLoading ? '⏳ Saving…' : '💾 Update Profile'}</button>
-                        </form>
-                      </div>
+                        <div className="adm-form-group">
+                          <label className="adm-label">Current Password</label>
+                          <input className="adm-input" type="password" placeholder="Enter current password" value={profileData.currentPassword} onChange={e => setProfileData(p => ({ ...p, currentPassword: e.target.value }))} />
+                        </div>
+                        <div className="adm-form-group">
+                          <label className="adm-label">New Password</label>
+                          <input className="adm-input" type="password" placeholder="Leave blank to keep current" value={profileData.newPassword} onChange={e => setProfileData(p => ({ ...p, newPassword: e.target.value }))} />
+                        </div>
+                        <button type="submit" className="adm-btn primary" disabled={profileLoading}>{profileLoading ? '⏳ Saving…' : '💾 Update Profile'}</button>
+                      </form>
                     </div>
                   </div>
                 </div>
