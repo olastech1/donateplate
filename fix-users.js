@@ -1,23 +1,12 @@
-const { Pool } = require('pg');
-
-const pool = new Pool({
-  connectionString: 'postgresql://neondb_owner:npg_cF5nAkiCNPK7@ep-holy-term-atud9rt2-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
-  ssl: { rejectUnauthorized: false }
-});
-
+const pool = require('./server/config/db');
 async function run() {
   try {
-    await pool.query(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(255);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_expires TIMESTAMP WITH TIME ZONE;
-    `);
-    console.log('Columns added successfully!');
-  } catch(e) {
-    console.error(e);
+    const result = await pool.query('UPDATE users SET email_verified = TRUE WHERE email_verified = FALSE');
+    console.log(`Updated ${result.rowCount} users.`);
+  } catch (err) {
+    console.error(err);
   } finally {
-    await pool.end();
+    process.exit(0);
   }
 }
-
 run();
