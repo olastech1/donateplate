@@ -57,7 +57,7 @@ export default function ExplorePage() {
               placeholder="Search by title, creator, or keywords..." 
               value={search} 
               onChange={(e) => setSearch(e.target.value)} 
-              style={{ paddingLeft: '48px', borderRadius: 'var(--radius-full)', background: 'var(--slate-50)', border: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}
+              style={{ paddingLeft: '48px', borderRadius: 'var(--radius-full)', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border)', boxShadow: 'none' }}
             />
             <button type="submit" className="btn btn-primary" style={{ borderRadius: 'var(--radius-full)' }}>Search</button>
           </form>

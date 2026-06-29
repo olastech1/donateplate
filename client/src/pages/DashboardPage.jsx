@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { campaignAPI, userAPI, withdrawalAPI, updateAPI, recurringAPI, rewardAPI, donationAPI } from '../services/api';
 import CampaignCard from '../components/campaign/CampaignCard';
@@ -28,7 +28,10 @@ const pct = (cur, goal) => Math.min(100, ((cur / goal) * 100) || 0).toFixed(0);
 export default function DashboardPage() {
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState('overview');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get('tab') || 'overview';
+  const [tab, setTab] = useState(initialTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const switchTab = (key) => { setTab(key); setMobileMenuOpen(false); };
@@ -279,21 +282,21 @@ export default function DashboardPage() {
               {/* stat cards */}
               <div className="dash-stats">
                 <div className="dash-stat-card">
-                  <div className="dash-stat-icon" style={{ background: '#EEF2FF', color: '#4F46E5' }}><FiTrendingUp /></div>
+                  <div className="dash-stat-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: 'var(--accent)' }}><FiTrendingUp /></div>
                   <div className="dash-stat-info">
                     <span className="dash-stat-value">{currency(userData.total_donated)}</span>
                     <span className="dash-stat-label">Total Donated</span>
                   </div>
                 </div>
                 <div className="dash-stat-card">
-                  <div className="dash-stat-icon" style={{ background: '#FEF3C7', color: '#D97706' }}><FiHeart /></div>
+                  <div className="dash-stat-icon" style={{ background: 'rgba(236, 72, 153, 0.1)', color: 'var(--pink-400)' }}><FiHeart /></div>
                   <div className="dash-stat-info">
                     <span className="dash-stat-value">{userData.total_campaigns_supported || 0}</span>
                     <span className="dash-stat-label">Campaigns Supported</span>
                   </div>
                 </div>
                 <div className="dash-stat-card">
-                  <div className="dash-stat-icon" style={{ background: '#ECFDF5', color: '#059669' }}><FiActivity /></div>
+                  <div className="dash-stat-icon" style={{ background: 'rgba(34, 211, 238, 0.1)', color: 'var(--teal-400)' }}><FiActivity /></div>
                   <div className="dash-stat-info">
                     <span className="dash-stat-value">{campaigns.length}</span>
                     <span className="dash-stat-label">My Campaigns</span>

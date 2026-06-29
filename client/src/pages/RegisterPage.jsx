@@ -65,15 +65,15 @@ export default function RegisterPage() {
         
         <div className="auth-right">
           <div className="auth-form-container animate-fade text-center">
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--teal-50)', color: 'var(--teal-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 24px' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(34,211,238,0.1)', color: 'var(--teal-400)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 24px' }}>
               <FiInbox />
             </div>
             
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--slate-900)', marginBottom: '16px' }}>Check your inbox</h2>
-            <p style={{ color: 'var(--slate-600)', marginBottom: '8px', fontSize: '1.1rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--text-primary)', marginBottom: '16px' }}>Check your inbox</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '1.1rem' }}>
               We sent a verification link to:
             </p>
-            <p style={{ fontWeight: 700, color: 'var(--slate-900)', fontSize: '1.2rem', marginBottom: '32px', wordBreak: 'break-all', padding: '12px', background: 'var(--slate-50)', borderRadius: 'var(--radius-md)' }}>
+            <p style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '1.2rem', marginBottom: '32px', wordBreak: 'break-all', padding: '12px', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
               {email}
             </p>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '32px', lineHeight: 1.6 }}>
@@ -135,7 +135,7 @@ export default function RegisterPage() {
       <div className="auth-right">
         <div className="auth-form-container animate-fade">
           <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--slate-900)', marginBottom: '8px' }}>Create an Account</h2>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--text-primary)', marginBottom: '8px' }}>Create an Account</h2>
             <p className="text-secondary">Fill in your details to get started</p>
           </div>
 

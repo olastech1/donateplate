@@ -81,7 +81,7 @@ export default function LoginPage() {
       <div className="auth-right">
         <div className="auth-form-container animate-fade">
           <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--slate-900)', marginBottom: '8px' }}>Sign in to your account</h2>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--text-primary)', marginBottom: '8px' }}>Sign in to your account</h2>
             <p className="text-secondary">Enter your details to access your dashboard</p>
           </div>
 
@@ -109,7 +109,7 @@ export default function LoginPage() {
                   className="btn btn-sm btn-outline"
                   onClick={handleResend}
                   disabled={resending}
-                  style={{ alignSelf: 'flex-start', background: '#fff' }}
+                  style={{ alignSelf: 'flex-start', background: 'transparent' }}
                 >
                   {resending ? 'Sending...' : 'Resend verification email'}
                 </button>
@@ -121,7 +121,7 @@ export default function LoginPage() {
             <div className="form-group">
               <label className="form-label">Email Address</label>
               <div style={{ position: 'relative' }}>
-                <FiMail style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+                <FiMail style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
                   type="email" 
                   className="form-input" 
@@ -142,7 +142,7 @@ export default function LoginPage() {
                 </Link>
               </div>
               <div style={{ position: 'relative' }}>
-                <FiLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+                <FiLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
                   type="password"
                   className="form-input"

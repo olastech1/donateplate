@@ -49,8 +49,11 @@ export default function Navbar() {
       <div className="navbar-inner">
         {/* Logo */}
         <Link to="/" className="navbar-logo">
-          <span style={{ fontSize: '1.2em', marginRight: '6px' }}>🍩</span>
-          <span className="gradient-text">DonateFate</span>
+          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--accent-glow)' }}>
+            <span style={{ color: 'white', fontWeight: 900, fontSize: '1.2rem', fontFamily: 'var(--font-display)' }}>D</span>
+          </div>
+          <span style={{ color: 'var(--text-primary)' }}>Donate</span>
+          <span className="gradient-text" style={{ marginLeft: '-6px' }}>Fate</span>
         </Link>
 
         {/* Hamburger — mobile only */}
@@ -89,7 +92,7 @@ export default function Navbar() {
               <li style={{ height: '1px', background: 'var(--border)', margin: '8px 0', listStyle: 'none' }} />
               <li><Link to="/campaigns/create" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent)', fontWeight: 700, padding: '12px', fontSize: '1.05rem', textDecoration: 'none', borderRadius: 'var(--radius)' }}><FiPlusCircle size={18} /> Start a Campaign</Link></li>
               <li><Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--slate-800)', borderRadius: 'var(--radius)' }}><FiLayout size={18} /> My Dashboard</Link></li>
-              <li><Link to={`/profile/${user.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--slate-800)', borderRadius: 'var(--radius)' }}><FiUser size={18} /> My Profile</Link></li>
+              <li><Link to={`/dashboard?tab=profile`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--slate-800)', borderRadius: 'var(--radius)' }}><FiUser size={18} /> My Profile</Link></li>
               {user.role === 'admin' && (
                 <li><Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', fontSize: '1.05rem', textDecoration: 'none', color: 'var(--warning)', fontWeight: 600, borderRadius: 'var(--radius)' }}><FiShield size={18} /> Admin Panel</Link></li>
               )}
@@ -141,7 +144,7 @@ export default function Navbar() {
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.email}</div>
                     </div>
                     <div style={{ padding: '8px 0' }}>
-                      <Link to={`/profile/${user.id}`} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}><FiUser size={16} /> My Profile</Link>
+                      <Link to={`/dashboard?tab=profile`} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}><FiUser size={16} /> My Profile</Link>
                       <Link to="/dashboard" className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}><FiLayout size={16} /> My Dashboard</Link>
                       <Link to="/campaigns/create" className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}><FiPlusCircle size={16} /> Start a Campaign</Link>
                       {user.role === 'admin' && (

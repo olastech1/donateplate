@@ -172,7 +172,7 @@ export default function Home() {
             <div className="grid grid-3">
               <div className="step-card">
                 <div className="step-number">1</div>
-                <div className="step-icon" style={{ background: 'var(--coral-50)', color: 'var(--coral-600)' }}>
+                <div className="step-icon" style={{ background: 'rgba(34,211,238,0.1)', color: 'var(--teal-400)' }}>
                   <FiCheckCircle />
                 </div>
                 <h3 className="step-title">Verified Impact</h3>
@@ -180,7 +180,7 @@ export default function Home() {
               </div>
               <div className="step-card">
                 <div className="step-number">2</div>
-                <div className="step-icon" style={{ background: 'var(--amber-50)', color: 'var(--amber-600)' }}>
+                <div className="step-icon" style={{ background: 'rgba(168,85,247,0.1)', color: 'var(--purple-400)' }}>
                   <FiShield />
                 </div>
                 <h3 className="step-title">Secure & Transparent</h3>
@@ -188,7 +188,7 @@ export default function Home() {
               </div>
               <div className="step-card">
                 <div className="step-number">3</div>
-                <div className="step-icon" style={{ background: 'var(--teal-50)', color: 'var(--teal-600)' }}>
+                <div className="step-icon" style={{ background: 'rgba(236,72,153,0.1)', color: 'var(--pink-400)' }}>
                   <FiTrendingUp />
                 </div>
                 <h3 className="step-title">Reward Tiers & Subscriptions</h3>
@@ -207,10 +207,10 @@ export default function Home() {
             Join thousands of donors and creators making a difference every day on DonateFate.
           </p>
           <div className="flex-center gap-2">
-            <Link to="/register" className="btn btn-xl" style={{ background: '#fff', color: 'var(--coral-600)' }}>
+            <Link to="/register" className="btn btn-xl btn-primary" style={{ background: '#fff', color: 'var(--bg-primary)' }}>
               Create an Account
             </Link>
-            <Link to="/explore" className="btn btn-xl" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)' }}>
+            <Link to="/explore" className="btn btn-xl" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
               Explore Projects
             </Link>
           </div>

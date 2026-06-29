@@ -163,17 +163,17 @@ export default function CampaignPage() {
         </div>
 
         {/* Mobile Action Bar (Only visible on mobile) */}
-        <div className="mobile-action-bar card" style={{ marginBottom: '32px', border: 'none', boxShadow: 'var(--shadow-xl)', borderRadius: 'var(--radius-xl)' }}>
+        <div className="mobile-action-bar card" style={{ marginBottom: '32px', background: 'var(--bg-card)', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-xl)', borderRadius: 'var(--radius-xl)' }}>
           <div className="card-body" style={{ padding: '24px' }}>
-            <div className="progress-track mb-3" style={{ height: '8px', background: 'var(--slate-100)' }}>
+            <div className="progress-track mb-3" style={{ height: '8px', background: 'var(--bg-input)' }}>
               <div className="progress-fill" style={{ width: `${progress}%`, background: 'var(--teal-500)', borderRadius: '4px' }}></div>
             </div>
             
-            <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--slate-900)', lineHeight: 1 }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--text-primary)', lineHeight: 1 }}>
               {formatCurrency(campaign.current_amount)}
             </div>
             <div className="text-muted mt-2 mb-4" style={{ fontSize: '1rem', fontWeight: 500 }}>
-              <span style={{ color: 'var(--slate-700)' }}>raised of {formatCurrency(campaign.goal_amount)} goal</span>
+              <span style={{ color: 'var(--text-secondary)' }}>raised of {formatCurrency(campaign.goal_amount)} goal</span>
             </div>
             
             <div className="text-muted mb-6" style={{ fontSize: '0.95rem' }}>
@@ -184,7 +184,7 @@ export default function CampaignPage() {
               <button 
                 onClick={() => document.getElementById('guest-checkout-form')?.scrollIntoView({ behavior: 'smooth' })}
                 className="btn btn-primary btn-block btn-lg"
-                style={{ fontSize: '1.15rem', padding: '16px', background: 'linear-gradient(to right, var(--teal-500), var(--teal-600))', border: 'none', boxShadow: '0 4px 12px rgba(20, 184, 166, 0.25)', borderRadius: 'var(--radius-lg)' }}
+                style={{ fontSize: '1.15rem', padding: '16px', background: 'var(--gradient-primary)', border: 'none', boxShadow: '0 4px 12px rgba(34, 211, 238, 0.25)', borderRadius: 'var(--radius-lg)' }}
               >
                 Donate now
               </button>
@@ -195,7 +195,7 @@ export default function CampaignPage() {
                     alert('Campaign link copied to clipboard!');
                   }}
                   className="btn btn-secondary flex-1"
-                  style={{ fontSize: '1.05rem', padding: '14px', background: 'var(--slate-100)', color: 'var(--slate-900)', border: 'none', borderRadius: 'var(--radius-lg)' }}
+                  style={{ fontSize: '1.05rem', padding: '14px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-lg)' }}
                 >
                   <FiShare2 /> Share
                 </button>
@@ -205,7 +205,7 @@ export default function CampaignPage() {
                     else { alert('Please log in to save campaigns.'); }
                   }}
                   className="btn btn-secondary"
-                  style={{ padding: '14px 20px', background: 'var(--slate-100)', color: 'var(--slate-900)', border: 'none', borderRadius: 'var(--radius-lg)' }}
+                  style={{ padding: '14px 20px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-lg)' }}
                   aria-label="Save Campaign"
                 >
                   <FiHeart />
