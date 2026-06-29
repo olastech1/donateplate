@@ -145,6 +145,7 @@ CREATE TABLE donations (
     amount                      DECIMAL(12, 2) NOT NULL CHECK (amount > 0),
     platform_fee                DECIMAL(12, 2) DEFAULT 0.00,
     is_anonymous                BOOLEAN NOT NULL DEFAULT FALSE,
+    comment                     TEXT,
 
     -- Stripe references
     stripe_checkout_session_id  VARCHAR(255) UNIQUE,
