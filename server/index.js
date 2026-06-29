@@ -91,14 +91,14 @@ app.get('/api/health', (req, res) => {
 app.get('/api/debug-db', async (req, res) => {
   const pool = require('./config/db');
   try {
-    const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL || 'NOT SET';
+    const dbUrl = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL || 'NOT SET';
     const host = dbUrl.match(/@([^/]+)\//)?.[1] || 'unknown';
     const result = await pool.query('SELECT COUNT(*) as total FROM campaigns');
     const activeResult = await pool.query("SELECT COUNT(*) as active FROM campaigns WHERE status = 'active'");
     res.json({
       success: true,
       db_host: host,
-      using_env: process.env.POSTGRES_URL ? 'POSTGRES_URL' : (process.env.DATABASE_URL ? 'DATABASE_URL' : 'NONE'),
+      using_env: process.env.NEON_DATABASE_URL ? 'NEON_DATABASE_URL' : (process.env.DATABASE_URL ? 'DATABASE_URL' : 'POSTGRES_URL'),
       campaigns_total: result.rows[0].total,
       campaigns_active: activeResult.rows[0].active
     });
