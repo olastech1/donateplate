@@ -87,6 +87,26 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Temporary debug endpoint — remove after fixing DB issue
+app.get('/api/debug-db', async (req, res) => {
+  const pool = require('./config/db');
+  try {
+    const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL || 'NOT SET';
+    const host = dbUrl.match(/@([^/]+)\//)?.[1] || 'unknown';
+    const result = await pool.query('SELECT COUNT(*) as total FROM campaigns');
+    const activeResult = await pool.query("SELECT COUNT(*) as active FROM campaigns WHERE status = 'active'");
+    res.json({
+      success: true,
+      db_host: host,
+      using_env: process.env.POSTGRES_URL ? 'POSTGRES_URL' : (process.env.DATABASE_URL ? 'DATABASE_URL' : 'NONE'),
+      campaigns_total: result.rows[0].total,
+      campaigns_active: activeResult.rows[0].active
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 404
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.method} ${req.url} not found.` });
