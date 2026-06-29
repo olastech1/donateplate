@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const pool = require('../config/db');
 const emailService = require('../services/emailService');
+const settings = require('../config/settings');
 
 const SALT_ROUNDS = 12;
 
@@ -30,15 +31,18 @@ const register = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const userRole = role === 'admin' ? 'creator' : (role || 'creator');
 
-    // Generate email verification token (valid 24 hours)
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+    const requireVerifySetting = await settings.getSetting('require_email_verification');
+    const requireVerification = requireVerifySetting !== 'false';
+    const emailVerified = !requireVerification;
+
     const result = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, email_verification_token, email_verification_expires)
-       VALUES ($1, $2, $3, $4, FALSE, $5, $6)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id, name, email, role, kyc_status, email_verified, created_at`,
-      [name, email.toLowerCase(), passwordHash, userRole, verificationToken, verificationExpires]
+      [name, email.toLowerCase(), passwordHash, userRole, emailVerified, verificationToken, verificationExpires]
     );
 
     const user = result.rows[0];
@@ -47,14 +51,21 @@ const register = async (req, res) => {
     const frontendUrl = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:5173';
     const verifyUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
-    // Send verification email
-    await emailService.sendEmailVerificationEmail(user.email, user.name, verifyUrl);
-
-    res.status(201).json({
-      success: true,
-      message: 'Account created! Please check your email to verify your address before logging in.',
-      data: { email: user.email }
-    });
+    // Send verification email if required
+    if (requireVerification) {
+      await emailService.sendEmailVerificationEmail(user.email, user.name, verifyUrl);
+      res.status(201).json({
+        success: true,
+        message: 'Account created! Please check your email to verify your address before logging in.',
+        data: { email: user.email }
+      });
+    } else {
+      res.status(201).json({
+        success: true,
+        message: 'Account created successfully! You can now log in.',
+        data: { email: user.email }
+      });
+    }
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -199,7 +210,10 @@ const login = async (req, res) => {
     }
 
     // Block login if email not verified
-    if (user.email_verified === false) {
+    const requireVerifySetting = await settings.getSetting('require_email_verification');
+    const requireVerification = requireVerifySetting !== 'false';
+
+    if (requireVerification && user.email_verified === false) {
       return res.status(403).json({
         success: false,
         code: 'EMAIL_NOT_VERIFIED',

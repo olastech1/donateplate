@@ -79,7 +79,8 @@ INSERT INTO platform_settings (setting_key, setting_value, is_encrypted, descrip
     ('smtp_port', '587', FALSE, 'SMTP server port'),
     ('smtp_user', '', FALSE, 'SMTP authentication username'),
     ('smtp_pass', '', TRUE, 'SMTP authentication password'),
-    ('smtp_from', 'DonateFate <noreply@donatefate.com>', FALSE, 'Sender Name and Email');
+    ('smtp_from', 'DonateFate <noreply@donatefate.com>', FALSE, 'Sender Name and Email'),
+    ('require_email_verification', 'true', FALSE, 'Require users to verify their email before logging in');
 
 CREATE INDEX idx_platform_settings_key ON platform_settings(setting_key);
 

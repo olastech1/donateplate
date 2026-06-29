@@ -62,19 +62,31 @@ function SettingField({ setting, onSave }) {
       </div>
       {editing ? (
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <input
-            type={setting.is_encrypted ? 'password' : 'text'}
-            className="adm-input"
-            style={{ maxWidth: '240px' }}
-            placeholder={setting.is_encrypted ? 'Enter new key...' : 'Enter value...'}
-            value={value}
-            onChange={e => setValue(e.target.value)}
-          />
+          {setting.display_value === 'true' || setting.display_value === 'false' ? (
+            <select
+              className="adm-input"
+              style={{ maxWidth: '240px' }}
+              value={value}
+              onChange={e => setValue(e.target.value)}
+            >
+              <option value="true">On (true)</option>
+              <option value="false">Off (false)</option>
+            </select>
+          ) : (
+            <input
+              type={setting.is_encrypted ? 'password' : 'text'}
+              className="adm-input"
+              style={{ maxWidth: '240px' }}
+              placeholder={setting.is_encrypted ? 'Enter new key...' : 'Enter value...'}
+              value={value}
+              onChange={e => setValue(e.target.value)}
+            />
+          )}
           <button className="adm-btn primary sm" onClick={() => { onSave(setting.setting_key, value); setEditing(false); setValue(''); }}>Save</button>
           <button className="adm-btn ghost sm" onClick={() => { setEditing(false); setValue(''); }}>Cancel</button>
         </div>
       ) : (
-        <button className="adm-btn secondary sm" onClick={() => setEditing(true)}>✏️ Edit</button>
+        <button className="adm-btn secondary sm" onClick={() => { setValue(setting.display_value === '••••••••' ? '' : setting.display_value || ''); setEditing(true); }}>✏️ Edit</button>
       )}
     </div>
   );
