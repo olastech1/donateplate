@@ -413,12 +413,35 @@ const donationCallback = async (req, res) => {
       [session_id]
     );
 
+    let status = result.rows[0]?.status || 'pending';
+
+    // Fallback check in case the webhook was missed/delayed
+    if (status === 'pending') {
+      try {
+        const stripeSecretKey = await getStripeSecretKey();
+        if (stripeSecretKey) {
+          const stripe = require('stripe')(stripeSecretKey);
+          const session = await stripe.checkout.sessions.retrieve(session_id);
+          
+          if (session.payment_status === 'paid') {
+            await pool.query(
+              `UPDATE donations SET status = 'success', stripe_payment_intent_id = $1 WHERE stripe_checkout_session_id = $2`,
+              [session.payment_intent, session_id]
+            );
+            status = 'success';
+          }
+        }
+      } catch (err) {
+        console.error('Fallback stripe check failed:', err.message);
+      }
+    }
+
     res.json({
       success: true,
       data: {
         found: result.rows.length > 0,
-        status: result.rows[0]?.status || 'pending',
-        tracking_url: `${process.env.FRONTEND_URL}/track/${session_id}`
+        status: status,
+        tracking_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/track/${session_id}`
       }
     });
   } catch (err) {
@@ -468,7 +491,38 @@ const getMyDonations = async (req, res) => {
        ORDER BY d.created_at DESC`,
       [req.user.id]
     );
-    res.json({ success: true, data: result.rows });
+
+    const donations = result.rows;
+
+    // Fallback check for any pending donations (if webhook was missed)
+    const pendingDonations = donations.filter(d => d.status === 'pending' && d.stripe_checkout_session_id);
+    if (pendingDonations.length > 0) {
+      try {
+        const stripeSecretKey = await getStripeSecretKey();
+        if (stripeSecretKey) {
+          const stripe = require('stripe')(stripeSecretKey);
+          
+          for (let d of pendingDonations) {
+            try {
+              const session = await stripe.checkout.sessions.retrieve(d.stripe_checkout_session_id);
+              if (session.payment_status === 'paid') {
+                await pool.query(
+                  `UPDATE donations SET status = 'success', stripe_payment_intent_id = $1 WHERE id = $2`,
+                  [session.payment_intent, d.id]
+                );
+                d.status = 'success';
+              }
+            } catch (err) {
+              console.error('Fallback stripe check for dashboard failed:', err.message);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to get stripe key for fallback:', err.message);
+      }
+    }
+
+    res.json({ success: true, data: donations });
   } catch (err) {
     console.error('Get my donations error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
