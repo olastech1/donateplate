@@ -209,7 +209,7 @@ export default function DashboardPage() {
       <aside className={`dash-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
         {/* brand */}
         <div className="dash-brand">
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: '#fff', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem' }}>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem' }}>
             <span style={{ fontSize: '1.2em' }}>🍩</span> DonatePlate
           </Link>
         </div>
