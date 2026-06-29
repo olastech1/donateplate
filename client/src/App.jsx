@@ -20,6 +20,7 @@ import TermsPage from './pages/TermsPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
+import ScrollToTop from './components/layout/ScrollToTop';
 
 import { useAuth } from './context/AuthContext';
 
@@ -35,12 +36,14 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* Admin — full-page shell, no shared Navbar/Footer */}
-      <Route path="/admin" element={<AdminDashboardPage />} />
-
-      {/* Dashboard — full-page shell, has its own sidebar */}
-      <Route path="/dashboard" element={<DashboardPage />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+        {/* Admin — full-page shell, no shared Navbar/Footer */}
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        
+        {/* Dashboard — full-page shell, has its own sidebar */}
+        <Route path="/dashboard" element={<DashboardPage />} />
 
       {/* All other pages — wrapped in shared Navbar + Footer */}
       <Route path="*" element={
@@ -77,6 +80,7 @@ function App() {
         </>
       } />
     </Routes>
+    </>
   );
 }
 
