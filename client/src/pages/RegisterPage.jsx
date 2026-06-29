@@ -1,3 +1,4 @@
+import { useSettings } from '../context/SettingsContext';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -5,6 +6,8 @@ import { authAPI } from '../services/api';
 import { FiMail, FiLock, FiUser, FiAlertCircle, FiCheckCircle, FiInbox, FiHeart } from 'react-icons/fi';
 
 export default function RegisterPage() {
+  const { platformSettings } = useSettings();
+  const platformName = platformSettings?.platform_name || 'DonatePlate';
   const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,7 +54,7 @@ export default function RegisterPage() {
           <div>
             <Link to="/" className="navbar-logo" style={{ color: '#fff' }}>
               <span style={{ background: '#fff', color: 'var(--teal-600)', padding: '4px 8px', borderRadius: '8px' }}>DP</span>
-              DonatePlate
+              {platformName}
             </Link>
           </div>
           <div style={{ maxWidth: '440px' }}>
@@ -111,7 +114,7 @@ export default function RegisterPage() {
         <div>
           <Link to="/" className="navbar-logo" style={{ color: '#fff' }}>
             <span style={{ background: '#fff', color: 'var(--coral-600)', padding: '4px 8px', borderRadius: '8px' }}>DP</span>
-            DonatePlate
+            {platformName}
           </Link>
         </div>
         <div style={{ maxWidth: '440px' }}>

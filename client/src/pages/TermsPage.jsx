@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { settingsAPI } from '../services/api';
+import { useSettings } from '../context/SettingsContext';
 
 export default function TermsPage() {
+  const { platformSettings } = useSettings();
+  const platformName = platformSettings?.platform_name || '${platformName}';
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -20,9 +23,9 @@ export default function TermsPage() {
     <div style="color: var(--text-secondary); line-height: 1.8;">
       <p style="margin-bottom: 16px;"><strong>Last Updated:</strong> May 2026</p>
       <h3 style="margin-top: 24px; margin-bottom: 12px; color: var(--slate-800);">1. Acceptance of Terms</h3>
-      <p style="margin-bottom: 16px;">By accessing or using DonatePlate, you agree to be bound by these Terms. If you disagree with any part of the terms, you may not access the platform.</p>
+      <p style="margin-bottom: 16px;">By accessing or using ${platformName}, you agree to be bound by these Terms. If you disagree with any part of the terms, you may not access the platform.</p>
       <h3 style="margin-top: 24px; margin-bottom: 12px; color: var(--slate-800);">2. Use of the Platform</h3>
-      <p style="margin-bottom: 16px;">DonatePlate is a platform to facilitate donations to verified campaigns. We are not a broker, financial institution, or charity. We do not guarantee the accuracy of campaign claims, though we enforce strict KYC policies for creators.</p>
+      <p style="margin-bottom: 16px;">${platformName} is a platform to facilitate donations to verified campaigns. We are not a broker, financial institution, or charity. We do not guarantee the accuracy of campaign claims, though we enforce strict KYC policies for creators.</p>
       <h3 style="margin-top: 24px; margin-bottom: 12px; color: var(--slate-800);">3. Campaign Creation & KYC</h3>
       <p style="margin-bottom: 16px;">Users creating campaigns ("Creators") must provide accurate KYC information. Funds will not be disbursed until identity and banking details are fully verified by our admin team. Misrepresentation will result in immediate account termination and potential legal action.</p>
       <h3 style="margin-top: 24px; margin-bottom: 12px; color: var(--slate-800);">4. Donations and Refunds</h3>

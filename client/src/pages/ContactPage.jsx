@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { settingsAPI } from '../services/api';
+import { useSettings } from '../context/SettingsContext';
 
 export default function ContactPage() {
+  const { platformSettings } = useSettings();
+  const platformName = platformSettings?.platform_name || '${platformName}';
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
 

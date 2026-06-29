@@ -1,3 +1,4 @@
+import { useSettings } from '../context/SettingsContext';
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -26,6 +27,8 @@ const currency = (n) => new Intl.NumberFormat('en-US', { style: 'currency', curr
 const pct = (cur, goal) => Math.min(100, ((cur / goal) * 100) || 0).toFixed(0);
 
 export default function DashboardPage() {
+  const { platformSettings } = useSettings();
+  const platformName = platformSettings?.platform_name || 'DonatePlate';
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -198,7 +201,7 @@ export default function DashboardPage() {
       {/* Mobile top bar */}
       <div className="dash-mobile-bar">
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: 'var(--slate-900)', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem' }}>
-          <span style={{ fontSize: '1.1em' }}>🍩</span> DonatePlate
+          <span style={{ fontSize: '1.1em' }}>🍩</span> {platformName}
         </Link>
         <button className="dash-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
           {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
@@ -210,7 +213,7 @@ export default function DashboardPage() {
         {/* brand */}
         <div className="dash-brand">
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem' }}>
-            <span style={{ fontSize: '1.2em' }}>🍩</span> DonatePlate
+            <span style={{ fontSize: '1.2em' }}>🍩</span> {platformName}
           </Link>
         </div>
 

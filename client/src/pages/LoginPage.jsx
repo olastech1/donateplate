@@ -1,3 +1,4 @@
+import { useSettings } from '../context/SettingsContext';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -5,6 +6,8 @@ import { authAPI } from '../services/api';
 import { FiMail, FiLock, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 
 export default function LoginPage() {
+  const { platformSettings } = useSettings();
+  const platformName = platformSettings?.platform_name || 'DonatePlate';
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -57,7 +60,7 @@ export default function LoginPage() {
         <div>
           <Link to="/" className="navbar-logo" style={{ color: '#fff' }}>
             <span style={{ background: '#fff', color: 'var(--accent)', padding: '4px 8px', borderRadius: '8px' }}>DP</span>
-            DonatePlate
+            {platformName}
           </Link>
         </div>
         <div style={{ maxWidth: '440px' }}>

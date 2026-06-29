@@ -1,3 +1,4 @@
+import { useSettings } from '../context/SettingsContext';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
@@ -94,6 +95,8 @@ function SettingField({ setting, onSave }) {
 
 // ── Main Component ───────────────────────────────────────────
 export default function AdminDashboardPage() {
+  const { platformSettings } = useSettings();
+  const platformName = platformSettings?.platform_name || 'DonatePlate';
   const { user } = useAuth();
   const navigate  = useNavigate();
 
@@ -488,7 +491,7 @@ export default function AdminDashboardPage() {
         {/* Logo */}
         <div className="adm-logo">
           <div className="adm-logo-mark">🍽️</div>
-          <span className="adm-logo-text">DonatePlate</span>
+          <span className="adm-logo-text">{platformName}</span>
           <span className="adm-logo-badge">Admin</span>
         </div>
 
@@ -540,7 +543,7 @@ export default function AdminDashboardPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button className="adm-menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
             <div className="adm-breadcrumb">
-              <span>DonatePlate</span>
+              <span>{platformName}</span>
               <span className="adm-breadcrumb-sep">/</span>
               <span>Admin</span>
               <span className="adm-breadcrumb-sep">/</span>
@@ -1145,7 +1148,7 @@ export default function AdminDashboardPage() {
                       </div>
                       <div className="adm-form-group">
                         <label className="adm-label">Subject Line</label>
-                        <input className="adm-input" placeholder="e.g. Important Update from DonatePlate" value={broadcastSubject} onChange={e => setBroadcastSubject(e.target.value)} />
+                        <input className="adm-input" placeholder="e.g. Important Update from {platformName}" value={broadcastSubject} onChange={e => setBroadcastSubject(e.target.value)} />
                       </div>
                       <div className="adm-form-group">
                         <label className="adm-label">Email Body (HTML)</label>

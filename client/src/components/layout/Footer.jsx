@@ -44,7 +44,7 @@ export default function Footer() {
             <Link to="/explore">Explore Campaigns</Link>
             <Link to="/campaigns/create">Start a Campaign</Link>
             <Link to="/dashboard">Creator Dashboard</Link>
-            <Link to="/about">About DonatePlate</Link>
+            <Link to="/about">About {platformName}</Link>
           </div>
           
           {/* Resources */}
