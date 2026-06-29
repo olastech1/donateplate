@@ -644,7 +644,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
   cursor: pointer;
   transition: background 0.3s;
 }
-.toggle-switch.on { background: #16a34a; }
+.toggle-switch.on { background: var(--slate-900); }
 .toggle-knob {
   width: 20px;
   height: 20px;
@@ -661,7 +661,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
 }
 .btn-donate-massive {
   width: 100%;
-  background: #16a34a;
+  background: var(--accent);
   color: white;
   font-size: 1.2rem;
   font-weight: 700;
@@ -675,7 +675,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
 }
-.btn-donate-massive:hover { background: #15803d; }
+.btn-donate-massive:hover { background: var(--slate-900); }
 .btn-donate-massive:active { transform: scale(0.98); }
 .sticky-bar-trust {
   display: flex;
