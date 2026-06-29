@@ -6,7 +6,8 @@ import {
   FiUser, FiActivity, FiDollarSign, FiEdit3, FiRepeat,
   FiGift, FiPlus, FiArrowLeft, FiLogOut, FiHeart, FiShield,
   FiAlertTriangle, FiAlertCircle, FiExternalLink, FiMessageSquare,
-  FiHome, FiTrendingUp, FiEye, FiMenu, FiX, FiCompass, FiInfo, FiMessageCircle, FiTrash2
+  FiHome, FiTrendingUp, FiEye, FiMenu, FiX, FiCompass, FiInfo, FiMessageCircle, FiTrash2,
+  FiCheckCircle, FiMapPin, FiLink, FiCalendar
 } from 'react-icons/fi';
 
 /* ── Tab definitions ── */
