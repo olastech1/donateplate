@@ -324,7 +324,9 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
 .alert-success { background: var(--success-bg); color: var(--teal-700); border-left-color: var(--success); }
 .alert-error { background: var(--danger-bg); color: var(--danger); border-left-color: var(--danger); }
 .alert-warning { background: var(--warning-bg); color: var(--amber-700); border-left-color: var(--warning); }
-.alert-info { background: var(--slate-100); color: var(--slate-700); border-left-color: var(--slate/* === Navbar === */
+.alert-info { background: var(--slate-100); color: var(--slate-700); border-left-color: var(--slate-400); }
+
+/* === Navbar === */
 .navbar {
   position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
   width: calc(100% - 32px); max-width: 1200px;
