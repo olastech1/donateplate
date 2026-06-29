@@ -163,38 +163,55 @@ export default function CampaignPage() {
         </div>
 
         {/* Mobile Action Bar (Only visible on mobile) */}
-        <div className="mobile-action-bar" style={{ marginBottom: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-            {/* Circular Progress */}
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: `conic-gradient(#10b981 ${progress}%, #e2e8f0 ${progress}%)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 700, color: 'var(--slate-800)' }}>
-                {progress.toFixed(0)}%
+        <div className="mobile-action-bar card" style={{ marginBottom: '32px', border: 'none', boxShadow: 'var(--shadow-xl)', borderRadius: 'var(--radius-xl)' }}>
+          <div className="card-body" style={{ padding: '24px' }}>
+            <div className="progress-track mb-3" style={{ height: '8px', background: 'var(--slate-100)' }}>
+              <div className="progress-fill" style={{ width: `${progress}%`, background: 'var(--teal-500)', borderRadius: '4px' }}></div>
+            </div>
+            
+            <div style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--slate-900)', lineHeight: 1 }}>
+              {formatCurrency(campaign.current_amount)}
+            </div>
+            <div className="text-muted mt-2 mb-4" style={{ fontSize: '1rem', fontWeight: 500 }}>
+              <span style={{ color: 'var(--slate-700)' }}>raised of {formatCurrency(campaign.goal_amount)} goal</span>
+            </div>
+            
+            <div className="text-muted mb-6" style={{ fontSize: '0.95rem' }}>
+              {campaign.donor_count || donors.length} donations
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => document.getElementById('guest-checkout-form')?.scrollIntoView({ behavior: 'smooth' })}
+                className="btn btn-primary btn-block btn-lg"
+                style={{ fontSize: '1.15rem', padding: '16px', background: 'linear-gradient(to right, var(--teal-500), var(--teal-600))', border: 'none', boxShadow: '0 4px 12px rgba(20, 184, 166, 0.25)', borderRadius: 'var(--radius-lg)' }}
+              >
+                Donate now
+              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert('Campaign link copied to clipboard!');
+                  }}
+                  className="btn btn-secondary flex-1"
+                  style={{ fontSize: '1.05rem', padding: '14px', background: 'var(--slate-100)', color: 'var(--slate-900)', border: 'none', borderRadius: 'var(--radius-lg)' }}
+                >
+                  <FiShare2 /> Share
+                </button>
+                <button 
+                  onClick={() => {
+                    if (user) { alert('Saved to favorites!'); } 
+                    else { alert('Please log in to save campaigns.'); }
+                  }}
+                  className="btn btn-secondary"
+                  style={{ padding: '14px 20px', background: 'var(--slate-100)', color: 'var(--slate-900)', border: 'none', borderRadius: 'var(--radius-lg)' }}
+                  aria-label="Save Campaign"
+                >
+                  <FiHeart />
+                </button>
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--slate-900)', lineHeight: 1 }}>{formatCurrency(campaign.current_amount)} <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--slate-700)' }}>raised</span></div>
-              <div style={{ color: 'var(--slate-500)', fontSize: '1rem', marginTop: '4px' }}>of {formatCurrency(campaign.goal_amount)} USD</div>
-            </div>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button 
-              className="btn"
-              onClick={() => document.getElementById('guest-checkout-form')?.scrollIntoView({ behavior: 'smooth' })}
-              style={{ flex: 1, background: '#f97316', color: 'white', border: 'none', padding: '16px', fontSize: '1.1rem', borderRadius: '100px', fontWeight: 700 }}
-            >
-              Donate
-            </button>
-            <button 
-              className="btn"
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Campaign link copied to clipboard!');
-              }}
-              style={{ flex: 1, background: '#0f172a', color: 'white', border: 'none', padding: '16px', fontSize: '1.1rem', borderRadius: '100px', fontWeight: 700 }}
-            >
-              Share
-            </button>
           </div>
         </div>
 
@@ -446,7 +463,7 @@ export default function CampaignPage() {
             <div style={{ position: 'sticky', top: '100px' }}>
               
               <div className="card checkout-panel" style={{ boxShadow: 'var(--shadow-xl)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}>
-                <div className="card-body" style={{ padding: '32px' }}>
+                <div className="card-body hide-on-mobile" style={{ padding: '32px' }}>
                   <div className="progress-track mb-3" style={{ height: '8px', background: 'var(--slate-100)' }}>
                     <div className="progress-fill" style={{ width: `${progress}%`, background: 'var(--teal-500)', borderRadius: '4px' }}></div>
                   </div>
