@@ -54,7 +54,7 @@ export default function Home() {
             <span className="gradient-text">every plate shared.</span>
           </h1>
           <p className="hero-subtitle animate-in" style={{ animationDelay: '0.3s' }}>
-            DonatePlate is a vibrant crowdfunding platform built on transparency. 
+            DonateFate is a vibrant crowdfunding platform built on transparency. 
             Discover verified campaigns, set up recurring donations, and track exactly how your generosity creates impact.
           </p>
           <div className="hero-actions animate-in" style={{ animationDelay: '0.4s' }}>
@@ -163,7 +163,7 @@ export default function Home() {
       <section className="section" style={{ background: 'var(--bg-card)' }}>
         <div className="container">
           <div className="section-header">
-            <h2>Why DonatePlate?</h2>
+            <h2>Why DonateFate?</h2>
             <p>We've built a platform that puts trust, transparency, and connection at the forefront of crowdfunding.</p>
           </div>
 
@@ -204,10 +204,10 @@ export default function Home() {
         <div className="container">
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, marginBottom: '20px', color: '#fff' }}>Ready to Serve Generosity?</h2>
           <p style={{ fontSize: '1.1rem', opacity: 0.9, maxWidth: '600px', margin: '0 auto 32px' }}>
-            Join thousands of donors and creators making a difference every day on DonatePlate.
+            Join thousands of donors and creators making a difference every day on DonateFate.
           </p>
           <div className="flex-center gap-2">
-            <Link to="/register" className="btn btn-xl btn-primary" style={{ background: '#fff', color: 'var(--bg-primary)' }}>
+            <Link to="/register" className="btn btn-xl btn-primary" style={{ background: '#fff', color: 'var(--slate-900)', border: 'none' }}>
               Create an Account
             </Link>
             <Link to="/explore" className="btn btn-xl" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
