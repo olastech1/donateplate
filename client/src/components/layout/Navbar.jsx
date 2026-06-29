@@ -1,19 +1,37 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSettings } from '../../context/SettingsContext';
 import {
   FiMenu, FiX, FiUser, FiLogOut, FiLayout, FiPlusCircle,
   FiChevronDown, FiCompass, FiShield, FiInfo
 } from 'react-icons/fi';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  
+  const { user, logout } = useAuth();
+  const { platformSettings } = useSettings();
   const location = useLocation();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+
+  // Extract first and second words for the logo styling
+  const platformName = platformSettings?.platform_name || 'DonatePlate';
+  const nameParts = platformName.split(/(?=[A-Z])/);
+  let firstPart = platformName;
+  let secondPart = '';
+  
+  if (nameParts.length >= 2) {
+    firstPart = nameParts[0];
+    secondPart = nameParts.slice(1).join('');
+  } else if (platformName.includes(' ')) {
+    const spaceParts = platformName.split(' ');
+    firstPart = spaceParts[0];
+    secondPart = spaceParts.slice(1).join(' ');
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -50,10 +68,10 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="navbar-logo">
           <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--accent-glow)' }}>
-            <span style={{ color: 'white', fontWeight: 900, fontSize: '1.2rem', fontFamily: 'var(--font-display)' }}>D</span>
+            <span style={{ color: 'white', fontWeight: 900, fontSize: '1.2rem', fontFamily: 'var(--font-display)' }}>{firstPart.charAt(0)}</span>
           </div>
-          <span style={{ color: 'var(--text-primary)' }}>Donate</span>
-          <span className="gradient-text" style={{ marginLeft: '-6px' }}>Plate</span>
+          <span style={{ color: 'var(--text-primary)' }}>{firstPart}</span>
+          {secondPart && <span className="gradient-text" style={{ marginLeft: '-6px' }}>{secondPart}</span>}
         </Link>
 
         {/* Hamburger — mobile only */}

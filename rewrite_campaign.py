@@ -1,134 +1,23 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import GuestCheckoutForm from '../components/donations/GuestCheckoutForm';
-import { campaignAPI, updateAPI, rewardAPI, commentAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { FiClock, FiTarget, FiUser, FiMessageCircle, FiGift, FiShare2, FiHeart, FiCheckCircle, FiActivity, FiChevronDown, FiShield, FiLock, FiChevronRight } from 'react-icons/fi';
+with open('client/src/pages/CampaignPage.jsx', 'r') as f:
+    lines = f.readlines()
 
-export default function CampaignPage() {
-  const { id } = useParams();
-  const { user } = useAuth();
-  
-  const [campaign, setCampaign] = useState(null);
-  const [donors, setDonors] = useState([]);
-  const [updates, setUpdates] = useState([]);
-  const [rewards, setRewards] = useState([]);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState('story');
-  const [showStickyBar, setShowStickyBar] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedReward, setSelectedReward] = useState(null);
-  const [submittingComment, setSubmittingComment] = useState(false);
-  const [addTip, setAddTip] = useState(true);
+header_lines = lines[:128]
+header_content = "".join(header_lines)
+
+header_content = header_content.replace(
+    "FiHeart, FiCheckCircle, FiActivity } from 'react-icons/fi';", 
+    "FiHeart, FiCheckCircle, FiActivity, FiChevronDown, FiShield, FiLock, FiChevronRight } from 'react-icons/fi';"
+)
+
+state_to_add = """  const [addTip, setAddTip] = useState(true);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+"""
+header_content = header_content.replace(
+    "const [submittingComment, setSubmittingComment] = useState(false);\n",
+    "const [submittingComment, setSubmittingComment] = useState(false);\n" + state_to_add
+)
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const checkoutForm = document.querySelector('.checkout-container');
-      if (checkoutForm) {
-        const rect = checkoutForm.getBoundingClientRect();
-        const isFormVisible = rect.top < window.innerHeight - 80;
-        setShowStickyBar(window.scrollY > 150 && !isFormVisible);
-      } else {
-        setShowStickyBar(window.scrollY > 150);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    Promise.all([
-      campaignAPI.getById(id),
-      campaignAPI.getDonors(id),
-      updateAPI.list(id),
-      rewardAPI.list(id),
-      commentAPI.list(id)
-    ]).then(([campRes, donorRes, updRes, rewRes, comRes]) => {
-      setCampaign(campRes.data.data);
-      setDonors(donorRes.data.data || []);
-      setUpdates(updRes.data.data || []);
-      setRewards(rewRes.data.data || []);
-      setComments(comRes.data.data || []);
-    }).catch(console.error)
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  useEffect(() => {
-    if (!campaign) return;
-    const existingTag = document.querySelector('meta[name="robots"][data-campaign]');
-    if (campaign.seo_visible === false) {
-      if (!existingTag) {
-        const meta = document.createElement('meta');
-        meta.name = 'robots';
-        meta.content = 'noindex,nofollow';
-        meta.setAttribute('data-campaign', 'true');
-        document.head.appendChild(meta);
-      }
-    } else {
-      existingTag?.remove();
-    }
-    return () => document.querySelector('meta[name="robots"][data-campaign]')?.remove();
-  }, [campaign]);
-
-  const handlePostComment = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-    setSubmittingComment(true);
-    try {
-      const res = await commentAPI.create(id, { content: newComment });
-      if (res.data.success) {
-        setComments([res.data.data, ...comments]);
-        setNewComment('');
-      }
-    } catch (err) {
-      alert('Failed to post comment. Ensure you are logged in.');
-    } finally {
-      setSubmittingComment(false);
-    }
-  };
-
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm('Delete this comment?')) return;
-    try {
-      await commentAPI.delete(commentId);
-      setComments(comments.filter(c => c.id !== commentId));
-    } catch (err) {
-      alert('Failed to delete comment.');
-    }
-  };
-
-  if (loading) return <div className="page flex-center"><div className="spinner" /></div>;
-  if (!campaign) return <div className="page container text-center"><h2>Campaign not found</h2></div>;
-
-  const progress = campaign.goal_amount > 0
-    ? Math.min(100, (campaign.current_amount / campaign.goal_amount) * 100)
-    : 0;
-
-  const timeAgo = (date) => {
-    const diff = Date.now() - new Date(date).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days > 0) return `${days}d ago`;
-    const hours = Math.floor(diff / 3600000);
-    return hours > 0 ? `${hours}h ago` : 'Just now';
-  };
-
-  const getDaysLeft = (endDate) => {
-    const end = new Date(endDate);
-    const now = new Date();
-    const diffTime = end - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
-  };
-
-  return (
+new_return = """  return (
     <div className="campaign-detail page animate-fade">
       
       {/* Hero Image Section */}
@@ -373,3 +262,9 @@ export default function CampaignPage() {
     </div>
   );
 }
+"""
+
+with open('client/src/pages/CampaignPage.jsx', 'w') as f:
+    f.write(header_content + new_return)
+
+print("Rewrote CampaignPage.jsx properly!")

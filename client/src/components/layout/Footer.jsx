@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSettings } from '../../context/SettingsContext';
 import { FiTwitter, FiInstagram, FiLinkedin, FiGithub, FiHeart, FiShield, FiLock } from 'react-icons/fi';
 
 export default function Footer() {
+  const { platformSettings } = useSettings();
+  const platformName = platformSettings?.platform_name || 'DonatePlate';
   const year = new Date().getFullYear();
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -19,7 +22,7 @@ export default function Footer() {
           <div className="footer-brand">
             <Link to="/" className="footer-logo">
               <span style={{ fontSize: '1.2em', marginRight: '6px' }}>🍩</span>
-              <span className="gradient-text">DonatePlate</span>
+              <span className="gradient-text">{platformName}</span>
             </Link>
             <p>Serve generosity. A vibrant crowdfunding platform where every campaign is verified and every donation is tracked transparently.</p>
             
@@ -77,7 +80,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="footer-bottom">
           <div className="footer-bottom-left">
-            <p>Made with <FiHeart size={12} style={{ display: 'inline', verticalAlign: 'middle', color: '#6366F1' }} /> by DonatePlate &copy; {year}</p>
+            <p>Made with <FiHeart size={12} style={{ display: 'inline', verticalAlign: 'middle', color: '#6366F1' }} /> by {platformName} &copy; {year}</p>
           </div>
           <div className="footer-bottom-right">
             <Link to="/terms">Terms</Link>
