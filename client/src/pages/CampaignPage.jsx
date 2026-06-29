@@ -131,21 +131,70 @@ export default function CampaignPage() {
       <div className="container">
         
         {/* Campaign Hero Image */}
-        <div style={{ position: 'relative', marginBottom: '40px' }}>
+        <div style={{ position: 'relative', marginBottom: '24px', borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}>
           <img 
             src={campaign.cover_image_url || 'https://images.unsplash.com/photo-1593113565630-1de62d64020b?auto=format&fit=crop&w=1200&q=80'} 
             alt={campaign.title} 
             className="campaign-hero-img"
           />
-          <div style={{ position: 'absolute', top: '24px', left: '24px', display: 'flex', gap: '8px' }}>
-            <span className="badge badge-category card-glass">
-              {campaign.category.replace('_', ' ').toUpperCase()}
-            </span>
-            {campaign.status === 'active' && (
-              <span className="badge badge-success">
-                <FiCheckCircle style={{ marginRight: '4px' }} /> Active
+          {/* Gradient Overlay */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(15, 23, 42, 0.9) 100%)' }}></div>
+          
+          <div style={{ position: 'absolute', bottom: '24px', left: '24px', right: '24px', color: 'white' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+              <span className="badge" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', backdropFilter: 'blur(4px)', border: 'none' }}>
+                {campaign.category.replace('_', ' ').toLowerCase()}
               </span>
-            )}
+              {campaign.status === 'active' && (
+                <span className="badge" style={{ background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', backdropFilter: 'blur(4px)', border: 'none' }}>
+                  active
+                </span>
+              )}
+            </div>
+            
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '8px', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+              {campaign.title}
+            </h1>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', opacity: 0.9 }}>
+              by <strong style={{ color: 'white' }}>{campaign.creator_name}</strong> • {new Date(campaign.created_at).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Action Bar (Only visible on mobile) */}
+        <div className="mobile-action-bar" style={{ marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+            {/* Circular Progress */}
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: `conic-gradient(#10b981 ${progress}%, #e2e8f0 ${progress}%)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 700, color: 'var(--slate-800)' }}>
+                {progress.toFixed(0)}%
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--slate-900)', lineHeight: 1 }}>{formatCurrency(campaign.current_amount)} <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--slate-700)' }}>raised</span></div>
+              <div style={{ color: 'var(--slate-500)', fontSize: '1rem', marginTop: '4px' }}>of {formatCurrency(campaign.goal_amount)} USD</div>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              className="btn"
+              onClick={() => document.getElementById('guest-checkout-form')?.scrollIntoView({ behavior: 'smooth' })}
+              style={{ flex: 1, background: '#f97316', color: 'white', border: 'none', padding: '16px', fontSize: '1.1rem', borderRadius: '100px', fontWeight: 700 }}
+            >
+              Donate
+            </button>
+            <button 
+              className="btn"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Campaign link copied to clipboard!');
+              }}
+              style={{ flex: 1, background: '#0f172a', color: 'white', border: 'none', padding: '16px', fontSize: '1.1rem', borderRadius: '100px', fontWeight: 700 }}
+            >
+              Share
+            </button>
           </div>
         </div>
 
@@ -153,22 +202,6 @@ export default function CampaignPage() {
         <div className="campaign-layout">
           {/* Left Column (Content) */}
           <div>
-            <h1 className="campaign-title">{campaign.title}</h1>
-            
-            <div className="campaign-meta">
-              <Link to={`/profile/${campaign.creator_id}`} className="flex-center" style={{ gap: '12px', color: 'var(--slate-800)', fontWeight: 600 }}>
-                <div className="profile-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem', border: 'none' }}>
-                  {campaign.creator_name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div style={{ lineHeight: 1.2 }}>{campaign.creator_name}</div>
-                  <div className="text-muted" style={{ fontSize: '0.8rem', fontWeight: 500 }}>Campaign Organizer</div>
-                </div>
-              </Link>
-              <div style={{ width: '1px', height: '24px', background: 'var(--border)' }}></div>
-              <span className="text-muted">Launched {new Date(campaign.created_at).toLocaleDateString()}</span>
-            </div>
-
             {/* Tabs */}
             <div className="tabs">
               {['story', 'rewards', 'updates', 'comments', 'donors'].map(t => (
@@ -496,23 +529,6 @@ export default function CampaignPage() {
           </div>
         </div>
 
-        {/* Mobile Sticky CTA Bar */}
-        <div className={`mobile-sticky-bar ${showStickyBar ? 'visible' : ''}`} style={{ display: 'none' /* Handled correctly in CSS via media queries, we leave markup here */ }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--slate-900)' }}>
-              {formatCurrency(campaign.current_amount)}
-            </div>
-            <div className="text-muted" style={{ fontSize: '0.85rem' }}>
-              of {formatCurrency(campaign.goal_amount)}
-            </div>
-          </div>
-          <button 
-            onClick={() => document.querySelector('.checkout-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            className="btn btn-primary" style={{ padding: '12px 32px' }}
-          >
-            Donate Now
-          </button>
-        </div>
 
       </div>
     </div>

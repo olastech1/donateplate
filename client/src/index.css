@@ -543,17 +543,16 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
 .donor-name { font-weight: 600; margin-bottom: 4px; }
 .donor-time { font-size: 0.8rem; color: var(--text-muted); }
 .donor-amount { font-weight: 700; color: var(--success); font-size: 1.1rem; }
-
-/* Mobile Sticky Bar */
-.mobile-sticky-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-top: 1px solid var(--border); padding: 16px 24px calc(16px + env(safe-area-inset-bottom)); z-index: 100; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
+.mobile-sticky-bar { display: none !important; }
+.mobile-action-bar { display: none; }
 @media (max-width: 1024px) {
   .campaign-layout { grid-template-columns: 1fr; }
   .campaign-sidebar { position: static; margin-top: 40px; }
   .campaign-hero-img { height: 320px; }
-  .mobile-sticky-bar { display: flex; gap: 16px; align-items: center; justify-content: space-between; }
+  .mobile-action-bar { display: block; }
 }
 @media (max-width: 768px) {
-  .campaign-hero-img { height: 240px; margin-bottom: 24px; }
+  .campaign-hero-img { height: 280px; margin-bottom: 24px; }
   .campaign-title { font-size: 1.8rem; }
   .campaign-meta { flex-direction: column; align-items: flex-start; gap: 12px; }
   .campaign-meta > div:nth-child(2) { display: none; }
