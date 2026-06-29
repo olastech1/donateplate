@@ -22,7 +22,6 @@ export default function CampaignPage() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedReward, setSelectedReward] = useState(null);
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [addTip, setAddTip] = useState(true);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   useEffect(() => {
@@ -329,15 +328,9 @@ export default function CampaignPage() {
       {/* Sticky Bottom Action Bar (Fundrise Style) */}
       <div className="sticky-bottom-bar">
         <div className="sticky-bar-content">
-          <div className="sticky-bar-toggle" onClick={() => setAddTip(!addTip)}>
-            <span>Add $10 to support the platform</span>
-            <div className={`toggle-switch ${addTip ? 'on' : ''}`}>
-              <div className="toggle-knob"></div>
-            </div>
-          </div>
           
           <button className="btn-donate-massive" onClick={() => setShowCheckoutModal(true)}>
-            <FiHeart /> Donate ${addTip ? '10.00' : '0.00'} <FiChevronRight />
+            <FiHeart /> Donate now <FiChevronRight />
           </button>
           
           <div className="sticky-bar-trust">
@@ -364,7 +357,7 @@ export default function CampaignPage() {
               campaignTitle={campaign.title} 
               selectedReward={selectedReward}
               rewards={rewards}
-              prefilledTip={addTip ? 10 : 0}
+              prefilledTip={0}
             />
           </div>
         </div>
