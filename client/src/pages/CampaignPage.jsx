@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import GuestCheckoutForm from '../components/donations/GuestCheckoutForm';
 import { campaignAPI, updateAPI, rewardAPI, commentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FiClock, FiTarget, FiUser, FiMessageCircle, FiGift, FiShare2, FiHeart, FiCheckCircle } from 'react-icons/fi';
+import { FiClock, FiTarget, FiUser, FiMessageCircle, FiGift, FiShare2, FiHeart, FiCheckCircle, FiActivity } from 'react-icons/fi';
 
 export default function CampaignPage() {
   const { id } = useParams();
@@ -409,7 +409,7 @@ export default function CampaignPage() {
           </div>
 
           {/* Right Column (Sticky Donation Sidebar) */}
-          <div className="checkout-container hide-on-mobile" style={{ padding: 0, border: 'none', background: 'transparent', boxShadow: 'none' }}>
+          <div className="checkout-container" style={{ padding: 0, border: 'none', background: 'transparent', boxShadow: 'none' }}>
             <div style={{ position: 'sticky', top: '100px' }}>
               
               <div className="card checkout-panel" style={{ boxShadow: 'var(--shadow-xl)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}>

@@ -550,7 +550,6 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
   .campaign-layout { grid-template-columns: 1fr; }
   .campaign-sidebar { position: static; margin-top: 40px; }
   .campaign-hero-img { height: 320px; }
-  .checkout-container { display: none; }
   .mobile-sticky-bar { display: flex; gap: 16px; align-items: center; justify-content: space-between; }
 }
 @media (max-width: 768px) {
