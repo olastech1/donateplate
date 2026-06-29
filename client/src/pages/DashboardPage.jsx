@@ -62,6 +62,10 @@ export default function DashboardPage() {
         const res = await userAPI.getMe();
         setUserData(res.data.data);
       }
+      if (tab === 'profile') {
+        const campRes = await campaignAPI.getMyCampaigns();
+        setCampaigns(campRes.data.data || []);
+      }
       if (tab === 'overview') {
         const [campRes, donRes] = await Promise.all([
           campaignAPI.getMyCampaigns(),
@@ -350,31 +354,78 @@ export default function DashboardPage() {
 
           {/* ═══ PROFILE ═══ */}
           {tab === 'profile' && userData && (
-            <div className="dash-card">
-              <div className="dash-profile-header">
-                <div className="dash-profile-row">
-                  <div className="dash-avatar-lg">{userData.name.charAt(0).toUpperCase()}</div>
-                  <div>
-                    <h2 className="dash-profile-name">{userData.name}</h2>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
-                      <span className="dash-badge dash-badge-neutral">{userData.email}</span>
-                      {userData.email_verified
-                        ? <span className="dash-badge dash-badge-success"><FiShield size={12} /> Verified</span>
-                        : <span className="dash-badge dash-badge-warning"><FiAlertTriangle size={12} /> Unverified</span>
-                      }
+            <div className="animate-in">
+              <div className="profile-header">
+                {/* Decorative background elements inside header */}
+                <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '400px', height: '400px', background: 'radial-gradient(circle, var(--coral-500) 0%, transparent 70%)', opacity: 0.15, filter: 'blur(40px)', zIndex: 0 }}></div>
+                <div style={{ position: 'absolute', bottom: '-50%', left: '-10%', width: '300px', height: '300px', background: 'radial-gradient(circle, var(--teal-400) 0%, transparent 70%)', opacity: 0.15, filter: 'blur(40px)', zIndex: 0 }}></div>
+                
+                <div className="profile-avatar flex-shrink-0">
+                  {userData.avatar_url ? (
+                    <img src={userData.avatar_url} alt={userData.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    userData.name.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className="profile-info flex-1">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                    <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, margin: 0 }}>{userData.name}</h1>
+                    <button className="btn btn-outline" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }} onClick={() => { setProfileForm({ bio: userData.bio || '', location: userData.location || '', website: userData.website || '', avatar_url: userData.avatar_url || '' }); setShowProfileModal(true); }}>
+                      <FiEdit3 /> Edit Profile
+                    </button>
+                  </div>
+                  
+                  {userData.bio && <p className="profile-bio" style={{ fontSize: '1.05rem', color: 'var(--slate-200)', maxWidth: '700px', lineHeight: 1.6, marginTop: '12px', marginBottom: '20px' }}>{userData.bio}</p>}
+                  {!userData.bio && <p style={{ marginTop: '12px', marginBottom: '20px' }}></p>}
+                  
+                  <div className="profile-meta flex flex-wrap" style={{ gap: '20px', alignItems: 'center' }}>
+                    <div className="badge badge-success" style={{ background: 'rgba(20,184,166,0.2)', border: '1px solid var(--teal-500)' }}>
+                      <FiCheckCircle style={{ marginRight: '4px' }} /> {userData.role.charAt(0).toUpperCase() + userData.role.slice(1)}
+                    </div>
+                    {userData.email_verified
+                      ? <div className="flex items-center gap-1" style={{ color: 'var(--teal-300)' }}><FiShield /> Verified Email</div>
+                      : <div className="flex items-center gap-1" style={{ color: 'var(--warning)' }}><FiAlertTriangle /> Unverified Email</div>
+                    }
+                    {userData.location && (
+                      <div className="flex items-center gap-1" style={{ color: 'var(--slate-300)' }}>
+                        <FiMapPin /> {userData.location}
+                      </div>
+                    )}
+                    {userData.website && (
+                      <div className="flex items-center gap-1" style={{ color: 'var(--slate-300)' }}>
+                        <FiLink /> <a href={userData.website} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'underline' }}>Website</a>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1" style={{ color: 'var(--slate-300)' }}>
+                      <FiCalendar /> Joined {new Date(userData.created_at).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
-                <button className="btn btn-outline" onClick={() => { setProfileForm({ bio: userData.bio || '', location: userData.location || '', website: userData.website || '', avatar_url: userData.avatar_url || '' }); setShowProfileModal(true); }}>
-                  <FiEdit3 /> Edit Profile
-                </button>
               </div>
-              <div className="dash-profile-details">
-                {userData.bio && <div className="dash-detail-block" style={{ gridColumn: '1/-1' }}><label>Bio</label><p>{userData.bio}</p></div>}
-                <div className="dash-detail-block"><label>Location</label><p>{userData.location || 'Not set'}</p></div>
-                <div className="dash-detail-block"><label>Website</label><p>{userData.website ? <a href={userData.website} target="_blank" rel="noreferrer">{userData.website}</a> : 'Not set'}</p></div>
-                <div className="dash-detail-block"><label>Member Since</label><p>{new Date(userData.created_at).toLocaleDateString()}</p></div>
-                <div className="dash-detail-block"><label>Role</label><p style={{ textTransform: 'capitalize' }}>{userData.role}</p></div>
+
+              {/* Stats */}
+              <div className="profile-stats" style={{ position: 'relative', zIndex: 10, marginTop: '-24px' }}>
+                <div className="profile-stat-card card-glass card-hover">
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--coral-50)', color: 'var(--coral-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <FiHeart size={24} />
+                  </div>
+                  <div className="profile-stat-value">{currency(userData.total_donated)}</div>
+                  <div className="profile-stat-label">Total Impact</div>
+                </div>
+                <div className="profile-stat-card card-glass card-hover">
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--teal-50)', color: 'var(--teal-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <FiTrendingUp size={24} />
+                  </div>
+                  <div className="profile-stat-value">{userData.total_campaigns_supported || 0}</div>
+                  <div className="profile-stat-label">Causes Supported</div>
+                </div>
+                <div className="profile-stat-card card-glass card-hover">
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--amber-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '1.5rem' }}>
+                    🍽️
+                  </div>
+                  <div className="profile-stat-value">{campaigns.length}</div>
+                  <div className="profile-stat-label">Campaigns Created</div>
+                </div>
               </div>
             </div>
           )}
