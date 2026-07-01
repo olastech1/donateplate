@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const { getSetting } = require('../config/settings');
 
-const getEmailTemplate = (content, previewText = '') => `
+const getEmailTemplate = (content, previewText = '', platformName = 'DonatePlate') => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,7 +18,7 @@ const getEmailTemplate = (content, previewText = '') => `
     
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); padding: 32px 20px; text-align: center;">
-      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">💜 Donate Fate</h1>
+      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">🍩 ${platformName}</h1>
     </div>
     
     <!-- Content -->
@@ -29,7 +29,7 @@ const getEmailTemplate = (content, previewText = '') => `
     <!-- Footer -->
     <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
       <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.5;">
-        © ${new Date().getFullYear()} Donate Fate.<br>
+        © ${new Date().getFullYear()} ${platformName}.<br>
         Every plea deserves an answer.
       </p>
     </div>
@@ -56,12 +56,18 @@ const getButtonHtml = (url, text) => `
  */
 const sendEmail = async (to, subject, htmlContent, previewText = '') => {
   try {
+    const platformName = await getSetting('platform_name') || 'DonatePlate';
+    const cleanSubject = subject.replace(/Donate Fate|DonatePlate/gi, platformName);
+    let cleanHtmlContent = htmlContent.replace(/Donate Fate|DonatePlate/gi, platformName);
+    let cleanPreviewText = previewText.replace(/Donate Fate|DonatePlate/gi, platformName);
+
     // DB settings take priority; fall back to Env vars if not set
     const smtpHost = await getSetting('smtp_host') || process.env.SMTP_HOST || 'smtp.gmail.com';
     const smtpPort = await getSetting('smtp_port') || process.env.SMTP_PORT || '587';
     const smtpUser = await getSetting('smtp_user') || process.env.SMTP_USER;
     const smtpPass = await getSetting('smtp_pass') || process.env.SMTP_PASS;
-    const smtpFrom = await getSetting('smtp_from') || process.env.SMTP_FROM || '"DonatePlate" <noreply@donateplate.com>';
+    const defaultFrom = `"${platformName}" <noreply@${platformName.replace(/\\s+/g, '').toLowerCase()}.com>`;
+    const smtpFrom = await getSetting('smtp_from') || process.env.SMTP_FROM || defaultFrom;
 
     if (!smtpUser || !smtpPass) {
       console.log(`[EMAIL MOCK] To: ${to} | Subject: ${subject}`);
@@ -81,8 +87,8 @@ const sendEmail = async (to, subject, htmlContent, previewText = '') => {
     const info = await transporter.sendMail({
       from: smtpFrom,
       to,
-      subject,
-      html: getEmailTemplate(htmlContent, previewText),
+      subject: cleanSubject,
+      html: getEmailTemplate(cleanHtmlContent, cleanPreviewText, platformName),
     });
     console.log(`Email sent: ${info.messageId}`);
   } catch (error) {
